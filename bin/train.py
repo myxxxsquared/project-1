@@ -6,16 +6,16 @@ import os
 
 import numpy as np
 import tensorflow as tf
-import data.reader as reader
-import data.utils as utils
 import model.model as Model
 import model.parallel as parallel
+
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
         description="_",
-        usage="train.py [<args>] [-h | --help]"
-    )
+        usage="train.py [<args>] [-h | --help]")
+    parser.add_argument("--output", type=str, default="train",
+                        help="Path to saved models")
 
     return parser.parse_args(args)
 
@@ -43,6 +43,12 @@ def default_parameters():
     )
 
     return params
+
+def override_parameters(params, args):
+    params.output = args.output or params.output
+    params.parse(args.parameters)
+    return params
+
 
 
 def get_initializer(params):
@@ -98,6 +104,8 @@ def session_config(params):
 def main(args):
     tf.logging.set_verbosity(tf.logging.INFO)
     params = default_parameters()
+    override_parameters(params, args)
+
 
     # Build Graph
     with tf.Graph().as_default():
