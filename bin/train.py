@@ -99,12 +99,12 @@ def main(args):
     # Build Graph
     with tf.Graph().as_default():
         features = {
-            'img': np.zeros((512,512,3), dtype=tf.float32),
-            'TR': np.zeros((512,512), dtype=tf.float32),
-            'TCL': np.zeros((512,512), dtype=tf.float32),
-            'radius': np.zeros((512,512), dtype=tf.float32),
-            'sin_theta': np.zeros((512,512), dtype=tf.float32),
-            'cos_theta': np.zeros((512,512), dtype=tf.float32),
+            'img': tf.zeros((512,512,3), dtype=tf.float32),
+            'TR': tf.zeros((512,512), dtype=tf.float32),
+            'TCL': tf.zeros((512,512), dtype=tf.float32),
+            'radius': tf.zeros((512,512), dtype=tf.float32),
+            'sin_theta': tf.zeros((512,512), dtype=tf.float32),
+            'cos_theta': tf.zeros((512,512), dtype=tf.float32),
         }
 
         # Build model
