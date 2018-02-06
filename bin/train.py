@@ -8,6 +8,7 @@ import numpy as np
 import tensorflow as tf
 import model.model as Model
 import model.parallel as parallel
+import data.dataset as dataset
 
 
 def parse_args(args=None):
@@ -111,14 +112,15 @@ def main(args):
 
     # Build Graph
     with tf.Graph().as_default():
-        features = {
-            'img': tf.zeros((512,512,3), dtype=tf.float32),
-            'TR': tf.zeros((512,512), dtype=tf.float32),
-            'TCL': tf.zeros((512,512), dtype=tf.float32),
-            'radius': tf.zeros((512,512), dtype=tf.float32),
-            'sin_theta': tf.zeros((512,512), dtype=tf.float32),
-            'cos_theta': tf.zeros((512,512), dtype=tf.float32),
-        }
+        # features = {
+        #     'img': tf.zeros((512,512,3), dtype=tf.float32),
+        #     'TR': tf.zeros((512,512), dtype=tf.float32),
+        #     'TCL': tf.zeros((512,512), dtype=tf.float32),
+        #     'radius': tf.zeros((512,512), dtype=tf.float32),
+        #     'sin_theta': tf.zeros((512,512), dtype=tf.float32),
+        #     'cos_theta': tf.zeros((512,512), dtype=tf.float32),
+        # }
+        features = dataset.get_train_input()
 
         # Build model
         initializer = get_initializer(params)
