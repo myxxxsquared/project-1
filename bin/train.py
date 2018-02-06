@@ -37,6 +37,8 @@ def default_parameters():
         output='/home/rjq/',
         save_checkpoint_steps=10,
         keep_checkpoint_max=5,
+        initializer_gain=0.08,
+
     )
 
     return params
