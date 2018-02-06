@@ -175,8 +175,6 @@ def main(args):
                 {
                     "step": global_step,
                     "loss": loss,
-                    "source": tf.shape(features["source"]),
-                    "target": tf.shape(features["target"])
                 },
                 every_n_iter=1
             ),
