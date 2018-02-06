@@ -39,6 +39,7 @@ def default_parameters():
         keep_checkpoint_max=5,
         initializer_gain=0.08,
         learning_rate=0.01,
+        save_checkpoint_secs=None,
     )
 
     return params
