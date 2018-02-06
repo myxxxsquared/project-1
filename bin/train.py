@@ -27,10 +27,16 @@ def default_parameters():
         neighbor=5,
         device_list=[0],
         learning_rate_decay = "noam",
-        warmup_steps = 2000,
+        warmup_steps=2000,
         adam_beta1=0.9,
         adam_beta2=0.999,
         adam_epsilon=1e-8,
+        train_steps=100,
+        initializer="uniform",
+        clip_grad_norm=5.0,
+        output='/home/rjq/',
+        save_checkpoint_steps=10,
+        keep_checkpoint_max=5,
     )
 
     return params
@@ -58,7 +64,7 @@ def get_learning_rate_decay(learning_rate, global_step, params):
     if params.learning_rate_decay == "noam":
         step = tf.to_float(global_step)
         warmup_steps = tf.to_float(params.warmup_steps)
-        multiplier = params.hidden_size ** -0.5
+        multiplier = 1000 ** -0.5
         decay = multiplier * tf.minimum((step + 1) * (warmup_steps ** -1.5),
                                         (step + 1) ** -0.5)
 
