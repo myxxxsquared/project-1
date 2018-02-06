@@ -5,7 +5,7 @@ class model():
         pass
 
     def get_loss(self, features):
-        return tf.constant(0, dtype=tf.float32)
+        return tf.Variable(0, dtype=tf.float32)
 
     def get_training_func(self, initializer):
         return self.get_loss
