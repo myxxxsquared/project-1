@@ -128,7 +128,7 @@ def main(args):
 
         # Build model
         initializer = get_initializer(params)
-        model = Model.model(params, configs.configs(),None)
+        model = Model.model(params)
 
         # Multi-GPU setting
         sharded_losses = parallel.parallel_model(

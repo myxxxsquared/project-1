@@ -48,16 +48,6 @@ def get_train_input(params):
         lambda index: tuple(tf.py_func(
             syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])))
 
-    # total_train_dataset = tf.data.Dataset.range(858749+1).repeat(params.pretrain_num)
-    # total_train_dataset = total_train_dataset.map(
-    #     lambda index: tuple(tf.py_func(
-    #         total_train_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])))
-    #
-    # total_test_dataset = tf.data.Dataset.range(858749+1).repeat(params.pretrain_num)
-    # total_test_dataset = total_test_dataset.map(
-    #     lambda index: tuple(tf.py_func(
-    #         total_test_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])))
-
 
     # syn_dataset = syn_dataset.batch(32)
     iterator = syn_dataset.make_one_shot_iterator()
