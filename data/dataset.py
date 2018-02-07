@@ -48,7 +48,7 @@ def syn_wrapper(index):
     return img, TR, TCL, radius, cos_theta, sin_theta
 
 
-BUFFER_SIZE=1000
+BUFFER_SIZE=5000
 def get_train_input(params):
     # syn_dataset = tf.data.Dataset.range(858749+1).repeat(params.pretrain_num)
     syn_dataset = tf.data.Dataset.range(1000).repeat(params.pretrain_num)
@@ -58,7 +58,7 @@ def get_train_input(params):
             syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
         num_parallel_calls=64).prefetch(BUFFER_SIZE)
 
-    # syn_dataset = syn_dataset.batch(1)
+    syn_dataset = syn_dataset.batch(32)
 
 
 
