@@ -33,7 +33,7 @@ class  model(object):
         #                                     self.configs.Label_size[2]),
         #                              name="Labels")
         self.input_image = img
-        self.Labels = np.stack((TR, TCL, radius, cos_theta, sin_theta))
+        self.Labels = np.stack((TR, TCL, radius, cos_theta))
 
 
         basenets = {'vgg16': Basenet.VGG16, 'vgg19': Basenet.VGG16,
