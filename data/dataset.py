@@ -6,8 +6,8 @@ from .data_labeling import data_churn
 
 PKL_DIR = '/home/rjq/data_cleaned/pkl/'
 
-DA = DataAugmentor()
-labelling = data_churn()
+
+
 
 
 def load_file(file):
@@ -15,10 +15,12 @@ def load_file(file):
 
 
 def data_aug(ins,augment_rate):
+    DA = DataAugmentor()
     return DA.augment(ins,augment_rate=augment_rate)
 
 
 def data_label(ins):
+    labelling = data_churn()
     return labelling._data_labeling(ins['img_name'],ins['img'],
                                     ins['contour'],ins['is_text_cnts'],
                                     ins['left_top'],ins['right_bottom'],
@@ -56,7 +58,8 @@ def get_train_input(params):
 
     syn_dataset = syn_dataset.map(
         lambda index: tuple(tf.py_func(
-            syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32]))).prefetch(BUFFER_SIZE)
+            syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
+        num_threads=64).prefetch(BUFFER_SIZE)
 
     syn_dataset = syn_dataset.batch(32)
 
