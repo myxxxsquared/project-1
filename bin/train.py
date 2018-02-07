@@ -9,7 +9,7 @@ import tensorflow as tf
 import model.Models as Model
 import model.parallel as parallel
 import data.dataset as dataset
-import bin.configs
+import bin.configs as configs
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
