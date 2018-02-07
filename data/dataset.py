@@ -28,11 +28,19 @@ def data_label(ins):
 
 
 def syn_wrapper(index):
-    PKL_DIR = '/home/rjq/data_cleaned/pkl/'
-    file = PKL_DIR + 'totaltext_train/' + str(index) + '.bin'
-    img_name, img, maps = data_label(data_aug(load_file(file), augment_rate=100))
+    # PKL_DIR = '/home/rjq/data_cleaned/pkl/'
+    # file = PKL_DIR + 'totaltext_train/' + str(index) + '.bin'
     # img_name, img, maps = data_label(data_aug(load_file(file), augment_rate=100))
-    [TR, TCL, radius, cos_theta, sin_theta] = maps
+    # # img_name, img, maps = data_label(data_aug(load_file(file), augment_rate=100))
+    # [TR, TCL, radius, cos_theta, sin_theta] = maps
+    import time
+    time.sleep(5)
+    img = np.zeros((512,512,3))
+    TR = np.zeros((512,512,3))
+    TCL = np.zeros((512,512,3))
+    radius = np.zeros((512,512,3))
+    cos_theta = np.zeros((512,512,3))
+    sin_theta = np.zeros((512,512,3))
     img = np.reshape(np.array(img, np.float32),(512,512,3))
     TR = np.reshape(np.array(TR, np.float32),(512,512,1))
     TCL = np.reshape(np.array(TCL, np.float32),(512,512,1))
