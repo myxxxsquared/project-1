@@ -56,20 +56,20 @@ BUFFER_SIZE=3000
 def get_train_input(params):
     # syn_dataset = tf.data.Dataset.range(858749+1).repeat(params.pretrain_num)
     #syn_dataset=tf.contrib.data.python.ops.dataset_ops.Dataset.range(1000).repeat(params.pretrain_num)
-    syn_dataset = tf.contrib.data.Dataset.range(1000).repeat(params.pretrain_num)
+    syn_dataset = tf.data.Dataset.range(1000).repeat(params.pretrain_num)
     # syn_dataset = tf.data.Dataset.range(1000)
 
-    # syn_dataset = syn_dataset.map(
-    #     lambda index: tuple(tf.py_func(
-    #         syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
-    #     num_parallel_calls=40).prefetch(BUFFER_SIZE)
-    #
-    # syn_dataset = syn_dataset.batch(32)
-
-    syn_dataset.map_and_batch(lambda index: tuple(tf.py_func(
+    syn_dataset = syn_dataset.map(
+        lambda index: tuple(tf.py_func(
             syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
-                              32, 40)
+        num_parallel_calls=40).prefetch(BUFFER_SIZE)
 
+    syn_dataset = syn_dataset.batch(32).prefetch(1000)
+
+    # syn_dataset.map_and_batch(lambda index: tuple(tf.py_func(
+    #         syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
+    #                           32, 40)
+    #
 
     iterator = syn_dataset.make_one_shot_iterator()
 
