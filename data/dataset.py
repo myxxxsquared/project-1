@@ -58,10 +58,10 @@ def get_train_input(params):
     iterator = syn_dataset.make_one_shot_iterator()
 
     features = iterator.get_next()
-    queue = tf.FIFOQueue(1000, dtypes=[tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32],
+    queue = tf.FIFOQueue(100000, dtypes=[tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32],
                          shapes=[(512,512,3),(512,512,1),(512,512,1),(512,512,1),(512,512,1),(512,512,1)])
     enqueue_op = queue.enqueue(features)
-    qr = tf.train.QueueRunner(queue, [enqueue_op] * 40)
+    qr = tf.train.QueueRunner(queue, [enqueue_op] * 80)
     tf.train.add_queue_runner(qr)
     inputs = queue.dequeue_many(32)
 
