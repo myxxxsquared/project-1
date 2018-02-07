@@ -26,7 +26,7 @@ def data_label(ins):
 
 
 def syn_wrapper(index):
-    file = PKL_DIR + 'synthtext_chars/' + str(index) + '.bin'
+    file = PKL_DIR + 'totaltext_train/' + str(index) + '.bin'
     img_name, img, maps = data_label(data_aug(load_file(file), augment_rate=100))
     [TR, TCL, radius, cos_theta, sin_theta] = maps
     img = np.array(img, np.float32)
@@ -41,7 +41,8 @@ def syn_wrapper(index):
 
 
 def get_train_input(params):
-    syn_dataset = tf.data.Dataset.range(858749+1).repeat(params.pretrain_num)
+    # syn_dataset = tf.data.Dataset.range(858749+1).repeat(params.pretrain_num)
+    syn_dataset = tf.data.Dataset.range(1000).repeat(params.pretrain_num)
 
     syn_dataset = syn_dataset.map(
         lambda index: tuple(tf.py_func(
