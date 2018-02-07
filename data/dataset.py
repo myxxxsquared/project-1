@@ -55,7 +55,7 @@ def get_train_input(params):
     syn_dataset = syn_dataset.map(
         lambda index: tuple(tf.py_func(
             syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
-        num_parallel_calls=40)
+        num_parallel_calls=64)
     syn_dataset = syn_dataset.batch(32)
     iterator = syn_dataset.make_one_shot_iterator()
 
