@@ -36,8 +36,19 @@ def get_cos(point, point1, point2):
     # point is pivot
     vec1 = (point[0]-point1[0], point[1]-point1[1])
     vec2 = (point[0]-point2[0], point[1]-point2[1])
-    return float((vec1[0]*vec2[0]+vec1[1]*vec2[1])/(get_l2_dist(point,point1)*get_l2_dist(point,point2)))
 
+    a_dot_b = vec1[0]*vec2[0]+vec1[1]*vec2[1]
+    if a_dot_b > 0: sign = 1
+    else: sign = -1
+    a_dot_b = a_dot_b*sign
+    a_mul_b = get_l2_dist(point,point1)*get_l2_dist(point,point2)
+    try:
+        cos = sign * math.exp(math.log(a_dot_b)-math.log(a_mul_b))
+    except:
+        print('cos error')
+        cos = 0.0
+    #possible error: ValueError: math domain error
+    return cos
 
 def get_shortest_dist(point, point1, point2):
     '''
@@ -85,6 +96,7 @@ def get_radius(point, cnt):
     cnt_changed = [(point[1], point[0]) for point in cnt]
     cnt_changed = cnt_changed + [cnt_changed[0]]
     dist_list = []
+
     for i in range(len(cnt_changed)-1):
         dist_list.append(get_shortest_dist(point, cnt_changed[i], cnt_changed[i+1]))
     return max(dist_list)
@@ -104,10 +116,14 @@ def is_validate_cnts(im, cnts):
             rows.append(cnt[i][1])
     col_max = max(cols)
     row_max = max(rows)
-    im_row, im_col = im.shape[0]-1, im.shape[1]-1
+    col_min = min(cols)
+    row_min = min(rows)
+    im_row, im_col = im.shape[0], im.shape[1]
     flag = True
     if im_row < row_max: flag = False
     if im_col < col_max: flag = False
+    if col_min < 0: flag = False
+    if row_min < 0: flag = False
     return flag
 
 
@@ -146,15 +162,28 @@ def validate(im, cnts):
         for i in range(len(cnt)):
             cols.append(cnt[i][0])
             rows.append(cnt[i][1])
+
+    cols, rows = [], []
+    for cnt in cnts:
+        cnt = np.squeeze(cnt)
+        for i in range(len(cnt)):
+            cols.append(cnt[i][0])
+            rows.append(cnt[i][1])
     col_max = int(max(cols))
     row_max = int(max(rows))
-    im_row, im_col = im.shape[0]-1, im.shape[1]-1
+    im_row, im_col = im.shape[0], im.shape[1]
     if im_row < row_max:
         temp = np.zeros([row_max-im_row, im.shape[1], im.shape[2]])
         im = np.concatenate((im, temp), 0)
     if im_col < col_max:
         temp = np.zeros([im.shape[0], col_max-im_col, im.shape[2]])
         im = np.concatenate((im, temp), 1)
+    for i in range(len(cnts)):
+        for j in range(len(cnts[i])):
+            for k in range(len(cnts[i][j])):
+                for l in range(len(cnts[i][j][k])):
+                    if cnts[i][j][k][l] < 0:
+                        cnts[i][j][k][l] = 0.0
     cnts = [np.array(np.reshape(cnt, (-1,1,2)), np.float32) for cnt in cnts]
     return im, cnts
 
@@ -301,6 +330,7 @@ def find_mid_line_with_radius_theta(points_list, crop_skel, neighbor, sampling_n
             center_line.append((x,y))
         center_line_set.add((x,y))
         radius_dict[(x,y)] = get_l2_dist((x1,y1),(x2,y2))/2
+
     if len(points_list) == 4:
         theta = get_theta([center_line[0]]+center_line[::30]+[center_line[-1]])
         for point in center_line:
@@ -432,8 +462,8 @@ def find_mid_line_with_radius_theta_char(char_cnt_per_text, sampling_num=500):
         skel_points.add(char_cnt_per_text[i][0])
     for i in range(len_-1):
         point1, point2 = char_cnt_per_text[i][0], char_cnt_per_text[i+1][0]
-        sample_points = sampling(point1, point2, sampling_num)
-        sample_radius = np.linspace(radius_dict[point1], radius_dict[point2], sampling_num)
+        sample_points = sampling(point1, point2, sampling_num//(len_-1))
+        sample_radius = np.linspace(radius_dict[point1], radius_dict[point2], len(sample_points))
         if i == 0:
             theta = get_theta([point1, point2])
         else:
@@ -618,7 +648,8 @@ def get_maps(im, cnts, is_textbox, thickness, crop_skel, neighbor, chars=None):
 
     if is_textbox:
         cnts = [np.array(cnt, np.float32) for cnt in cnts]
-
+        if not is_validate_cnts(im, cnts):
+            im, cnts = validate(im,cnts)
         skels_points, radius_dict, score_dict, cos_theta_dict, sin_theta_dict, mask_fills = \
             get_maps_textbox(im,cnts, thickness, crop_skel, neighbor)
     else:
@@ -627,52 +658,13 @@ def get_maps(im, cnts, is_textbox, thickness, crop_skel, neighbor, chars=None):
         char_cnts, text_cnts = cnts
         char_cnts = [np.array(cnt, np.float32) for cnt in char_cnts]
         text_cnts = [np.array(cnt, np.float32) for cnt in text_cnts]
+        if not is_validate_cnts(im, text_cnts):
+            im, text_cnts = validate(im,text_cnts)
         cnts = [char_cnts, text_cnts]
         skels_points, radius_dict, score_dict, cos_theta_dict, sin_theta_dict, mask_fills = \
             get_maps_charbox(im,cnts, thickness, crop_skel, neighbor, chars)
     return skels_points, radius_dict, score_dict, cos_theta_dict, sin_theta_dict, mask_fills
 
-
-def data_labeling(img_name, img, cnts, is_text_cnts, thickness, crop_skel, neighbor, chars = None):
-    '''
-    :param img_name: pass to return directly, (to be determined, int or str)
-    :param img: ndarray, np.uint8,
-    :param cnts:
-            if is_text_cnts is True: list(ndarray), ndarray: dtype np.float32, shape [n, 1, 2], order(col, row)
-            if is_text_cnts is False: list(list(ndarray), list(ndarray)), for [char_cnts, text_cnts]
-    :param is_text_cnts: bool
-    :param left_top: for cropping
-    :param right_bottom: for cropping
-    :param chars:
-            if is_text_cnts is True: None
-            if is_text_cnts is False: a nested list storing the chars info for synthtext
-    :return:
-            img_name: passed down
-            img: np.ndarray np.uint8
-            maps: [TR, TCL, radius, cos_theta, sin_theta], all of them are 2-d array,
-            TR: np.bool; TCL: np.bool; radius: np.float32; cos_theta/sin_theta: np.float32
-    '''
-
-    skels_points, radius_dict, score_dict, cos_theta_dict, sin_theta_dict, mask_fills = \
-        get_maps(img, cnts, is_text_cnts, thickness, crop_skel, neighbor, chars)
-    TR = mask_fills[0]
-    for i in range(1, len(mask_fills)):
-        TR = np.bitwise_or(TR, mask_fills[i])
-    TCL = np.zeros(img.shape[:2], np.bool)
-    for point, _ in score_dict.items():
-        TCL[point[0], point[1]] = True
-    radius = np.zeros(img.shape[:2], np.float32)
-    for point, r in radius_dict.items():
-        radius[point[0], point[1]] = r
-    cos_theta = np.zeros(img.shape[:2], np.float32)
-    for point, c_t in cos_theta_dict.items():
-        cos_theta[point[0], point[1]] = c_t
-    sin_theta = np.zeros(img.shape[:2], np.float32)
-    for point, s_t in sin_theta_dict.items():
-        sin_theta[point[0], point[1]] = s_t
-
-    maps = [TR, TCL, radius, cos_theta, sin_theta]
-    return img_name, img, maps
 
 if __name__ == '__main__':
     ########### test text_cnts ############
@@ -731,13 +723,12 @@ if __name__ == '__main__':
     PKL_DIR = '/home/rjq/data_cleaned/pkl/'
     import pickle
 
-
-    for i in range(800000):
+    for i in range(0, 80000):
         res = pickle.load(open(PKL_DIR+'synthtext_chars/'+str(i)+'.bin', 'rb'))
         # print(res['img_name'],
         #       res['contour'],
         #       res['img'])
-        #
+
         img_name = res['img_name']
         img_name = img_name.replace('/', '_')
         img = res['img']
@@ -753,35 +744,52 @@ if __name__ == '__main__':
         zeros = cv2.drawContours(zeros, text_cnts, -1, (255,255,255), 1)
         cv2.imwrite(img_name+'_box.jpg', zeros)
 
-        skels_points, radius_dict, score_dict, cos_theta_dict, sin_theta_dict, mask_fills = \
-            get_maps(img, cnts, is_text_cnts, thickness=0.15, neighbor=5, crop_skel=1.0,
-                     chars = chars)
-        TR = mask_fills[0]
-        for i in range(1, len(mask_fills)):
-            TR = np.bitwise_or(TR, mask_fills[i])
-        TCL = np.zeros(img.shape[:2], np.bool)
-        for point, _ in score_dict.items():
-            TCL[point[0], point[1]] = True
-        radius = np.zeros(img.shape[:2], np.float32)
-        for point, r in radius_dict.items():
-            radius[point[0], point[1]] = r
-        cos_theta = np.zeros(img.shape[:2], np.float32)
-        for point, c_t in cos_theta_dict.items():
-            cos_theta[point[0], point[1]] = c_t
-        sin_theta = np.zeros(img.shape[:2], np.float32)
-        for point, s_t in sin_theta_dict.items():
-            sin_theta[point[0], point[1]] = s_t
+        if not is_validate_cnts(img, cnts[1]):
+            print('img_name', img_name)
+            print('index', i)
+            print(img.shape)
+            print(cnts[1])
+            img, cnts_ = validate(img, cnts[1])
+            cnts = [cnts[0], cnts_]
+        try:
+            skels_points, radius_dict, score_dict, cos_theta_dict, sin_theta_dict, mask_fills = \
+                get_maps(img, cnts, is_text_cnts, thickness=0.15, neighbor=5, crop_skel=1.0,
+                         chars = chars)
+
+            TR = mask_fills[0]
+            for i in range(1, len(mask_fills)):
+                TR = np.bitwise_or(TR, mask_fills[i])
+            TCL = np.zeros(img.shape[:2], np.bool)
+            for point, _ in score_dict.items():
+                TCL[point[0], point[1]] = True
+            radius = np.zeros(img.shape[:2], np.float32)
+            for point, r in radius_dict.items():
+                radius[point[0], point[1]] = r
+            cos_theta = np.zeros(img.shape[:2], np.float32)
+            for point, c_t in cos_theta_dict.items():
+                cos_theta[point[0], point[1]] = c_t
+            sin_theta = np.zeros(img.shape[:2], np.float32)
+            for point, s_t in sin_theta_dict.items():
+                sin_theta[point[0], point[1]] = s_t
 
 
-        def save_heatmap(save_name, map):
-            map = np.array(map, np.float32)
-            if np.max(map) != 0.0 or np.max(map) != 0:
-                cv2.imwrite(save_name, (map * 255 / np.max(map)).astype(np.uint8))
-            else:
-                cv2.imwrite(save_name, map.astype(np.uint8))
+            def save_heatmap(save_name, map):
+                map = np.array(map, np.float32)
+                if np.max(map) != 0.0 or np.max(map) != 0:
+                    cv2.imwrite(save_name, (map * 255 / np.max(map)).astype(np.uint8))
+                else:
+                    cv2.imwrite(save_name, map.astype(np.uint8))
 
-        # save_heatmap(img_name+'_TR.jpg', TR)
-        # save_heatmap(img_name+'_TCL.jpg', TCL)
-        # save_heatmap(img_name+'_radius.jpg', radius)
-        # save_heatmap(img_name+'_cos_theta.jpg', cos_theta)
-        # save_heatmap(img_name+'_sin_theta.jpg', sin_theta)
+            save_heatmap(img_name+'_TR.jpg', TR)
+            save_heatmap(img_name+'_TCL.jpg', TCL)
+            save_heatmap(img_name+'_radius.jpg', radius)
+            save_heatmap(img_name+'_cos_theta.jpg', cos_theta)
+            save_heatmap(img_name+'_sin_theta.jpg', sin_theta)
+        except Exception as e:
+            print(e)
+            raise AttributeError
+            # print('img_name', img_name)
+            # print('index', i)
+            # print(img.shape)
+            # print(cnts[1])
+            #

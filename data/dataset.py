@@ -22,7 +22,7 @@ def data_label(ins):
     return labelling._data_labeling(ins['img_name'],ins['img'],
                                     ins['contour'],ins['is_text_cnts'],
                                     ins['left_top'],ins['right_bottom'],
-                                    None)
+                                    ins['chars'])
 
 
 def wrapper(index):
@@ -44,6 +44,7 @@ def get_train_input():
         lambda index: tuple(tf.py_func(
             wrapper, [index], [tf.float32])))
     iterator = dataset.make_one_shot_iterator()
+    dataset = dataset.batch(32)
     features = iterator.get_next()
     return features
 
