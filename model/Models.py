@@ -12,7 +12,7 @@ class  model(object):
         self.configs = configs
         self.params = params
         self.logs = logs
-        self._build_network()
+
 
     # this function is to build the network stem from BaseNet
     def _build_network(self, features):
