@@ -61,7 +61,7 @@ def get_train_input(params):
     queue = tf.FIFOQueue(1000, dtypes=[tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32],
                          shapes=[(512,512,3),(512,512,1),(512,512,1),(512,512,1),(512,512,1),(512,512,1)])
     enqueue_op = queue.enqueue(features)
-    qr = tf.train.QueueRunner(queue, [enqueue_op] * 4)
+    qr = tf.train.QueueRunner(queue, [enqueue_op] * 40)
     tf.train.add_queue_runner(qr)
     inputs = queue.dequeue_many(32)
 
