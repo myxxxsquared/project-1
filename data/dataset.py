@@ -56,7 +56,8 @@ BUFFER_SIZE=3000
 def get_train_input(params):
     # syn_dataset = tf.data.Dataset.range(858749+1).repeat(params.pretrain_num)
     #syn_dataset=tf.contrib.data.python.ops.dataset_ops.Dataset.range(1000).repeat(params.pretrain_num)
-    syn_dataset = tf.data.Dataset.range(1000).repeat(params.pretrain_num)
+    # syn_dataset = tf.data.Dataset.range(1000).repeat(params.pretrain_num)
+    syn_dataset = tf.data.Dataset.range(1000)
 
     # syn_dataset = syn_dataset.map(
     #     lambda index: tuple(tf.py_func(
