@@ -130,6 +130,12 @@ class model():
     def get_loss(self, features):
 
         img, TR, TCL, radius, cos_theta, sin_theta = features
+        img = tf.reshape(img, (512,512,3))
+        TR = tf.reshape(TR, (512,512))
+        TCL = tf.reshape(TCL, (512,512))
+        radius = tf.reshape(radius, (512,512))
+        cos_theta = tf.reshape(cos_theta, (512,512))
+        sin_theta = tf.reshape(sin_theta, (512,512))
         Labels = tf.stack((TR, TCL, radius, cos_theta, sin_theta))
         basenets={'vgg16':Basenet.VGG16,'vgg19':Basenet.VGG16,'resnet':Basenet.ResNet}#for resnet :  'resnet-layer_number'
 
