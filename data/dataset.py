@@ -72,7 +72,7 @@ def get_train_input(params):
 
     syn_dataset = syn_dataset.map(
         lambda index: tuple(tf.py_func(
-            syn_wrapper, [index]))
+            syn_wrapper, [index])))
 
     # total_train_dataset = tf.data.Dataset.range(858749+1).repeat(params.pretrain_num)
     # total_train_dataset = total_train_dataset.map(
