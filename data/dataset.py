@@ -57,7 +57,7 @@ def get_train_input(params):
             syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])))
 
 
-    # syn_dataset = syn_dataset.batch(32)
+    syn_dataset = syn_dataset.batch(32)
     iterator = syn_dataset.make_one_shot_iterator()
 
     features = iterator.get_next()
