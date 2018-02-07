@@ -6,7 +6,7 @@ class model():
 
     def get_loss(self, features):
         print(features)
-        radius = tf.reshape(features, (512,512))
+        radius = tf.reshape(features['radius'], (512,512))
         train_var = tf.Variable(0.5, dtype=tf.float32)
         loss = tf.reduce_sum(radius)*train_var+ tf.reduce_sum(radius)*(1-train_var)
         return loss
