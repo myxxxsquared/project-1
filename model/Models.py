@@ -17,6 +17,12 @@ class  model(object):
     # this function is to build the network stem from BaseNet
     def _build_network(self, features):
         img, TR, TCL, radius, cos_theta, sin_theta = features
+        img = tf.cast(img, tf.float32)
+        TR = tf.cast(TR, tf.float32)
+        TCL = tf.cast(TCL, tf.float32)
+        radius = tf.cast(radius, tf.float32)
+        cos_theta = tf.cast(cos_theta, tf.float32)
+        sin_theta = tf.cast(sin_theta, tf.float32)
 
         # self.input_image = tf.placeholder(tf.float32,
         #                                   shape=(None,
