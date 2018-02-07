@@ -35,8 +35,9 @@ def syn_wrapper(index):
     radius = np.array(radius, np.float32)
     cos_theta = np.array(cos_theta, np.float32)
     sin_theta = np.array(sin_theta, np.float32)
-    res = np.stack((img, TR, TCL, radius, cos_theta, sin_theta))
-    return res
+
+    # res = np.stack((img, TR, TCL, radius, cos_theta, sin_theta))
+    return img, TR, TCL, radius, cos_theta, sin_theta
 
 
 def get_train_input(params):
@@ -44,7 +45,7 @@ def get_train_input(params):
 
     syn_dataset = syn_dataset.map(
         lambda index: tuple(tf.py_func(
-            syn_wrapper, [index], [tf.float32])))
+            syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])))
 
     # total_train_dataset = tf.data.Dataset.range(858749+1).repeat(params.pretrain_num)
     # total_train_dataset = total_train_dataset.map(
