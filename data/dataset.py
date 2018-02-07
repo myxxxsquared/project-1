@@ -51,13 +51,12 @@ def syn_wrapper(index):
 BUFFER_SIZE=5000
 def get_train_input(params):
     # syn_dataset = tf.data.Dataset.range(858749+1).repeat(params.pretrain_num)
-    syn_dataset=tf.contrib.data.python.ops.dataset_ops.Dataset.range(1000).repeat(params.pretrain_num)
-    # syn_dataset = tf.data.Dataset.range(1000).repeat(params.pretrain_num)
+    #syn_dataset=tf.contrib.data.python.ops.dataset_ops.Dataset.range(1000).repeat(params.pretrain_num)
+    syn_dataset = tf.data.Dataset.range(1000).repeat(params.pretrain_num)
 
     syn_dataset = syn_dataset.map(
         lambda index: tuple(tf.py_func(
-            syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
-        num_threads=64).prefetch(BUFFER_SIZE)
+            syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32]))).prefetch(BUFFER_SIZE)
 
     syn_dataset = syn_dataset.batch(32)
 
