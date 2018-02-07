@@ -42,6 +42,8 @@ def default_parameters():
         initializer_gain=0.08,
         learning_rate=0.01,
         save_checkpoint_secs=None,
+        pretrain_num=1,
+        train_num=10
     )
     return params
 
@@ -110,7 +112,7 @@ def main(args):
 
     # Build Graph
     with tf.Graph().as_default():
-        features = dataset.get_train_input()
+        features = dataset.get_train_input(params)
 
         # Build model
         initializer = get_initializer(params)
