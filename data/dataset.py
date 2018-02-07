@@ -35,7 +35,12 @@ def syn_wrapper(index):
     radius = np.array(radius, np.float32)
     cos_theta = tf.cast(cos_theta, tf.float32)
     sin_theta = tf.cast(sin_theta, tf.float32)
-    return img, TR, TCL, radius, cos_theta, sin_theta
+    return {'img':img,
+            'TR':TR,
+            'TCL':TCL,
+            'radius':radius,
+            'cos_theta':cos_theta,
+            'sin_theta':sin_theta}
 
 def total_train_wrapper(index):
     file = PKL_DIR + 'totaltext_train/' + str(index) + '.bin'
