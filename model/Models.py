@@ -7,7 +7,7 @@ class model():
     def get_loss(self, features):
         print(features)
         print(type(features))
-        img, TR, TCL, radius, cos_theta, sin_theta = tf.unstack(features,6)
+        img, TR, TCL, radius, cos_theta, sin_theta = tf.unstack(features)
         radius = tf.reshape(radius, (512,512))
         print(radius)
         print(type(radius))
