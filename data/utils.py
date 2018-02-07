@@ -677,66 +677,66 @@ def data_labeling(img_name, img, cnts, is_text_cnts, thickness, crop_skel, neigh
 if __name__ == '__main__':
     ########### test text_cnts ############
 
-    PKL_DIR = '/home/rjq/data_cleaned/pkl/'
-    import pickle
-
-    for i in range(100):
-        res = pickle.load(open(PKL_DIR+'totaltext_train/'+str(i)+'.bin', 'rb'))
-        print(res['img_name'],
-              res['contour'],
-              res['img'])
-
-        img_name = res['img_name']
-        img = res['img']
-        cnts = res['contour']
-        is_text_cnts = res['is_text_cnts']
-
-        skels_points, radius_dict, score_dict, cos_theta_dict, sin_theta_dict, mask_fills = \
-            get_maps(img, cnts, is_text_cnts, thickness=0.15, crop_skel=1.0, neighbor=5)
-        TR = mask_fills[0]
-        for i in range(1, len(mask_fills)):
-            TR = np.bitwise_or(TR, mask_fills[i])
-        TCL = np.zeros(img.shape[:2], np.bool)
-        for point, _ in score_dict.items():
-            TCL[point[0], point[1]] = True
-        radius = np.zeros(img.shape[:2], np.float32)
-        for point, r in radius_dict.items():
-            radius[point[0], point[1]] = r
-        cos_theta = np.zeros(img.shape[:2], np.float32)
-        for point, c_t in cos_theta_dict.items():
-            cos_theta[point[0], point[1]] = c_t
-        sin_theta = np.zeros(img.shape[:2], np.float32)
-        for point, s_t in sin_theta_dict.items():
-            sin_theta[point[0], point[1]] = s_t
-
-
-        def save_heatmap(save_name, map):
-            map = np.array(map, np.float32)
-            if np.max(map) != 0.0 or np.max(map) != 0:
-                cv2.imwrite(save_name, (map * 255 / np.max(map)).astype(np.uint8))
-            else:
-                cv2.imwrite(save_name, map.astype(np.uint8))
-        cv2.imwrite(img_name+'.jpg', img)
-        zeros = np.zeros_like(img)
-        cnts = [np.array(cnt, np.int32) for cnt in cnts]
-        zeros = cv2.drawContours(zeros, cnts, -1, (255,255,255), 1)
-        cv2.imwrite(img_name+'_box.jpg', zeros)
-        save_heatmap(img_name+'_TR.jpg', TR)
-        save_heatmap(img_name+'_TCL.jpg', TCL)
-        save_heatmap(img_name+'_radius.jpg', radius)
-        save_heatmap(img_name+'_cos_theta.jpg', cos_theta)
-        save_heatmap(img_name+'_sin_theta.jpg', sin_theta)
+    # PKL_DIR = '/home/rjq/data_cleaned/pkl/'
+    # import pickle
+    #
+    # for i in range(100):
+    #     res = pickle.load(open(PKL_DIR+'totaltext_train/'+str(i)+'.bin', 'rb'))
+    #     print(res['img_name'],
+    #           res['contour'],
+    #           res['img'])
+    #
+    #     img_name = res['img_name']
+    #     img = res['img']
+    #     cnts = res['contour']
+    #     is_text_cnts = res['is_text_cnts']
+    #
+    #     skels_points, radius_dict, score_dict, cos_theta_dict, sin_theta_dict, mask_fills = \
+    #         get_maps(img, cnts, is_text_cnts, thickness=0.15, crop_skel=1.0, neighbor=5)
+    #     TR = mask_fills[0]
+    #     for i in range(1, len(mask_fills)):
+    #         TR = np.bitwise_or(TR, mask_fills[i])
+    #     TCL = np.zeros(img.shape[:2], np.bool)
+    #     for point, _ in score_dict.items():
+    #         TCL[point[0], point[1]] = True
+    #     radius = np.zeros(img.shape[:2], np.float32)
+    #     for point, r in radius_dict.items():
+    #         radius[point[0], point[1]] = r
+    #     cos_theta = np.zeros(img.shape[:2], np.float32)
+    #     for point, c_t in cos_theta_dict.items():
+    #         cos_theta[point[0], point[1]] = c_t
+    #     sin_theta = np.zeros(img.shape[:2], np.float32)
+    #     for point, s_t in sin_theta_dict.items():
+    #         sin_theta[point[0], point[1]] = s_t
+    #
+    #
+    #     def save_heatmap(save_name, map):
+    #         map = np.array(map, np.float32)
+    #         if np.max(map) != 0.0 or np.max(map) != 0:
+    #             cv2.imwrite(save_name, (map * 255 / np.max(map)).astype(np.uint8))
+    #         else:
+    #             cv2.imwrite(save_name, map.astype(np.uint8))
+    #     cv2.imwrite(img_name+'.jpg', img)
+    #     zeros = np.zeros_like(img)
+    #     cnts = [np.array(cnt, np.int32) for cnt in cnts]
+    #     zeros = cv2.drawContours(zeros, cnts, -1, (255,255,255), 1)
+    #     cv2.imwrite(img_name+'_box.jpg', zeros)
+    #     save_heatmap(img_name+'_TR.jpg', TR)
+    #     save_heatmap(img_name+'_TCL.jpg', TCL)
+    #     save_heatmap(img_name+'_radius.jpg', radius)
+    #     save_heatmap(img_name+'_cos_theta.jpg', cos_theta)
+    #     save_heatmap(img_name+'_sin_theta.jpg', sin_theta)
 
     ######## test char_cnts and text_cnts ############
     PKL_DIR = '/home/rjq/data_cleaned/pkl/'
     import pickle
 
-    for i in range(100):
+    for i in range(10000):
         res = pickle.load(open(PKL_DIR+'synthtext_chars/'+str(i)+'.bin', 'rb'))
-        print(res['img_name'],
-              res['contour'],
-              res['img'])
-
+        # print(res['img_name'],
+        #       res['contour'],
+        #       res['img'])
+        #
         img_name = res['img_name']
         img_name = img_name.replace('/', '_')
         img = res['img']
@@ -779,8 +779,8 @@ if __name__ == '__main__':
             else:
                 cv2.imwrite(save_name, map.astype(np.uint8))
 
-        save_heatmap(img_name+'_TR.jpg', TR)
-        save_heatmap(img_name+'_TCL.jpg', TCL)
-        save_heatmap(img_name+'_radius.jpg', radius)
-        save_heatmap(img_name+'_cos_theta.jpg', cos_theta)
-        save_heatmap(img_name+'_sin_theta.jpg', sin_theta)
+        # save_heatmap(img_name+'_TR.jpg', TR)
+        # save_heatmap(img_name+'_TCL.jpg', TCL)
+        # save_heatmap(img_name+'_radius.jpg', radius)
+        # save_heatmap(img_name+'_cos_theta.jpg', cos_theta)
+        # save_heatmap(img_name+'_sin_theta.jpg', sin_theta)
