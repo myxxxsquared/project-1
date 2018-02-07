@@ -1,5 +1,6 @@
 import tensorflow as tf
 import pickle
+import numpy as np
 from .data_augementation import DataAugmentor
 from .data_labeling import data_churn
 
@@ -31,7 +32,7 @@ def wrapper(index):
     # img = tf.cast(img, tf.float32)
     # TR = tf.cast(TR, tf.float32)
     # TCL = tf.cast(TCL, tf.float32)
-    radius = tf.cast(radius, tf.float32)
+    radius = np.array(radius, np.float32)
     # cos_theta = tf.cast(cos_theta, tf.float32)
     # sin_theta = tf.cast(sin_theta, tf.float32)
     return radius
