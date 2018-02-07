@@ -7,7 +7,7 @@ from .yellowfin import *
 from tensorflow.contrib.layers import xavier_initializer_conv2d as xavier
 
 
-class network(object):
+class  model(object):
     def __init__(self, params, configs, logs):
         self.configs = configs
         self.params = params
