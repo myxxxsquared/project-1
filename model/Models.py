@@ -8,6 +8,12 @@ from tensorflow.contrib.layers import xavier_initializer_conv2d as xavier
 
 def model_graph(features, params):
     img, TR, TCL, radius, cos_theta, sin_theta = features
+    img = tf.reshape(img, (512,512,3))
+    TR = tf.reshape(TR, (512,512,1))
+    TCL = tf.reshape(TCL, (512,512,1))
+    radius = tf.reshape(radius, (512,512,1))
+    cos_theta = tf.reshape(cos_theta, (512,512,1))
+    sin_theta = tf.reshape(sin_theta, (512,512,1))
     alpha = tf.Variable(0.5, dtype=tf.float32)
     loss = tf.reduce_sum(img)*alpha+tf.reduce_sum(img)*(1-alpha)
     return loss
