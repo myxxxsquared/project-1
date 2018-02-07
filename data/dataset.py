@@ -55,13 +55,34 @@ def get_train_input(params):
     syn_dataset = syn_dataset.map(
         lambda index: tuple(tf.py_func(
             syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])))
-
-
-    syn_dataset = syn_dataset.batch(32)
     iterator = syn_dataset.make_one_shot_iterator()
 
     features = iterator.get_next()
-    return features
+    queue = tf.FIFOQueue(1000, dtypes=[tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])
+    enqueue_op = queue.enqueue(features)
+    qr = tf.train.QueueRunner(queue, [enqueue_op] * 4)
+    tf.train.add_queue_runner(qr)
+    inputs = queue.dequeue_many(32)
+
+    # Launch the graph.
+    # sess = tf.Session()
+    # # Create a coordinator, launch the queue runner threads.
+    # coord = tf.train.Coordinator()
+    # enqueue_threads = qr.create_threads(sess, coord=coord, start=True)
+    # # Run the training loop, controlling termination with the coordinator.
+    # for step in range(1000000):
+    #     if coord.should_stop():
+    #         break
+    #     sess.run(train_op)
+    # # When done, ask the threads to stop.
+    # # coord.request_stop()
+    # # # And wait for them to actually do it.
+    # # coord.join(enqueue_threads)
+    #
+    # # syn_dataset = syn_dataset.batch(32)
+
+
+    return inputs
 
 
 

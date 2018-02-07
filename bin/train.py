@@ -125,6 +125,9 @@ def main(args):
         #             np.zeros((512, 512, 1), np.float32),
         #             np.zeros((512, 512, 1), np.float32),
         #             np.zeros((512, 512, 1), np.float32)]
+        with tf.Session() as sess()
+            coord = tf.train.Coordinator()
+            threads = tf.train.start_queue_runners(coord=coord)
 
         # Build model
         initializer = get_initializer(params)
