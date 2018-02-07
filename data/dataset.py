@@ -21,7 +21,7 @@ def data_label(ins):
     return labelling._data_labeling(ins['img_name'],ins['img'],
                                     ins['contour'],ins['is_text_cnts'],
                                     ins['left_top'],ins['right_bottom'],
-                                    ins['chars'])
+                                    None)
 
 
 def wrapper(index):
