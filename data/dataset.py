@@ -54,7 +54,7 @@ def get_train_input(params):
 
     syn_dataset = syn_dataset.map(
         lambda index: tuple(tf.py_func(
-            syn_wrapper, [index], [tf.,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])))
+            syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])))
 
 
     # syn_dataset = syn_dataset.batch(32)
