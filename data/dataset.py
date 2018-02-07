@@ -54,16 +54,18 @@ def get_train_input(params):
 
     syn_dataset = syn_dataset.map(
         lambda index: tuple(tf.py_func(
-            syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])))
+            syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
+        num_threads=40)
+    syn_dataset = syn_dataset.batch(32)
     iterator = syn_dataset.make_one_shot_iterator()
 
     features = iterator.get_next()
-    queue = tf.FIFOQueue(100000, dtypes=[tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32],
-                         shapes=[(512,512,3),(512,512,1),(512,512,1),(512,512,1),(512,512,1),(512,512,1)])
-    enqueue_op = queue.enqueue(features)
-    qr = tf.train.QueueRunner(queue, [enqueue_op] * 80)
-    tf.train.add_queue_runner(qr)
-    inputs = queue.dequeue_many(32)
+    # queue = tf.FIFOQueue(100000, dtypes=[tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32],
+    #                      shapes=[(512,512,3),(512,512,1),(512,512,1),(512,512,1),(512,512,1),(512,512,1)])
+    # enqueue_op = queue.enqueue(features)
+    # qr = tf.train.QueueRunner(queue, [enqueue_op] * 80)
+    # tf.train.add_queue_runner(qr)
+    # inputs = queue.dequeue_many(32)
 
     # Launch the graph.
     # sess = tf.Session()
