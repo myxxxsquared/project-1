@@ -7,11 +7,11 @@ from  tensorflow.contrib.layers import xavier_initializer_conv2d as xavier
 from . import ResNetSchedule
 
 class BaseNet(object):
-    def __init__(self,configs,log):
-        self.input_size=configs.input_size#tuple  height * width * channels  (pre-resized)
-        self.padding=configs.padding#str
-        self.pooling = configs.pooling
-        self.log=log
+    def __init__(self,params,log):
+        self.input_size=params.input_size#tuple  height * width * channels  (pre-resized)
+        self.padding=params.padding#str
+        self.pooling = params.pooling
+        # self.log=log
 
     def minus_mean(self,image, MeanPixel):
         #this step in carried out in VGG
@@ -155,7 +155,7 @@ class VGG16(BaseNet):
             net[name] = activations
 
 
-        self.log['info']("BackBone network built.")
+        # self.log['info']("BackBone network built.")
         self.pipe={"input_pipe": input_image,
                 "output_pipe": net}
 
@@ -203,7 +203,7 @@ class VGG19(BaseNet):
                                                                            name='norm') * 20  # optional, not in the original VGG network
             net[name] = activations
 
-        self.log['info']("BackBone network built.")
+        # self.log['info']("BackBone network built.")
         self.pipe = {"input_pipe": input_image,
                     "output_pipe": net}
 
@@ -269,6 +269,6 @@ class ResNet(BaseNet):
 
             net[stage]=activations
 
-        self.log['info']("BackBone network built.")
+        # self.log['info']("BackBone network built.")
         self.pipe = {"input_pipe": input_image,
                     "output_pipe": net}

@@ -9,7 +9,7 @@ import tensorflow as tf
 import model.Models as Model
 import model.parallel as parallel
 import data.dataset as dataset
-
+from . import configs
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
@@ -43,7 +43,11 @@ def default_parameters():
         learning_rate=0.01,
         save_checkpoint_secs=None,
         pretrain_num=1,
-        train_num=10
+        train_num=10,
+        basenets='vgg16',
+        input_size='512*512*3',
+        padding='SAME',
+        pooling='max'
     )
     return params
 
@@ -116,7 +120,7 @@ def main(args):
 
         # Build model
         initializer = get_initializer(params)
-        model = Model.model()
+        model = Model.model(params, configs.configs())
 
         # Multi-GPU setting
         sharded_losses = parallel.parallel_model(
