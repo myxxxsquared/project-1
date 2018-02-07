@@ -4,7 +4,7 @@ import numpy as np
 from .data_augementation import DataAugmentor
 from .data_labeling import data_churn
 
-PKL_DIR = '/home/rjq/data_cleaned/pkl/'
+
 
 
 
@@ -28,6 +28,7 @@ def data_label(ins):
 
 
 def syn_wrapper(index):
+    PKL_DIR = '/home/rjq/data_cleaned/pkl/'
     file = PKL_DIR + 'totaltext_train/' + str(index) + '.bin'
     img_name, img, maps = data_label(data_aug(load_file(file), augment_rate=100))
     [TR, TCL, radius, cos_theta, sin_theta] = maps
