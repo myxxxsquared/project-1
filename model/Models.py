@@ -6,7 +6,7 @@ class model():
 
     def get_loss(self, features):
         print(features)
-        img = tf.reshape(features[0], (512,512, 3))
+        img = tf.reshape(features[1], (512,512))
         train_var = tf.Variable(0.5, dtype=tf.float32)
         loss = tf.reduce_sum(img)*train_var+ tf.reduce_sum(img)*(1-train_var)
         return loss
