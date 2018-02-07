@@ -85,7 +85,7 @@ def get_train_input(params):
     # # syn_dataset = syn_dataset.batch(32)
 
 
-    return inputs
+    return features
 
 
 
