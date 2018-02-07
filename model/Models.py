@@ -13,18 +13,22 @@ class  model(object):
         self.params = params
         self.logs = logs
         self._build_network()
-        self.saver = tf.train.Saver()
 
     # this function is to build the network stem from BaseNet
-    def _build_network(self):
-        self.input_image = tf.placeholder(tf.float32,
-                                          shape=(None,
-                                                 *(self.configs.image_size)),
-                                          name="InputImage")
-        self.Labels = tf.placeholder(tf.float32,
-                                     shape=(None, self.configs.Label_size[0], self.configs.Label_size[1],
-                                            self.configs.Label_size[2]),
-                                     name="Labels")
+    def _build_network(self, features):
+        img, TR, TCL, radius, cos_theta, sin_theta = features
+
+        # self.input_image = tf.placeholder(tf.float32,
+        #                                   shape=(None,
+        #                                          *(self.configs.image_size)),
+        #                                   name="InputImage")
+        # self.Labels = tf.placeholder(tf.float32,
+        #                              shape=(None, self.configs.Label_size[0], self.configs.Label_size[1],
+        #                                     self.configs.Label_size[2]),
+        #                              name="Labels")
+        self.input_image = img
+        self.Labels = np.stack((TR, TCL, radius, cos_theta, sin_theta))
+
 
         basenets = {'vgg16': Basenet.VGG16, 'vgg19': Basenet.VGG16,
                     'resnet': Basenet.ResNet}  # for resnet :  'resnet-layer_number'
@@ -37,10 +41,10 @@ class  model(object):
         # self.logs['info']('Network built: prediction layer.')
         self._build_loss()
         # self.logs['info']('Network built: loss function.')
-        self._train()
         # self.logs['info']('Network built: train step.')
         # self.logs['info']('Network built: all done.')
         self.global_step = tf.get_variable('global_step', [], initializer=tf.constant_initializer(0), trainable=False)
+        return self.total_loss
 
     # this function is to build blocks for predictions of pixels
     def _add_prediction_block(self):
@@ -160,23 +164,9 @@ class  model(object):
                               tr, 1)
         self.image_summary_op = tf.summary.merge([i1, i2, i3, i4, i5])
 
-    def _train(self):
-        optimizer = {'Adam': tf.train.AdamOptimizer, 'YF': YFOptimizer}
-        self.train_step = optimizer[self.configs.optimizer](learning_rate=self.configs.learning_rate).minimize(
-            self.total_loss, global_step=self.global_step)
+    def get_training_func(self):
+        return self._build_network()
 
-    def save(self, sess, path=None):
-        if path:
-            self.saver.save(sess, path)
-        else:
-            self.saver.save(sess, os.path.join(path, str(int(time.time())) + '.cntk'))
-
-    def load(self, sess, path):
-        try:
-            self.saver.restore(sess, path)
-        except:
-            # self.logs['debug']('failed to restore.')
-            raise ValueError('failed to restore.')
 
 
 def flatten(output):
