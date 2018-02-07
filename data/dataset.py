@@ -43,7 +43,7 @@ def syn_wrapper(index):
     # cos_theta = tf.convert_to_tensor(np.reshape(np.array(cos_theta, np.float32),(512,512,1)))
     # sin_theta = tf.convert_to_tensor(np.reshape(np.array(sin_theta, np.float32),(512,512,1)))
 
-    print(img.shape)
+    # print(img.shape)
     # res = np.stack((img, TR, TCL, radius, cos_theta, sin_theta))
     return img, TR, TCL, radius, cos_theta, sin_theta
 
