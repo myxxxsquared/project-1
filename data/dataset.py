@@ -31,6 +31,7 @@ def syn_wrapper(index):
     PKL_DIR = '/home/rjq/data_cleaned/pkl/'
     file = PKL_DIR + 'totaltext_train/' + str(index) + '.bin'
     img_name, img, maps = data_label(data_aug(load_file(file), augment_rate=100))
+    # img_name, img, maps = data_label(data_aug(load_file(file), augment_rate=100))
     [TR, TCL, radius, cos_theta, sin_theta] = maps
     img = np.reshape(np.array(img, np.float32),(512,512,3))
     TR = np.reshape(np.array(TR, np.float32),(512,512,1))
@@ -57,13 +58,16 @@ def get_train_input(params):
     #syn_dataset=tf.contrib.data.python.ops.dataset_ops.Dataset.range(1000).repeat(params.pretrain_num)
     syn_dataset = tf.data.Dataset.range(1000).repeat(params.pretrain_num)
 
-    syn_dataset = syn_dataset.map(
-        lambda index: tuple(tf.py_func(
+    # syn_dataset = syn_dataset.map(
+    #     lambda index: tuple(tf.py_func(
+    #         syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
+    #     num_parallel_calls=40).prefetch(BUFFER_SIZE)
+    #
+    # syn_dataset = syn_dataset.batch(32)
+
+    syn_dataset.map_and_batch(lambda index: tuple(tf.py_func(
             syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
-        num_parallel_calls=40).prefetch(BUFFER_SIZE)
-
-    syn_dataset = syn_dataset.batch(32)
-
+                              32, 40)
 
 
     iterator = syn_dataset.make_one_shot_iterator()
