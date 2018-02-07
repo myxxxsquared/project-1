@@ -125,9 +125,7 @@ def main(args):
         #             np.zeros((512, 512, 1), np.float32),
         #             np.zeros((512, 512, 1), np.float32),
         #             np.zeros((512, 512, 1), np.float32)]
-        with tf.Session() as sess()
-            coord = tf.train.Coordinator()
-            threads = tf.train.start_queue_runners(coord=coord)
+
 
         # Build model
         initializer = get_initializer(params)
@@ -231,9 +229,13 @@ def main(args):
         with tf.train.MonitoredTrainingSession(
                 checkpoint_dir=params.output, hooks=train_hooks,
                 save_checkpoint_secs=None, config=config) as sess:
+            coord = tf.train.Coordinator()
+            threads = tf.train.start_queue_runners(coord=coord)
             while not sess.should_stop():
                 # Bypass hook calls
                 sess.run(train_op)
+            coord.request_stop()
+            coord.join(threads)
 
 if __name__ == "__main__":
     main(parse_args())
