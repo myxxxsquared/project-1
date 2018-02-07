@@ -6,8 +6,9 @@ class model():
 
     def get_loss(self, features):
         print(features)
-        img, TR, TCL, radius, cos_theta, sin_theta = tf.split(features,6)
-        radius = tf.reshape(radius, (512,512))
+        print(type(features))
+        # img, TR, TCL, radius, cos_theta, sin_theta = tf.split(features,6)
+        # radius = tf.reshape(radius, (512,512))
         train_var = tf.Variable(0.5, dtype=tf.float32)
         loss = tf.reduce_sum(radius)*train_var+ tf.reduce_sum(radius)*(1-train_var)
         return loss
