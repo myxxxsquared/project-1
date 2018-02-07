@@ -136,6 +136,7 @@ class model():
         radius = tf.reshape(radius, (512,512))
         cos_theta = tf.reshape(cos_theta, (512,512))
         sin_theta = tf.reshape(sin_theta, (512,512))
+        print(img, TR,TCL, radius,cos_theta,sin_theta)
         Labels = tf.stack((TR, TCL, radius, cos_theta, sin_theta))
         basenets={'vgg16':Basenet.VGG16,'vgg19':Basenet.VGG16,'resnet':Basenet.ResNet}#for resnet :  'resnet-layer_number'
 
