@@ -15,7 +15,7 @@ def parse_args(args=None):
     parser = argparse.ArgumentParser(
         description="_",
         usage="train.py [<args>] [-h | --help]")
-    parser.add_argument("output", type=str, default="train",
+    parser.add_argument("--output", type=str, default="train",
                         help="Path to saved models")
     parser.add_argument("--parameters", type=str, default="",
                         help="Additional hyper parameters")
