@@ -35,7 +35,7 @@ def syn_wrapper(index):
     radius = np.array(radius, np.float32)
     cos_theta = np.array(cos_theta, np.float32)
     sin_theta = np.array(sin_theta, np.float32)
-    res = np.stack(((img, TR, TCL, radius, cos_theta, sin_theta))
+    res = np.stack((img, TR, TCL, radius, cos_theta, sin_theta))
     return res
 
 
