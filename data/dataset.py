@@ -33,32 +33,8 @@ def syn_wrapper(index):
     TR = np.array(TR, np.float32)
     TCL = np.array(TCL, np.float32)
     radius = np.array(radius, np.float32)
-    cos_theta = tf.cast(cos_theta, tf.float32)
-    sin_theta = tf.cast(sin_theta, tf.float32)
-    return img, TR, TCL, radius, cos_theta, sin_theta
-
-def total_train_wrapper(index):
-    file = PKL_DIR + 'totaltext_train/' + str(index) + '.bin'
-    img_name, img, maps = data_label(data_aug(load_file(file), augment_rate=100))
-    [TR, TCL, radius, cos_theta, sin_theta] = maps
-    img = np.array(img, np.float32)
-    TR = np.array(TR, np.float32)
-    TCL = np.array(TCL, np.float32)
-    radius = np.array(radius, np.float32)
-    cos_theta = tf.cast(cos_theta, tf.float32)
-    sin_theta = tf.cast(sin_theta, tf.float32)
-    return img, TR, TCL, radius, cos_theta, sin_theta
-
-def total_test_wrapper(index):
-    file = PKL_DIR + 'totaltext_test/' + str(index) + '.bin'
-    img_name, img, maps = data_label(data_aug(load_file(file), augment_rate=100))
-    [TR, TCL, radius, cos_theta, sin_theta] = maps
-    img = np.array(img, np.float32)
-    TR = np.array(TR, np.float32)
-    TCL = np.array(TCL, np.float32)
-    radius = np.array(radius, np.float32)
-    cos_theta = tf.cast(cos_theta, tf.float32)
-    sin_theta = tf.cast(sin_theta, tf.float32)
+    cos_theta = np.array(cos_theta, np.float32)
+    sin_theta = np.array(sin_theta, np.float32)
     return img, TR, TCL, radius, cos_theta, sin_theta
 
 
