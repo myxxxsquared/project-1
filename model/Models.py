@@ -15,11 +15,12 @@ def model_graph(features, params):
 class  model(object):
     def __init__(self, params):
         self.params = params
+        self._scope = 'model'
 
     def get_training_func(self, initializer):
         def training_fn(features, params=None):
             if params is None:
-                params = self.parameters
+                params = self.params
             with tf.variable_scope(self._scope, initializer=initializer,
                                    reuse=tf.AUTO_REUSE):
                 loss = model_graph(features, params)
