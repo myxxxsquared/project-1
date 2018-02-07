@@ -48,6 +48,7 @@ def syn_wrapper(index):
     return img, TR, TCL, radius, cos_theta, sin_theta
 
 
+BUFFER_SIZE=10000
 def get_train_input(params):
     # syn_dataset = tf.data.Dataset.range(858749+1).repeat(params.pretrain_num)
     syn_dataset = tf.data.Dataset.range(1000).repeat(params.pretrain_num)
@@ -55,9 +56,14 @@ def get_train_input(params):
     syn_dataset = syn_dataset.map(
         lambda index: tuple(tf.py_func(
             syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
-        num_parallel_calls=64)
+        num_parallel_calls=64).prefetch(BUFFER_SIZE).flat_map(lambda *x: tf.data.Dataset.from_tensor_slices(x)).shuffle(BUFFER_SIZE)
     syn_dataset = syn_dataset.batch(32)
+
+
+
     iterator = syn_dataset.make_one_shot_iterator()
+
+
 
     features = iterator.get_next()
     # queue = tf.FIFOQueue(100000, dtypes=[tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32],
