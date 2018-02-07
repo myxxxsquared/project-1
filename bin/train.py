@@ -47,7 +47,9 @@ def default_parameters():
         basenets='vgg16',
         input_size='512*512*3',
         padding='SAME',
-        pooling='max'
+        pooling='max',
+        basenet = 'VGG16'
+
     )
     return params
 
