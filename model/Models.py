@@ -164,8 +164,10 @@ class  model(object):
                               tr, 1)
         self.image_summary_op = tf.summary.merge([i1, i2, i3, i4, i5])
 
-    def get_training_func(self):
-        return self._build_network()
+    def get_training_func(self, features):
+        def fn(features):
+            return self._build_network(features)
+        return fn
 
 
 
