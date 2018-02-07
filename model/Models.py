@@ -8,7 +8,9 @@ class model():
         print(features)
         print(type(features))
         img, TR, TCL, radius, cos_theta, sin_theta = features
-        # radius = tf.reshape(radius, (512,512))
+        radius = tf.reshape(radius, (512,512))
+        print(radius)
+        print(type(radius))
         train_var = tf.Variable(0.5, dtype=tf.float32)
         loss = tf.reduce_sum(radius)*train_var+ tf.reduce_sum(radius)*(1-train_var)
         return loss
