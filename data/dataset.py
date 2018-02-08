@@ -109,9 +109,7 @@ def get_train_input(params):
 
 
     enqueue_op = queue.enqueue(features_op())
-    with tf.device('/cpu:0'):
-        op = tf.group(features_op, enqueue_op)
-    qr = tf.train.QueueRunner(queue, [op] * 80)
+    qr = tf.train.QueueRunner(queue, [enqueue_op] * 80)
     tf.train.add_queue_runner(qr)
     inputs = queue.dequeue_many(32)
 
