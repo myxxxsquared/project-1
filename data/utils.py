@@ -752,7 +752,7 @@ def get_maps(im, cnts, is_textbox, thickness, crop_skel, neighbor, chars=None):
     return skels_points, radius_dict, score_dict, cos_theta_dict, sin_theta_dict, mask_fills
 
 def data_labeling(img_name, img, cnts, is_text_cnts, left_top, right_bottom,
-                  thickness=0.2, crop_skel=1.0, neighbor=5, chars = None):
+                  chars=None, thickness=0.2, crop_skel=1.0, neighbor=5):
     '''
     :param img_name: pass to return directly, (to be determined, int or str)
     :param img: ndarray, np.uint8,
