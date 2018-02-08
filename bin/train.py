@@ -118,17 +118,18 @@ def main(args):
 
     # Build Graph
     with tf.Graph().as_default():
-        # features = dataset.get_train_input(params)
-        features = [np.zeros((512,512,3),np.float32),
-                    np.zeros((512, 512, 1), np.float32),
-                    np.zeros((512, 512, 1), np.float32),
-                    np.zeros((512, 512, 1), np.float32),
-                    np.zeros((512, 512, 1), np.float32),
-                    np.zeros((512, 512, 1), np.float32)]
+        features = dataset.get_train_input(params)
+        # features = [np.zeros((512,512,3),np.float32),
+        #             np.zeros((512, 512, 1), np.float32),
+        #             np.zeros((512, 512, 1), np.float32),
+        #             np.zeros((512, 512, 1), np.float32),
+        #             np.zeros((512, 512, 1), np.float32),
+        #             np.zeros((512, 512, 1), np.float32)]
+
 
         # Build model
         initializer = get_initializer(params)
-        model = Model.model(params, configs.configs(),None)
+        model = Model.model(params)
 
         # Multi-GPU setting
         sharded_losses = parallel.parallel_model(
@@ -228,9 +229,13 @@ def main(args):
         with tf.train.MonitoredTrainingSession(
                 checkpoint_dir=params.output, hooks=train_hooks,
                 save_checkpoint_secs=None, config=config) as sess:
+            coord = tf.train.Coordinator()
+            threads = tf.train.start_queue_runners(sess=sess, coord=coord)
             while not sess.should_stop():
                 # Bypass hook calls
                 sess.run(train_op)
+            coord.request_stop()
+            coord.join(threads)
 
 if __name__ == "__main__":
     main(parse_args())
