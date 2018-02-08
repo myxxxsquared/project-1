@@ -60,17 +60,47 @@ def syn_wrapper(index):
 
 BUFFER_SIZE=3000
 def get_train_input(params):
-    syn_dataset = tf.data.Dataset.range(800000).repeat(params.pretrain_num)
+    # syn_dataset = tf.data.Dataset.range(800000).repeat(params.pretrain_num)
+    #
+    # syn_dataset = syn_dataset.map(
+    #     lambda index: tuple(tf.py_func(
+    #         syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
+    #     num_parallel_calls=40).prefetch(BUFFER_SIZE)
+    #
+    # syn_dataset = syn_dataset.batch(32).prefetch(5000)
+    #
+    # iterator = syn_dataset.make_one_shot_iterator()
+    # features = iterator.get_next()
 
-    syn_dataset = syn_dataset.map(
-        lambda index: tuple(tf.py_func(
-            syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
-        num_parallel_calls=40).prefetch(BUFFER_SIZE)
+    from multiprocessing import Process
+    import queue
+    q = queue.Queue(5000)
+    def work(q, i):
+        for _ in range(100000):
+            img = np.zeros((512,512,3))
+            TR = np.zeros((512,512,1))
+            TCL = np.zeros((512,512,1))
+            radius = np.zeros((512,512,1))
+            cos_theta = np.zeros((512,512,1))
+            sin_theta = np.zeros((512,512,1))
+            img = np.reshape(np.array(img, np.float32),(512,512,3))
+            TR = np.reshape(np.array(TR, np.float32),(512,512,1))
+            TCL = np.reshape(np.array(TCL, np.float32),(512,512,1))
+            radius = np.reshape(np.array(radius, np.float32),(512,512,1))
+            cos_theta = np.reshape(np.array(cos_theta, np.float32),(512,512,1))
+            sin_theta = np.reshape(np.array(sin_theta, np.float32),(512,512,1))
 
-    syn_dataset = syn_dataset.batch(32).prefetch(5000)
+            q.put([img, TR, TCL, radius, cos_theta, sin_theta])
 
-    iterator = syn_dataset.make_one_shot_iterator()
-    features = iterator.get_next()
+    jobs = []
+    for i in range(40):
+        jobs.append(Process(target=work, args=(q,i)))
+    for job in jobs:
+        job.start()
+    for job in jobs:
+        job.join()
+
+    features = q.get()
 
     # queue = tf.FIFOQueue(100000, dtypes=[tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32],
     #                      shapes=[(512,512,3),(512,512,1),(512,512,1),(512,512,1),(512,512,1),(512,512,1)])
