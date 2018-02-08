@@ -24,10 +24,7 @@ def data_label(ins):
                                     ins['left_top'],ins['right_bottom'],
                                     ins['chars'])
 
-index  = 0
-def syn_wrapper(useless):
-    global index
-    index += 1
+def syn_wrapper(index):
     PKL_DIR = '/home/rjq/data_cleaned/pkl/'
     file = PKL_DIR + 'synthtext_chars/' + str(index) + '.bin'
     img_name, img, maps = data_label(data_aug(load_file(file), augment_rate=100))
@@ -104,8 +101,8 @@ def get_train_input(params):
     #
     # features = q.get()
     #
-
-    features = tf.py_func(syn_wrapper,[0], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])
+    index = tf.placeholder(dtype=tf.int32)
+    features = tf.py_func(syn_wrapper,[index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])
     queue = tf.FIFOQueue(100000, dtypes=[tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32],
                      shapes=[(512,512,3),(512,512,1),(512,512,1),(512,512,1),(512,512,1),(512,512,1)])
 
@@ -131,8 +128,16 @@ def get_train_input(params):
     #
     # # syn_dataset = syn_dataset.batch(32)
 
+    # from multiprocessing import Pool
+    # patch_num = 20
+    # result = []
+    # p=Pool(patch_num)
+    # for i in range(patch_num):
+    #     result.append(p.apply_async(synthtext_to_pickle,args=('synthtext_chars/', patch_num, i))
+    # p.close()
+    # p.join()
 
-    return inputs
+    return inputs, enqueue_op, index
 
 
 
