@@ -44,7 +44,7 @@ def get_cos(point, point1, point2):
     try:
         cos = sign * math.exp(math.log(a_dot_b)-math.log(a_mul_b))
     except:
-        print('cos error')
+        # print('cos error')
         cos = 0.0
     #possible error: ValueError: math domain error
     return cos
@@ -182,7 +182,7 @@ def validate(im, cnts, cnts1=None, chars=None):
             for i in range(num):
                 if cnt[i,0,0]>=col or cnt[i,0,1]>=row:
                     flag = False
-                    print('cnt is out of image')
+                    # print('cnt is out of image')
             if flag:
                 temp.append(cnt)
         cnts = [np.array(np.reshape(cnt, (-1,1,2)), np.float32) for cnt in cnts]
