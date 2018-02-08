@@ -228,26 +228,29 @@ def main(args):
         def MyLoop(coord, sess, i):
             while not coord.should_stop():
                 sess.run(enqueue_op, feed_dict={'index':i})
-        coord = tf.train.Coordinator()
+
+
 
         # Create 10 threads that run 'MyLoop()'
-        with tf.Session() as sess:
-            threads = [tf.train.threading.Thread(target=MyLoop, args=(coord, sess,i)) for i in xrange(10)]
+        with tf.Session() as sess1:
+            coord = tf.train.Coordinator()
+            threads = [tf.train.threading.Thread(target=MyLoop, args=(coord, sess1,i)) for i in xrange(10)]
 
         # Start the threads and wait for all of them to stop. for t in threads: t.start()
-            coord.join(threads)
+
 
         # Create session, do not use default CheckpointSaverHook
-        with tf.train.MonitoredTrainingSession(
-                checkpoint_dir=params.output, hooks=train_hooks,
-                save_checkpoint_secs=None, config=config) as sess:
-            # coord = tf.train.Coordinator()
-            # threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-            while not sess.should_stop():
-                # Bypass hook calls
-                sess.run(train_op)
-            # coord.request_stop()
-            # coord.join(threads)
+            with tf.train.MonitoredTrainingSession(
+                    checkpoint_dir=params.output, hooks=train_hooks,
+                    save_checkpoint_secs=None, config=config) as sess:
+                # coord = tf.train.Coordinator()
+                # threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+                while not sess.should_stop():
+                    # Bypass hook calls
+                    sess.run(train_op)
+                # coord.request_stop()
+                # coord.join(threads)
+            coord.join(threads)
 
 if __name__ == "__main__":
     main(parse_args())
