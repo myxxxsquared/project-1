@@ -46,12 +46,12 @@ def syn_wrapper(index):
     # cos_theta = np.reshape(np.array(cos_theta, np.float32),(512,512,1))
     # sin_theta = np.reshape(np.array(sin_theta, np.float32),(512,512,1))
 
-    img = tf.convert_to_tensor(np.reshape(np.array(img, np.float32),(512,512,3)))
-    TR = tf.convert_to_tensor(np.reshape(np.array(TR, np.float32),(512,512,1)))
-    TCL = tf.convert_to_tensor(np.reshape(np.array(TCL, np.float32),(512,512,1)))
-    radius = tf.convert_to_tensor(np.reshape(np.array(radius, np.float32),(512,512,1)))
-    cos_theta = tf.convert_to_tensor(np.reshape(np.array(cos_theta, np.float32),(512,512,1)))
-    sin_theta = tf.convert_to_tensor(np.reshape(np.array(sin_theta, np.float32),(512,512,1)))
+    img = np.reshape(np.array(img, np.float32),(512,512,3))
+    TR = np.reshape(np.array(TR, np.float32),(512,512,1))
+    TCL = np.reshape(np.array(TCL, np.float32),(512,512,1))
+    radius = np.reshape(np.array(radius, np.float32),(512,512,1))
+    cos_theta = np.reshape(np.array(cos_theta, np.float32),(512,512,1))
+    sin_theta = np.reshape(np.array(sin_theta, np.float32),(512,512,1))
 
     # print(img.shape)
     # res = np.stack((img, TR, TCL, radius, cos_theta, sin_theta))
