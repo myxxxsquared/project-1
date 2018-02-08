@@ -118,7 +118,19 @@ def main(args):
 
     # Build Graph
     with tf.Graph().as_default():
-        features = dataset.get_train_input(params)
+
+        inputs = dataset.get_train_input(params)
+        img, TR, TCL, radius, cos_theta, sin_theta = inputs
+
+        features = {
+            'img': img,
+            'TR': TR,
+            'TCL': TCL,
+            'radius': radius,
+            'cos_theta': cos_theta,
+            'sin_theta': sin_theta
+        }
+
         # features = [np.zeros((512,512,3),np.float32),
         #             np.zeros((512, 512, 1), np.float32),
         #             np.zeros((512, 512, 1), np.float32),
