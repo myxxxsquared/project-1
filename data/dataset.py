@@ -1,8 +1,8 @@
 import tensorflow as tf
 import pickle
 import numpy as np
-from .data_augementation import DataAugmentor
-from .data_labeling import data_churn
+from .data_augementation import augment
+from .utils import data_labeling
 
 
 
@@ -15,26 +15,24 @@ def load_file(file):
 
 
 def data_aug(ins,augment_rate):
-    DA = DataAugmentor()
-    return DA.augment(ins,augment_rate=augment_rate)
+    return augment(ins,augment_rate=augment_rate)
 
 
 def data_label(ins):
-    labelling = data_churn()
-    return labelling._data_labeling(ins['img_name'],ins['img'],
+    return data_labeling(ins['img_name'],ins['img'],
                                     ins['contour'],ins['is_text_cnts'],
                                     ins['left_top'],ins['right_bottom'],
                                     ins.get('chars',None))
 
 
 def syn_wrapper(index):
-    # PKL_DIR = '/home/rjq/data_cleaned/pkl/'
-    # file = PKL_DIR + 'totaltext_train/' + str(index) + '.bin'
-    # img_name, img, maps = data_label(data_aug(load_file(file), augment_rate=100))
-    # # img_name, img, maps = data_label(data_aug(load_file(file), augment_rate=100))
-    # [TR, TCL, radius, cos_theta, sin_theta] = maps
-    import time
-    time.sleep(5)
+    PKL_DIR = '/home/rjq/data_cleaned/pkl/'
+    file = PKL_DIR + 'totaltext_train/' + str(index) + '.bin'
+    img_name, img, maps = data_label(data_aug(load_file(file), augment_rate=100))
+    TR, TCL, radius, cos_theta, sin_theta = maps
+
+    # import time
+    # time.sleep(5)
     img = np.zeros((512,512,3))
     TR = np.zeros((512,512,1))
     TCL = np.zeros((512,512,1))
