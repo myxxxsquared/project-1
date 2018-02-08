@@ -102,9 +102,8 @@ def get_train_input(params):
     #
     # features = q.get()
     #
-    index = 0
-    features = syn_wrapper(index)
-    index += 1
+    index = tf.placeholder(dtype=tf.int32)
+    features = tf.py_func(syn_wrapper,[index],[index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])
     queue = tf.FIFOQueue(100000, dtypes=[tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32],
                          shapes=[(512,512,3),(512,512,1),(512,512,1),(512,512,1),(512,512,1),(512,512,1)])
     enqueue_op = queue.enqueue(features)
