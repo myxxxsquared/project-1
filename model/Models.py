@@ -14,12 +14,6 @@ def model_graph(features, params):
     radius = features['radius']
     cos_theta = features['cos_theta']
     sin_theta = features['sin_theta']
-    img = tf.cast(tf.reshape(img, (-1,512,512,3)),tf.float32)
-    TR = tf.cast(tf.reshape(TR, (-1,512,512,1)),tf.float32)
-    TCL = tf.cast(tf.reshape(TCL, (-1,512,512,1)),tf.float32)
-    radius = tf.cast(tf.reshape(radius, (-1,512,512,1)),tf.float32)
-    cos_theta = tf.cast(tf.reshape(cos_theta, (-1,512,512,1)),tf.float32)
-    sin_theta = tf.cast(tf.reshape(sin_theta, (-1,512,512,1)),tf.float32)
     alpha = tf.Variable(0.5, dtype=tf.float32)
     loss = tf.reduce_sum(img)*alpha+tf.reduce_sum(img)*(1-alpha)
     return loss
