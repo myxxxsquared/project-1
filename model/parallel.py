@@ -66,7 +66,7 @@ def data_parallelism(devices, fn, *args, **kwargs):
 
     new_kwargs = [{} for _ in range(num_worker)]
 
-    for k, v in kwargs.iteritems():
+    for k, v in kwargs.items():
         vals = _maybe_repeat(v, num_worker)
 
         for i in range(num_worker):
