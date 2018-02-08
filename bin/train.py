@@ -230,16 +230,16 @@ def main(args):
 
 
         # Create session, do not use default CheckpointSaverHook
-            with tf.train.MonitoredTrainingSession(
-                    checkpoint_dir=params.output, hooks=train_hooks,
-                    save_checkpoint_secs=None, config=config) as sess:
-                coord = tf.train.Coordinator()
-                threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-                while not sess.should_stop():
-                    # Bypass hook calls
-                    sess.run(train_op)
-                coord.request_stop()
-                coord.join(threads)
+        with tf.train.MonitoredTrainingSession(
+                checkpoint_dir=params.output, hooks=train_hooks,
+                save_checkpoint_secs=None, config=config) as sess:
+            coord = tf.train.Coordinator()
+            threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+            while not sess.should_stop():
+                # Bypass hook calls
+                sess.run(train_op)
+            coord.request_stop()
+            coord.join(threads)
 
 if __name__ == "__main__":
     main(parse_args())
