@@ -118,7 +118,7 @@ def main(args):
 
     # Build Graph
     with tf.Graph().as_default():
-        features, enqueue_op, index = dataset.get_train_input(params)
+        features = dataset.get_train_input(params)
         # features = [np.zeros((512,512,3),np.float32),
         #             np.zeros((512, 512, 1), np.float32),
         #             np.zeros((512, 512, 1), np.float32),

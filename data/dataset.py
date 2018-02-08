@@ -139,7 +139,7 @@ def get_train_input(params):
     # p.close()
     # p.join()
 
-    return inputs, enqueue_op, index
+    return inputs
 
 
 
