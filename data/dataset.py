@@ -97,8 +97,8 @@ def get_train_input(params):
         jobs.append(Process(target=work, args=(q,i)))
     for job in jobs:
         job.start()
-    for job in jobs:
-        job.join()
+    # for job in jobs:
+    #     job.join()
 
     features = q.get()
 
