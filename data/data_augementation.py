@@ -38,7 +38,7 @@ it takes around 0.25~0.3s to generate one augmented image on average.
 
 
 def _get_seq(affine=False):
-    ADD_AUGMENTATION_LIST = [
+    add_augmentation_list = [
         iaa.Add((-30, 30), per_channel=True),
         iaa.Add((-30, 30), per_channel=False),
         iaa.AddElementwise((-30, 30), per_channel=False),
@@ -52,14 +52,14 @@ def _get_seq(affine=False):
         iaa.MultiplyElementwise((0.8, 1.2), per_channel=False)
     ]
 
-    BLUR_AUGMENTATION_LIST = [
+    blur_augmentation_list = [
         iaa.GaussianBlur((2, 3)),
         iaa.AverageBlur((2, 3)),
         iaa.MedianBlur((3, 5)),
         iaa.BilateralBlur((2, 3))
     ]
 
-    NOISE_AUGMENTATION_LIST = [
+    noise_augmentation_list = [
         iaa.AdditiveGaussianNoise(0, (5, 20), per_channel=True),
         iaa.AdditiveGaussianNoise(0, (5, 20), per_channel=False),
         iaa.Dropout((0.05, 0.15), per_channel=False),
@@ -69,7 +69,7 @@ def _get_seq(affine=False):
         # iaa.SaltAndPepper((0.05, 0.15), per_channel=False)
     ]
 
-    OTHER_AUGMENTATION_LIST = [
+    other_augmentation_list = [
         iaa.Sharpen((0.9, 0.11), (0.8, 1.2)),
         iaa.Emboss((0.9, 0.11), (0.3, 1.6)),
         iaa.EdgeDetect((0, 0.4)),
@@ -84,16 +84,16 @@ def _get_seq(affine=False):
         ]
         return iaa.Sequential([choice(affine)])#
 
-    shuffle(ADD_AUGMENTATION_LIST)
-    ADD_AUGMENTATION_LIST = ADD_AUGMENTATION_LIST[:randint(0, 1)]
-    shuffle(OTHER_AUGMENTATION_LIST)
-    OTHER_AUGMENTATION_LIST = OTHER_AUGMENTATION_LIST[:randint(0, 1)]
-    shuffle(BLUR_AUGMENTATION_LIST)
-    BLUR_AUGMENTATION_LIST = BLUR_AUGMENTATION_LIST[:randint(0, 1)]
-    shuffle(NOISE_AUGMENTATION_LIST)
-    NOISE_AUGMENTATION_LIST = NOISE_AUGMENTATION_LIST[:randint(0, 1)]
+    shuffle(add_augmentation_list)
+    add_augmentation_list = add_augmentation_list[:randint(0, 1)]
+    shuffle(other_augmentation_list)
+    other_augmentation_list = other_augmentation_list[:randint(0, 1)]
+    shuffle(blur_augmentation_list)
+    blur_augmentation_list = blur_augmentation_list[:randint(0, 1)]
+    shuffle(noise_augmentation_list)
+    noise_augmentation_list = noise_augmentation_list[:randint(0, 1)]
 
-    final_list = ADD_AUGMENTATION_LIST + NOISE_AUGMENTATION_LIST + BLUR_AUGMENTATION_LIST + OTHER_AUGMENTATION_LIST
+    final_list = add_augmentation_list + noise_augmentation_list + blur_augmentation_list + other_augmentation_list
 
     if len(final_list) == 0:
         final_list.append(iaa.Noop())
