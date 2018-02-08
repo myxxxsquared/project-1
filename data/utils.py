@@ -226,7 +226,7 @@ def validate(im, cnts, cnts1=None, chars=None):
                 for i in range(len(cnts[flatten_index])):
                     if cnts[flatten_index][i, 0, 0] >= col or cnts[flatten_index][i, 0, 1] >= row:
                         flag = False
-                        print('cnt is out of image')
+                        # print('cnt is out of image')
                 text_flag = flag or text_flag
                 if flag:
                     temp_chars_.append(chars[text_index][char_index])
