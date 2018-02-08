@@ -1,4 +1,10 @@
 # coding=utf-8
+# Copyright 2018 The THUMT Authors
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import operator
 
 import tensorflow as tf
@@ -60,7 +66,7 @@ def data_parallelism(devices, fn, *args, **kwargs):
 
     new_kwargs = [{} for _ in range(num_worker)]
 
-    for k, v in kwargs.items():
+    for k, v in kwargs.iteritems():
         vals = _maybe_repeat(v, num_worker)
 
         for i in range(num_worker):
@@ -91,19 +97,19 @@ def shard_features(features, device_list):
 
     sharded_features = {}
 
-    for k, v in features.items():
+    for k, v in features.iteritems():
         v = tf.convert_to_tensor(v)
         if not v.shape.as_list():
-            v = tf.expand_dims(v, axis=0)
+            v = tf.expand_dims(v, axis=-1)
             v = tf.tile(v, [num_datashards])
         with tf.device(v.device):
-            sharded_features[k] = tf.split(v, num_datashards,0)
+            sharded_features[k] = tf.split(v, num_datashards, 0)
 
     datashard_to_features = []
 
     for d in range(num_datashards):
         feat = {
-            k: v[d] for k, v in sharded_features.items()
+            k: v[d] for k, v in sharded_features.iteritems()
         }
         datashard_to_features.append(feat)
 
