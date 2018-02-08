@@ -210,7 +210,7 @@ def validate(im, cnts, cnts1=None, chars=None):
             for char in text:
                 chars_count += 1
         if chars_count != len(cnts):
-            print('our priori for synthtext is wrong, algo might goes wrong: chars_count != len(char_cnts) ')
+            # print('our priori for synthtext is wrong, algo might goes wrong: chars_count != len(char_cnts) ')
             # print('chars_count', chars_count)
             # print('len_char_count', len(cnts))
 
