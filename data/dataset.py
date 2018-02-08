@@ -96,13 +96,12 @@ def get_train_input(params):
     #
     # features = q.get()
     #
-    syn_dataset = tf.data.Dataset.range(800000).repeat(params.pretrain_num)
-    iterator = syn_dataset.make_one_shot_iterator()
+    # syn_dataset = tf.data.Dataset.range(800000).repeat(params.pretrain_num)
+    # iterator = syn_dataset.make_one_shot_iterator()
 
     def feed():
         for i in range(len(100000)):
             yield {'index': i}
-
 
     index = tf.placeholder(dtype=tf.int32)
     features = tf.py_func(syn_wrapper,[index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])
@@ -112,7 +111,7 @@ def get_train_input(params):
     enqueue_op = queue.enqueue(features)
 
     # qr = tf.train.QueueRunner(queue, [enqueue_op] * 80)
-    qr = tf.contrib.training.FeedingQueueRunner(queue,[enqueue_op], feed_fns=[feed])
+    qr = tf.contrib.training.FeedingQueueRunner(queue,[enqueue_op], feed_fns=[feed()])
 
     tf.train.add_queue_runner(qr)
     inputs = queue.dequeue_many(32)
