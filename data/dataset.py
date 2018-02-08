@@ -70,7 +70,7 @@ def get_train_input(params):
     # syn_dataset = syn_dataset.prefetch(5000)
     #
     # iterator = syn_dataset.make_one_shot_iterator()
-    features = iterator.get_next()
+    # features = iterator.get_next()
 
     # from multiprocessing import Process
     # import queue
