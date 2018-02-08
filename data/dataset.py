@@ -22,7 +22,7 @@ def data_label(ins):
     return data_labeling(ins['img_name'],ins['img'],
                                     ins['contour'],ins['is_text_cnts'],
                                     ins['left_top'],ins['right_bottom'],
-                                    ins.get('chars',None))
+                                    ins['chars'])
 
 
 def syn_wrapper(index):
