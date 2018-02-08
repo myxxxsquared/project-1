@@ -60,16 +60,16 @@ def syn_wrapper(index):
 
 BUFFER_SIZE=3000
 def get_train_input(params):
-    syn_dataset = tf.data.Dataset.range(800000).repeat(params.pretrain_num)
-
-    syn_dataset = syn_dataset.map(
-        lambda index: tuple(tf.py_func(
-            syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
-        num_parallel_calls=40).prefetch(BUFFER_SIZE)
-
-    syn_dataset = syn_dataset.prefetch(5000)
-
-    iterator = syn_dataset.make_one_shot_iterator()
+    # syn_dataset = tf.data.Dataset.range(800000).repeat(params.pretrain_num)
+    #
+    # syn_dataset = syn_dataset.map(
+    #     lambda index: tuple(tf.py_func(
+    #         syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
+    #     num_parallel_calls=40).prefetch(BUFFER_SIZE)
+    #
+    # syn_dataset = syn_dataset.prefetch(5000)
+    #
+    # iterator = syn_dataset.make_one_shot_iterator()
     features = iterator.get_next()
 
     # from multiprocessing import Process
@@ -102,6 +102,9 @@ def get_train_input(params):
     #
     # features = q.get()
     #
+    index = 0
+    features = syn_wrapper(index)
+    index += 1
     queue = tf.FIFOQueue(100000, dtypes=[tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32],
                          shapes=[(512,512,3),(512,512,1),(512,512,1),(512,512,1),(512,512,1),(512,512,1)])
     enqueue_op = queue.enqueue(features)
