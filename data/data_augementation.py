@@ -36,45 +36,46 @@ it takes around 0.25~0.3s to generate one augmented image on average.
 
 """
 
-ADD_AUGMENTATION_LIST = [
-    iaa.Add((-30, 30), per_channel=True),
-    iaa.Add((-30, 30), per_channel=False),
-    iaa.AddElementwise((-30, 30), per_channel=False),
-    iaa.AddElementwise((-30, 30), per_channel=True),
-    iaa.Invert(p=0.2, per_channel=True),
-    iaa.Invert(p=0.2, per_channel=False),
-    iaa.AddToHueAndSaturation((0, 80), True),
-    iaa.Multiply((0.8, 1.2), per_channel=True),
-    iaa.Multiply((0.8, 1.2), per_channel=False),
-    iaa.MultiplyElementwise((0.8, 1.2), per_channel=True),
-    iaa.MultiplyElementwise((0.8, 1.2), per_channel=False)
- ]
-
-BLUR_AUGMENTATION_LIST = [
-    iaa.GaussianBlur((2, 3)),
-    iaa.AverageBlur((2, 3)),
-    iaa.MedianBlur((3, 5)),
-    iaa.BilateralBlur((2, 3))
-]
-
-NOISE_AUGMENTATION_LIST = [
-    iaa.AdditiveGaussianNoise(0, (5, 20), per_channel=True),
-    iaa.AdditiveGaussianNoise(0, (5, 20), per_channel=False),
-    iaa.Dropout((0.05, 0.15), per_channel=False),
-    iaa.Dropout((0.05, 0.15), per_channel=True),
-    iaa.CoarseDropout((0.05, 0.15), size_percent=(0.5, 0.7))
-    # iaa.SaltAndPepper((0.05, 0.15), per_channel=True),
-    # iaa.SaltAndPepper((0.05, 0.15), per_channel=False)
-]
-
-OTHER_AUGMENTATION_LIST = [
-    iaa.Sharpen((0.9, 0.11), (0.8, 1.2)),
-    iaa.Emboss((0.9, 0.11), (0.3, 1.6)),
-    iaa.EdgeDetect((0, 0.4)),
-    iaa.Grayscale((0, 1))
-]
 
 def _get_seq(affine=False):
+    ADD_AUGMENTATION_LIST = [
+        iaa.Add((-30, 30), per_channel=True),
+        iaa.Add((-30, 30), per_channel=False),
+        iaa.AddElementwise((-30, 30), per_channel=False),
+        iaa.AddElementwise((-30, 30), per_channel=True),
+        iaa.Invert(p=0.2, per_channel=True),
+        iaa.Invert(p=0.2, per_channel=False),
+        iaa.AddToHueAndSaturation((0, 80), True),
+        iaa.Multiply((0.8, 1.2), per_channel=True),
+        iaa.Multiply((0.8, 1.2), per_channel=False),
+        iaa.MultiplyElementwise((0.8, 1.2), per_channel=True),
+        iaa.MultiplyElementwise((0.8, 1.2), per_channel=False)
+    ]
+
+    BLUR_AUGMENTATION_LIST = [
+        iaa.GaussianBlur((2, 3)),
+        iaa.AverageBlur((2, 3)),
+        iaa.MedianBlur((3, 5)),
+        iaa.BilateralBlur((2, 3))
+    ]
+
+    NOISE_AUGMENTATION_LIST = [
+        iaa.AdditiveGaussianNoise(0, (5, 20), per_channel=True),
+        iaa.AdditiveGaussianNoise(0, (5, 20), per_channel=False),
+        iaa.Dropout((0.05, 0.15), per_channel=False),
+        iaa.Dropout((0.05, 0.15), per_channel=True),
+        iaa.CoarseDropout((0.05, 0.15), size_percent=(0.5, 0.7))
+        # iaa.SaltAndPepper((0.05, 0.15), per_channel=True),
+        # iaa.SaltAndPepper((0.05, 0.15), per_channel=False)
+    ]
+
+    OTHER_AUGMENTATION_LIST = [
+        iaa.Sharpen((0.9, 0.11), (0.8, 1.2)),
+        iaa.Emboss((0.9, 0.11), (0.3, 1.6)),
+        iaa.EdgeDetect((0, 0.4)),
+        iaa.Grayscale((0, 1))
+    ]
+
     if affine:
         affine = [
             iaa.Affine(rotate=360*np.random.rand()-180),
