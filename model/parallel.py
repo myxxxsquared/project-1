@@ -94,7 +94,7 @@ def shard_features(features, device_list):
     for k, v in features.items():
         v = tf.convert_to_tensor(v)
         if not v.shape.as_list():
-            v = tf.expand_dims(v, axis=-1)
+            v = tf.expand_dims(v, axis=0)
             v = tf.tile(v, [num_datashards])
         with tf.device(v.device):
             sharded_features[k] = tf.split(v, num_datashards,0)
