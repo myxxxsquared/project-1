@@ -99,6 +99,7 @@ def shard_features(features, device_list):
 
     for k, v in features.items():
         v = tf.convert_to_tensor(v)
+        print(v.shape.as_list())
         if not v.shape.as_list():
             v = tf.expand_dims(v, axis=-1)
             v = tf.tile(v, [num_datashards])
