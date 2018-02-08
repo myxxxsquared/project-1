@@ -97,7 +97,7 @@ def shard_features(features, device_list):
 
     sharded_features = {}
 
-    for k, v in features.iteritems():
+    for k, v in features.items():
         v = tf.convert_to_tensor(v)
         if not v.shape.as_list():
             v = tf.expand_dims(v, axis=-1)
@@ -109,7 +109,7 @@ def shard_features(features, device_list):
 
     for d in range(num_datashards):
         feat = {
-            k: v[d] for k, v in sharded_features.iteritems()
+            k: v[d] for k, v in sharded_features.items()
         }
         datashard_to_features.append(feat)
 
