@@ -7,7 +7,6 @@ from .yellowfin import *
 from tensorflow.contrib.layers import xavier_initializer_conv2d as xavier
 
 def model_graph(features, params):
-    img, TR, TCL, radius, cos_theta, sin_theta = features
     img = features['img']
     TR = features['TR']
     TCL = features['TCL']

@@ -143,10 +143,6 @@ def main(args):
         #             np.zeros((512, 512, 1), np.float32),
         #             np.zeros((512, 512, 1), np.float32)]
 
-
-
-
-
         # Build model
         initializer = get_initializer(params)
         model = Model.model(params)
