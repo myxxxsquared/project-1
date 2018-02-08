@@ -101,7 +101,7 @@ def get_train_input(params):
 
     def feed():
         for i in range(len(100000)):
-            yield {index: i}
+            yield {'index': i}
 
 
     index = tf.placeholder(dtype=tf.int32)
