@@ -27,7 +27,7 @@ def data_label(ins):
 
 def syn_wrapper(index):
     PKL_DIR = '/home/rjq/data_cleaned/pkl/'
-    file = PKL_DIR + 'totaltext_train/' + str(index) + '.bin'
+    file = PKL_DIR + 'synthtext_chars/' + str(index) + '.bin'
     img_name, img, maps = data_label(data_aug(load_file(file), augment_rate=100))
     TR, TCL, radius, cos_theta, sin_theta = maps
 
