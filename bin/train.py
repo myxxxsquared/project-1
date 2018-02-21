@@ -157,6 +157,7 @@ def main(args):
         learning_rate = tf.convert_to_tensor(learning_rate, dtype=tf.float32)
         tf.summary.scalar("learning_rate", learning_rate)
 
+        print('create opt')
         # Create optimizer
         opt = tf.train.AdamOptimizer(learning_rate,
                                      beta1=params.adam_beta1,
@@ -173,7 +174,7 @@ def main(args):
             colocate_gradients_with_ops=True
         )
 
-
+        print('create hooks')
         # Add hooks
         train_hooks = [
             tf.train.StopAtStepHook(last_step=params.train_steps),
@@ -198,6 +199,7 @@ def main(args):
 
         config = session_config(params)
 
+        print('create session')
         # Create session, do not use default CheckpointSaverHook
         with tf.train.MonitoredTrainingSession(
                 checkpoint_dir=params.output, hooks=train_hooks,
