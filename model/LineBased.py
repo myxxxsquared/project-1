@@ -237,7 +237,7 @@ def _build_loss(Labels, prediction):
     # tf.summary.scalar('geo', geo_loss)
     # tf.summary.scalar('TR_score', TR_score_loss)
     total_loss, score_loss, geo_loss, geo_attr, TR_score_loss =0,0,0,0,0
-    total_loss = tf.reduce_sum(Labels-prediction[:,:,:,:5])
+    total_loss = tf.reduce_sum(Labels-prediction[:,:,:,:5])/tf.size(Labels)
     return total_loss, score_loss, geo_loss, geo_attr, TR_score_loss
 
 
