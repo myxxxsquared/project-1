@@ -37,7 +37,7 @@ def default_parameters():
         initializer="uniform",
         clip_grad_norm=5.0,
         output='/home/rjq/train',
-        save_checkpoint_steps=10,
+        save_checkpoint_steps=100,
         keep_checkpoint_max=5,
         initializer_gain=0.08,
         learning_rate=0.01,
