@@ -233,6 +233,7 @@ def _build_loss(Labels, prediction):
                                            ) / pos_num)
             total_loss += geo_loss[-1]
 
+    tf.logging.info('loss', total_loss, score_loss, geo_loss, geo_attr, TR_score_loss)
     return total_loss, score_loss, geo_loss, geo_attr, TR_score_loss
 
 
