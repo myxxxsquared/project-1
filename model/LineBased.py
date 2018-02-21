@@ -233,8 +233,6 @@ def _build_loss(Labels, prediction):
                                            ) / pos_num)
             total_loss += geo_loss[-1]
 
-    # total_loss, score_loss, geo_loss, geo_attr, TR_score_loss =0,0,0,0,0
-    # total_loss = tf.reduce_sum(Labels-prediction[:,:,:,:5])/tf.cast(tf.size(Labels),tf.float32)
     return total_loss, score_loss, geo_loss, geo_attr, TR_score_loss
 
 
