@@ -97,9 +97,12 @@ def shard_features(features, device_list):
     datashard_to_features = []
 
     for d in range(num_datashards):
-        feat = {
-            k: v[d] for k, v in sharded_features.items()
-        }
+        worker = "/gpu:%d" % i
+        device_setter = _create_device_setter(False, worker, len(device_list))
+        with tf.device(device_setter):
+            feat = {
+                k: v[d] for k, v in sharded_features.items()
+            }
         datashard_to_features.append(feat)
 
     return datashard_to_features
