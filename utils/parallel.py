@@ -1,17 +1,8 @@
-# coding=utf-8
-# Copyright 2018 The THUMT Authors
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import operator
-
 import tensorflow as tf
+import operator
 
 
 class GPUParamServerDeviceSetter(object):
-
     def __init__(self, worker_device, ps_devices):
         self.ps_devices = ps_devices
         self.worker_device = worker_device
@@ -65,10 +56,8 @@ def data_parallelism(devices, fn, *args, **kwargs):
         new_args = [[] for _ in range(num_worker)]
 
     new_kwargs = [{} for _ in range(num_worker)]
-
     for k, v in kwargs.items():
         vals = _maybe_repeat(v, num_worker)
-
         for i in range(num_worker):
             new_kwargs[i][k] = vals[i]
 
@@ -99,11 +88,9 @@ def shard_features(features, device_list):
 
     for k, v in features.items():
         v = tf.convert_to_tensor(v)
-        print(v.shape.as_list())
-        # if not v.shape.as_list():
-
-        v = tf.expand_dims(v, axis=-1)
-        v = tf.tile(v, [num_datashards])
+        if not v.shape.as_list():
+            v = tf.expand_dims(v, axis=-1)
+            v = tf.tile(v, [num_datashards])
         with tf.device(v.device):
             sharded_features[k] = tf.split(v, num_datashards, 0)
 

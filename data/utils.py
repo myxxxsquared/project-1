@@ -7,6 +7,7 @@ warnings.simplefilter('ignore', np.RankWarning)
 
 BANNED = ("'", '"', ',', '.')
 
+
 def get_l2_dist(point1, point2):
     '''
     :param point1: tuple (x, y) int or float
@@ -152,6 +153,7 @@ def validate(im, cnts, cnts1=None, chars=None):
     :param im: numpy.ndarray, shape (row, col, 3), dtype uint 8
     :param cnts: list(numpy.ndarray), shape (n, 1, 2) or (n,2), dtype int32 or float32, point order (col, row)
     :param cnts1: if is not None, cnts is char_cnts, cnts1 is text cnts
+    :param chars: chars
     :return:
         im: numpy.ndarray, shape (row, col, 3), dtype uint 8
         cnts: list(numpy.ndarray), shape (n, 1, 2), dtype float32, point order (col, row)
@@ -246,6 +248,7 @@ def validate(im, cnts, cnts1=None, chars=None):
         # print('cnts1' , cnts1)
 
         return im, cnts, cnts1, chars
+
 
 def resize(im, cnts, row, col):
     '''
@@ -751,6 +754,7 @@ def get_maps(im, cnts, is_textbox, thickness, crop_skel, neighbor, chars=None):
             get_maps_charbox(im,cnts, thickness, crop_skel, neighbor, chars)
     return skels_points, radius_dict, score_dict, cos_theta_dict, sin_theta_dict, mask_fills
 
+
 def data_labeling(img_name, img, cnts, is_text_cnts, left_top, right_bottom,
                   chars=None, thickness=0.2, crop_skel=1.0, neighbor=5):
     '''
@@ -797,6 +801,7 @@ def data_labeling(img_name, img, cnts, is_text_cnts, left_top, right_bottom,
     img = img[left_top[0]:right_bottom[0], left_top[1]:right_bottom[1],:]
     maps = [TR, TCL, radius, cos_theta, sin_theta]
     return img_name, img, maps
+
 
 if __name__ == '__main__':
     ########### test text_cnts ############

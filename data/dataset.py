@@ -10,7 +10,7 @@ def load_file(file):
 
 
 def data_aug(ins,augment_rate):
-    return augment(ins,augment_rate=augment_rate)
+    return augment(ins, augment_rate=augment_rate)
 
 
 def data_label(ins):
@@ -18,6 +18,7 @@ def data_label(ins):
                                     ins['contour'],ins['is_text_cnts'],
                                     ins['left_top'],ins['right_bottom'],
                                     ins['chars'])
+
 
 def syn_wrapper(index):
     PKL_DIR = '/home/rjq/data_cleaned/pkl/'
@@ -52,96 +53,9 @@ def syn_wrapper(index):
     return img, TR, TCL, radius, cos_theta, sin_theta
 
 
-BUFFER_SIZE=3000
 def get_train_input(params):
-    syn_dataset = tf.data.Dataset.range(800000).repeat(params.pretrain_num)
-
-    syn_dataset = syn_dataset.map(
-        lambda index: tuple(tf.py_func(
-            syn_wrapper, [index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])),
-        num_parallel_calls=40).prefetch(BUFFER_SIZE)
-
-    syn_dataset = syn_dataset.prefetch(5000)
-    #
-    iterator = syn_dataset.make_one_shot_iterator()
-    features = iterator.get_next()
-
-    # from multiprocessing import Process
-    # import queue
-    # q = queue.Queue(5000)
-    # def work(q, i):
-    #     for _ in range(100000):
-    #         img = np.zeros((512,512,3))
-    #         TR = np.zeros((512,512,1))
-    #         TCL = np.zeros((512,512,1))
-    #         radius = np.zeros((512,512,1))
-    #         cos_theta = np.zeros((512,512,1))
-    #         sin_theta = np.zeros((512,512,1))
-    #         img = np.reshape(np.array(img, np.float32),(512,512,3))
-    #         TR = np.reshape(np.array(TR, np.float32),(512,512,1))
-    #         TCL = np.reshape(np.array(TCL, np.float32),(512,512,1))
-    #         radius = np.reshape(np.array(radius, np.float32),(512,512,1))
-    #         cos_theta = np.reshape(np.array(cos_theta, np.float32),(512,512,1))
-    #         sin_theta = np.reshape(np.array(sin_theta, np.float32),(512,512,1))
-    #
-    #         q.put([img, TR, TCL, radius, cos_theta, sin_theta])
-    #
-    # jobs = []
-    # for i in range(40):
-    #     jobs.append(Process(target=work, args=(q,i)))
-    # for job in jobs:
-    #     job.start()
-    # # for job in jobs:
-    # #     job.join()
-    #
-    # features = q.get()
-    #
-    # syn_dataset = tf.data.Dataset.range(800000).repeat(params.pretrain_num)
-    # iterator = syn_dataset.make_one_shot_iterator()
-
-    # def feed():
-    #     for i in range(len(100000)):
-    #         yield {'index': i}
-    #
-    # index = tf.placeholder(dtype=tf.int32)
-    # features = tf.py_func(syn_wrapper,[index], [tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])
-    #
-    # queue = tf.FIFOQueue(100000, dtypes=[tf.float32,tf.float32,tf.float32,tf.float32,tf.float32,tf.float32],
-    #                  shapes=[(512,512,3),(512,512,1),(512,512,1),(512,512,1),(512,512,1),(512,512,1)])
-    # enqueue_op = queue.enqueue(features)
-    #
-    # # qr = tf.train.QueueRunner(queue, [enqueue_op] * 80)
-    # qr = tf.contrib.training.FeedingQueueRunner(queue,[enqueue_op], feed_fns=[feed()])
-    #
-    # tf.train.add_queue_runner(qr)
-    # inputs = queue.dequeue_many(32)
-
-    # # Launch the graph.
-    # sess = tf.Session()
-    # # Create a coordinator, launch the queue runner threads.
-    # coord = tf.train.Coordinator()
-    # enqueue_threads = qr.create_threads(sess, coord=coord, start=True)
-    # # Run the training loop, controlling termination with the coordinator.
-    # for step in range(1000000):
-    #     if coord.should_stop():
-    #         break
-    #     sess.run(train_op)
-    # # When done, ask the threads to stop.
-    # # coord.request_stop()
-    # # # And wait for them to actually do it.
-    # # coord.join(enqueue_threads)
-    #
-    # # syn_dataset = syn_dataset.batch(32)
-
-    # from multiprocessing import Pool
-    # patch_num = 20
-    # result = []
-    # p=Pool(patch_num)
-    # for i in range(patch_num):
-    #     result.append(p.apply_async(synthtext_to_pickle,args=('synthtext_chars/', patch_num, i))
-    # p.close()
-    # p.join()
-
+    features = {'input_img': np.random.random((512,512, 3)),
+                'Labels': np.random.random((512,512,5))}
     return features
 
 

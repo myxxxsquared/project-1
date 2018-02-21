@@ -6,10 +6,9 @@ import os
 
 import numpy as np
 import tensorflow as tf
-import model.Models as Model
-import model.parallel as parallel
+import model.LineBased as LineBased
 import data.dataset as dataset
-import bin.configs as configs
+from utils import parallel
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
@@ -28,7 +27,7 @@ def default_parameters():
         crop_skel=1.0,
         neighbor=5,
         device_list=[3,4,5],
-        learning_rate_decay = "noam",
+        learning_rate_decay="noam",
         warmup_steps=2000,
         adam_beta1=0.9,
         adam_beta2=0.999,
@@ -36,7 +35,7 @@ def default_parameters():
         train_steps=10000,
         initializer="uniform",
         clip_grad_norm=5.0,
-        output='/home/rjq/',
+        output='/home/rjq/train',
         save_checkpoint_steps=10,
         keep_checkpoint_max=5,
         initializer_gain=0.08,
@@ -45,11 +44,15 @@ def default_parameters():
         pretrain_num=1,
         train_num=10,
         basenets='vgg16',
-        input_size='512*512*3',
+        input_size=[512,512,3],
+        Label_size=[512,512,5],
         padding='SAME',
         pooling='max',
-        basenet = 'vgg16'
-
+        basenet='vgg16',
+        upsampling='DeConv',
+        US_Params='3 3 2 2 same ReLU',
+        Predict_stage=4,
+        predict_channels=[128, 64, 32, 32],
     )
     return params
 
@@ -119,33 +122,11 @@ def main(args):
     # Build Graph
     with tf.Graph().as_default():
 
-        inputs = dataset.get_train_input(params)
-        img, TR, TCL, radius, cos_theta, sin_theta = inputs
-        img = tf.cast(tf.reshape(img, (-1, 512, 512, 3)), tf.float32)
-        TR = tf.cast(tf.reshape(TR, (-1, 512, 512, 1)), tf.float32)
-        TCL = tf.cast(tf.reshape(TCL, (-1, 512, 512, 1)), tf.float32)
-        radius = tf.cast(tf.reshape(radius, (-1, 512, 512, 1)), tf.float32)
-        cos_theta = tf.cast(tf.reshape(cos_theta, (-1, 512, 512, 1)), tf.float32)
-        sin_theta = tf.cast(tf.reshape(sin_theta, (-1, 512, 512, 1)), tf.float32)
-        features = {
-            'img': img,
-            'TR': TR,
-            'TCL': TCL,
-            'radius': radius,
-            'cos_theta': cos_theta,
-            'sin_theta': sin_theta
-        }
-
-        # features = [np.zeros((512,512,3),np.float32),
-        #             np.zeros((512, 512, 1), np.float32),
-        #             np.zeros((512, 512, 1), np.float32),
-        #             np.zeros((512, 512, 1), np.float32),
-        #             np.zeros((512, 512, 1), np.float32),
-        #             np.zeros((512, 512, 1), np.float32)]
+        features = dataset.get_train_input(params)
 
         # Build model
         initializer = get_initializer(params)
-        model = Model.model(params)
+        model = LineBased.Model(params)
 
         # Multi-GPU setting
         sharded_losses = parallel.parallel_model(
@@ -190,16 +171,7 @@ def main(args):
             optimizer=opt,
             colocate_gradients_with_ops=True
         )
-        zero_op = tf.no_op("zero_op")
-        collect_op = tf.no_op("collect_op")
 
-        # Validation
-        # if params.validation and params.references[0]:
-        #     files = [params.validation] + list(params.references)
-        #     eval_inputs = dataset.sort_and_zip_files(files)
-        #     eval_input_fn = dataset.get_evaluation_input
-        # else:
-        #     eval_input_fn = None
 
         # Add hooks
         train_hooks = [
@@ -225,26 +197,6 @@ def main(args):
 
         config = session_config(params)
 
-        # if eval_input_fn is not None:
-        #     train_hooks.append(
-        #         hooks.EvaluationHook(
-        #             lambda f: search.create_inference_graph(
-        #                 model.get_evaluation_func(), f, params
-        #             ),
-        #             lambda: eval_input_fn(eval_inputs, params),
-        #             lambda x: decode_target_ids(x, params),
-        #             params.output,
-        #             config,
-        #             params.keep_top_checkpoint_max,
-        #             eval_secs=params.eval_secs,
-        #             eval_steps=params.eval_steps
-        #         )
-        #     )
-
-
-        # Start the threads and wait for all of them to stop. for t in threads: t.start()
-
-
         # Create session, do not use default CheckpointSaverHook
         with tf.train.MonitoredTrainingSession(
                 checkpoint_dir=params.output, hooks=train_hooks,
@@ -252,10 +204,10 @@ def main(args):
             coord = tf.train.Coordinator()
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
             while not sess.should_stop():
-                # Bypass hook calls
                 sess.run(train_op)
             coord.request_stop()
             coord.join(threads)
+
 
 if __name__ == "__main__":
     main(parse_args())

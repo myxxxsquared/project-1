@@ -6,6 +6,7 @@ import imgaug as ia
 from random import shuffle, randint, choice, random
 import copy
 
+
 def _get_seq(self, affine=False):
     if affine:
         affine = [
