@@ -246,7 +246,7 @@ def model_graph(features, mode, params):
         pipe = _build_back_bone(params, input_img)
         prediction = _add_prediction_block(params, pipe)
         total_loss, score_loss, geo_loss, geo_attr, TR_score_loss = _build_loss(Labels, prediction)
-        loss = total_loss
+        loss = score_loss
     else:
         loss = 0.0
     return loss
