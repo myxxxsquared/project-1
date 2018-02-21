@@ -54,8 +54,8 @@ def syn_wrapper(index):
 
 
 def get_train_input(params):
-    features = {'input_img': np.random.random((90, 512,512, 3)),
-                'Labels': np.random.random((90, 512,512,5))}
+    features = {'input_img': np.random.random((90, 512,512, 3)).astype(np.float32),
+                'Labels': np.random.random((90, 512,512,5)).astype(np.float32)}
     return features
 
 
