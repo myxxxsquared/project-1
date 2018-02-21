@@ -33,6 +33,7 @@ def default_parameters():
         adam_beta2=0.999,
         adam_epsilon=1e-8,
         train_steps=10000,
+
         initializer="uniform",
         clip_grad_norm=5.0,
         output='/home/rjq/train',
@@ -201,12 +202,12 @@ def main(args):
         with tf.train.MonitoredTrainingSession(
                 checkpoint_dir=params.output, hooks=train_hooks,
                 save_checkpoint_secs=None, config=config) as sess:
-            coord = tf.train.Coordinator()
-            threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+            # coord = tf.train.Coordinator()
+            # threads = tf.train.start_queue_runners(sess=sess, coord=coord)
             while not sess.should_stop():
                 sess.run(train_op)
-            coord.request_stop()
-            coord.join(threads)
+            # coord.request_stop()
+            # coord.join(threads)
 
 
 if __name__ == "__main__":
