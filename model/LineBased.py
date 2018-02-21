@@ -232,10 +232,10 @@ def _build_loss(Labels, prediction):
                                            _flatten(prediction[:, :, :, i + 2:i + 3] * pos)
                                            ) / pos_num)
             total_loss += geo_loss[-1]
-    tf.summary.scalar('total', total_loss)
-    tf.summary.scalar('score', score_loss)
-    tf.summary.scalar('geo', geo_loss)
-    tf.summary.scalar('TR_score', TR_score_loss)
+    # tf.summary.scalar('total', total_loss)
+    # tf.summary.scalar('score', score_loss)
+    # tf.summary.scalar('geo', geo_loss)
+    # tf.summary.scalar('TR_score', TR_score_loss)
     return total_loss, score_loss, geo_loss, geo_attr, TR_score_loss
 
 
