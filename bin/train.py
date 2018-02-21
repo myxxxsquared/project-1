@@ -183,7 +183,7 @@ def main(args):
                 {
                     "step": global_step,
                     "loss": loss,
-                    "multi-gpu": sharded_losses,
+                    "gpu": sharded_losses
                 },
                 every_n_iter=1
             ),
