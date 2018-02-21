@@ -181,63 +181,60 @@ def _add_prediction_block(params, pipe):
 
 
 def _build_loss(Labels, prediction):
-    # with tf.name_scope('TR_loss'):
-    #     def pos_mask_TR():
-    #         # from self.Labels[:,:,:,0:1]
-    #         return Labels[:, :, :, 4:5] > 0
-    #     pos_TR = tf.cast(pos_mask_TR(), tf.float32)
-    #     pos_num_TR = tf.reduce_sum(pos_TR) + 1e-3
-    #     neg_num_TR = tf.cast(3 * pos_num_TR + 1, tf.int32)  # in case, OHNM is used
-    #     # TR score map loss
-    #     singel_labels_TR = _flatten(Labels[:, :, :, 4:5])
-    #     one_hot_labels_TR = tf.concat([1 - singel_labels_TR, singel_labels_TR], axis=-1)
-    #     loss_TR = tf.losses.softmax_cross_entropy(one_hot_labels_TR,
-    #                                               _flatten(prediction[:, :, :, 5:7]),
-    #                                               reduction=tf.losses.Reduction.NONE)
-    #     pos_flatten_TR = tf.reshape(_flatten(pos_TR), shape=(-1,))
-    #
-    #     pos_loss_TR = loss_TR * pos_flatten_TR
-    #     neg_losses_TR = loss_TR * (1 - pos_flatten_TR)
-    #     neg_loss_TR = tf.nn.top_k(neg_losses_TR, k=tf.reduce_min((neg_num_TR, tf.size(neg_losses_TR)))).values
-    #     TR_score_loss = (tf.reduce_sum(pos_loss_TR) / pos_num_TR +
-    #                      tf.reduce_sum(neg_loss_TR) / pos_num_TR) # top_k in use
-    #
-    # with tf.name_scope('TCL_loss'):
-    #     def pos_mask():
-    #         # from self.Labels[:,:,:,0:1]
-    #         return Labels[:, :, :, 0:1] > 0
-    #     pos = tf.cast(pos_mask(), tf.float32)
-    #     pos_num = tf.reduce_sum(pos) + 1e-3
-    #     neg_num = tf.cast(3 * pos_num + 1, tf.int32)  # in case, OHNM is used
-    #     # score map loss
-    #     singel_labels = _flatten(Labels[:, :, :, 0:1])
-    #     one_hot_labels = tf.concat([1 - singel_labels, singel_labels], axis=-1)
-    #     loss = tf.losses.softmax_cross_entropy(one_hot_labels,
-    #                                            _flatten(prediction[:, :, :, 0:2]),
-    #                                            reduction=tf.losses.Reduction.NONE)
-    #
-    #     pos_flatten = tf.reshape(_flatten(pos), shape=(-1,))
-    #     pos_loss = loss * pos_flatten * pos_flatten_TR
-    #     neg_loss = loss * (1 - pos_flatten) * pos_flatten_TR
-    #     # neg_loss=tf.nn.top_k(neg_losses,k=neg_num).values
-    #     score_loss = (tf.reduce_sum(pos_loss) / pos_num +
-    #                   tf.reduce_sum(neg_loss) / pos_num)# top_k not in use TODO: rebalance the pos/neg number !
-    #
-    # with tf.name_scope('Geo_loss'):
-    #     geo_attr = ['radius', 'cos', 'sin']
-    #     geo_loss = []
-    #     total_loss = score_loss + TR_score_loss  # for training
-    #     for i in range(4 - 1):  # self.configs.Label_size[2]-1):
-    #         geo_loss.append(_smooth_l1_loss(_flatten(Labels[:, :, :, i + 1:i + 2] * pos),
-    #                                        _flatten(prediction[:, :, :, i + 2:i + 3] * pos)
-    #                                        ) / pos_num)
-    #         total_loss += geo_loss[-1]
-    # tf.summary.scalar('total', total_loss)
-    # tf.summary.scalar('score', score_loss)
-    # tf.summary.scalar('geo', geo_loss)
-    # tf.summary.scalar('TR_score', TR_score_loss)
-    total_loss, score_loss, geo_loss, geo_attr, TR_score_loss =0,0,0,0,0
-    total_loss = tf.reduce_sum(Labels-prediction[:,:,:,:5])/tf.cast(tf.size(Labels),tf.float32)
+    with tf.name_scope('TR_loss'):
+        def pos_mask_TR():
+            # from self.Labels[:,:,:,0:1]
+            return Labels[:, :, :, 4:5] > 0
+        pos_TR = tf.cast(pos_mask_TR(), tf.float32)
+        pos_num_TR = tf.reduce_sum(pos_TR) + 1e-3
+        neg_num_TR = tf.cast(3 * pos_num_TR + 1, tf.int32)  # in case, OHNM is used
+        # TR score map loss
+        singel_labels_TR = _flatten(Labels[:, :, :, 4:5])
+        one_hot_labels_TR = tf.concat([1 - singel_labels_TR, singel_labels_TR], axis=-1)
+        loss_TR = tf.losses.softmax_cross_entropy(one_hot_labels_TR,
+                                                  _flatten(prediction[:, :, :, 5:7]),
+                                                  reduction=tf.losses.Reduction.NONE)
+        pos_flatten_TR = tf.reshape(_flatten(pos_TR), shape=(-1,))
+
+        pos_loss_TR = loss_TR * pos_flatten_TR
+        neg_losses_TR = loss_TR * (1 - pos_flatten_TR)
+        neg_loss_TR = tf.nn.top_k(neg_losses_TR, k=tf.reduce_min((neg_num_TR, tf.size(neg_losses_TR)))).values
+        TR_score_loss = (tf.reduce_sum(pos_loss_TR) / pos_num_TR +
+                         tf.reduce_sum(neg_loss_TR) / pos_num_TR) # top_k in use
+
+    with tf.name_scope('TCL_loss'):
+        def pos_mask():
+            # from self.Labels[:,:,:,0:1]
+            return Labels[:, :, :, 0:1] > 0
+        pos = tf.cast(pos_mask(), tf.float32)
+        pos_num = tf.reduce_sum(pos) + 1e-3
+        neg_num = tf.cast(3 * pos_num + 1, tf.int32)  # in case, OHNM is used
+        # score map loss
+        singel_labels = _flatten(Labels[:, :, :, 0:1])
+        one_hot_labels = tf.concat([1 - singel_labels, singel_labels], axis=-1)
+        loss = tf.losses.softmax_cross_entropy(one_hot_labels,
+                                               _flatten(prediction[:, :, :, 0:2]),
+                                               reduction=tf.losses.Reduction.NONE)
+
+        pos_flatten = tf.reshape(_flatten(pos), shape=(-1,))
+        pos_loss = loss * pos_flatten * pos_flatten_TR
+        neg_loss = loss * (1 - pos_flatten) * pos_flatten_TR
+        # neg_loss=tf.nn.top_k(neg_losses,k=neg_num).values
+        score_loss = (tf.reduce_sum(pos_loss) / pos_num +
+                      tf.reduce_sum(neg_loss) / pos_num)# top_k not in use TODO: rebalance the pos/neg number !
+
+    with tf.name_scope('Geo_loss'):
+        geo_attr = ['radius', 'cos', 'sin']
+        geo_loss = []
+        total_loss = score_loss + TR_score_loss  # for training
+        for i in range(4 - 1):  # self.configs.Label_size[2]-1):
+            geo_loss.append(_smooth_l1_loss(_flatten(Labels[:, :, :, i + 1:i + 2] * pos),
+                                           _flatten(prediction[:, :, :, i + 2:i + 3] * pos)
+                                           ) / pos_num)
+            total_loss += geo_loss[-1]
+
+    # total_loss, score_loss, geo_loss, geo_attr, TR_score_loss =0,0,0,0,0
+    # total_loss = tf.reduce_sum(Labels-prediction[:,:,:,:5])/tf.cast(tf.size(Labels),tf.float32)
     return total_loss, score_loss, geo_loss, geo_attr, TR_score_loss
 
 
