@@ -183,9 +183,6 @@ def main(args):
                 {
                     "step": global_step,
                     "loss": loss,
-                    "0": sharded_losses[0],
-                    "1": sharded_losses[1],
-                    "2": sharded_losses[2],
                 },
                 every_n_iter=1
             ),
