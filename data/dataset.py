@@ -55,7 +55,7 @@ def syn_wrapper(index):
 
 def get_train_input(params):
 
-    with tf.device('/cpu:0'):
+    with tf.device('/gpu:0'):
         features = {'input_img': tf.convert_to_tensor(np.ones((9, 512,512, 3)).astype(np.float32)),
                     'Labels': tf.convert_to_tensor(np.ones((9, 512,512,5)).astype(np.float32))}
     return features
