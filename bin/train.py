@@ -180,40 +180,43 @@ def main(args):
 
         print('create hooks')
         # Add hooks
-        train_hooks = [
-            tf.train.StopAtStepHook(last_step=params.train_steps),
-            tf.train.NanTensorHook(loss),
-            tf.train.LoggingTensorHook(
-                {
-                    "step": global_step,
-                    "loss": loss,
-                },
-                every_n_iter=1
-            ),
-            tf.train.CheckpointSaverHook(
-                checkpoint_dir=params.output,
-                save_secs=params.save_checkpoint_secs or None,
-                save_steps=params.save_checkpoint_steps or None,
-                saver=tf.train.Saver(
-                    max_to_keep=params.keep_checkpoint_max,
-                    sharded=False
-                )
-            )
-        ]
+        # train_hooks = [
+        #     tf.train.StopAtStepHook(last_step=params.train_steps),
+        #     tf.train.NanTensorHook(loss),
+        #     tf.train.LoggingTensorHook(
+        #         {
+        #             "step": global_step,
+        #             "loss": loss,
+        #         },
+        #         every_n_iter=1
+        #     ),
+        #     tf.train.CheckpointSaverHook(
+        #         checkpoint_dir=params.output,
+        #         save_secs=params.save_checkpoint_secs or None,
+        #         save_steps=params.save_checkpoint_steps or None,
+        #         saver=tf.train.Saver(
+        #             max_to_keep=params.keep_checkpoint_max,
+        #             sharded=False
+        #         )
+        #     )
+        # ]
 
         config = session_config(params)
 
         print('create session')
         # Create session, do not use default CheckpointSaverHook
-        with tf.train.MonitoredTrainingSession(
-                checkpoint_dir=params.output, hooks=train_hooks,
-                save_checkpoint_secs=None, config=config) as sess:
-            # coord = tf.train.Coordinator()
-            # threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-            while not sess.should_stop():
-                sess.run(train_op)
-            # coord.request_stop()
+        # with tf.train.MonitoredTrainingSession(
+        #         checkpoint_dir=params.output, hooks=train_hooks,
+        #         save_checkpoint_secs=None, config=config) as sess:
+        #     # coord = tf.train.Coordinator()
+        #     # threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+        #     while not sess.should_stop():
+        #         sess.run(train_op)
+        #     # coord.request_stop()
             # coord.join(threads)
+        with tf.Session(config=config) as sess:
+            loss = sess.run(train_op)
+            print(global_step, loss)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,8 @@ from data.data_labelling import data_churn
 import multiprocessing as mp
 import pickle
 
-PKL_DIR = '/home/rjq/data_cleaned/pkl/totaltext_train/'
+PKL_DIR = '/home/rjq/data_cleaned/pkl/'
+TOTAL_TRAIN_DIR = 'totaltext_train/'
 
 DA = DataAugmentor()
 labelling = data_churn()
@@ -36,7 +37,7 @@ print('queue excuted')
 
 
 def enqueue(file_name):
-    img_name, img, maps, cnts = loading_data(file_name)
+    img_name, img, maps, cnts = loading_data(PKL_DIR+file_name)
     q.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
     print('example: ' + file_name)
@@ -44,7 +45,7 @@ def enqueue(file_name):
 def start_queue(params):
     thread_num = params.thread_num
     epoch = params.epoch
-    file_names = [PKL_DIR+name for name in os.listdir(PKL_DIR)]*epoch
+    file_names = [TOTAL_TRAIN_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TRAIN_DIR)]*epoch
 
     print('start')
     pool = mp.Pool(thread_num)
@@ -62,6 +63,7 @@ def generator(params, aqueue):
             maps = features['Labels']
             imgs.append(np.expand_dims(img,0))
             mapss.append(np.expand_dims(maps,0))
+
         yield {'input_img': np.concatenate(imgs).astype(np.float32),
                 'Labels': np.concatenate(mapss).astype(np.float32)}
 
@@ -69,8 +71,10 @@ def generator(params, aqueue):
 def get_train_input(params):
     return generator(params, q).__next__()
 
+
+
+
+
 if __name__ == '__main__':
-    # res = loading_data(PKL_DIR+'100.bin')
-    # print(len(res))
     for i in range(500):
         print(get_train_input('x'))
