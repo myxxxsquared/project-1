@@ -45,8 +45,8 @@ def get_train_input(params):
     for i in range(3):
         jobs[i].start()
     print(q.get())
-    for i in range(3):
-        jobs[i].join()
+    # for i in range(3):
+    #     jobs[i].join()
     print(q.get())
     print('end')
     with tf.device('/cpu:0'):
