@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
-from .data_augmentation import DataAugmentor
-from .data_labelling import data_churn
+from data.data_augmentation import DataAugmentor
+from data.data_labelling import data_churn
 import multiprocessing as mp
 import pickle
 
