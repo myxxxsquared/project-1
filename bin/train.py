@@ -44,8 +44,6 @@ def default_parameters():
         initializer_gain=0.08,
         learning_rate=0.01,
         save_checkpoint_secs=None,
-        pretrain_num=1,
-        train_num=10,
         basenets='vgg16',
         input_size=[512,512,3],
         Label_size=[512,512,5],
@@ -56,6 +54,10 @@ def default_parameters():
         US_Params='3 3 2 2 same ReLU',
         Predict_stage=4,
         predict_channels=[128, 64, 32, 32],
+
+        batch_size=10,
+        thread_num=10,
+        epoch=10,
     )
     return params
 
@@ -124,7 +126,7 @@ def main(args):
 
     # Build Graph
     with tf.Graph().as_default():
-
+        dataset.start_queue(params)
         features = dataset.get_train_input(params)
 
         # Build model

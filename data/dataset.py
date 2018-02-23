@@ -1,4 +1,5 @@
 import tensorflow as tf
+import os
 import numpy as np
 from data.data_augmentation import DataAugmentor
 from data.data_labelling import data_churn
@@ -29,36 +30,29 @@ def _data_label(ins):
 def loading_data(file, test_mode=False, real_test=False):
     return _data_label(_data_aug(_load_file(file), augment_rate=100, test_mode=test_mode, real_test=real_test))
 
-thread_num = 10
-batch_size = 10
+
 q = mp.Queue()
 
-def enqueue(q, start, end, batch_size):
-    for i in range(start, end, batch_size):
-        imgs = []
-        mapss = []
-        for j in range(batch_size):
-            img_name, img, maps, cnts = loading_data(PKL_DIR+str(i+j)+'.bin')
-            imgs.append(np.expand_dims(img,0))
-            mapss.append(np.expand_dims(maps,0))
-        q.put({'input_img': np.concatenate(imgs).astype(np.float32),
-               'Labels': np.concatenate(mapss).astype(np.float32)})
-        print(np.concatenate(imgs).shape)
-        print(np.concatenate(mapss).shape)
-        # q.put({'input_img': np.ones((12, 512,512, 3)).astype(np.float32),
-        #        'Labels': np.ones((12, 512,512,5)).astype(np.float32)})
-        # q.put(i)
+def start_queue(params):
+    thread_num = params.thread_num
+    epoch = params.epoch
 
-starts = np.array(list(range(thread_num)))*(1254//thread_num+1)
-ends = (np.array(list(range(thread_num)))+1)*(1254//thread_num+1)
-ends[-1] = 1254
+    def enqueue(q, file_name):
+        img_name, img, maps, cnts = loading_data(file_name)
+        q.put({'input_img': img,
+               'Labels': maps.astype(np.float32)})
+        print('example'+str(i))
 
-jobs = []
-for i in range(thread_num):
-    jobs.append(mp.Process(target=enqueue, args=(q, starts[i], ends[i], batch_size)))
-for i in range(thread_num):
-    jobs[i].start()
+    file_names = os.listdir(PKL_DIR)*epoch
+    qs = [q]*len(file_names)
+    args = []
+    for q, name in zip(qs, file_names):
+        args.append((q,name))
 
+    p = mp.Pool()
+    print('start')
+    p.map(enqueue, args)
+    print('end')
 
 def generator(q):
     while True:
@@ -66,7 +60,16 @@ def generator(q):
 
 
 def get_train_input(params):
-    return generator(q).__next__()
+    imgs = []
+    mapss = []
+    for i in range(params.batch_size):
+        features = generator(q).__next__()
+        img = features['input_img']
+        map = features['Lables']
+        imgs.append(img)
+        mapss.append(map)
+    return {'input_img': np.concatenate(imgs).astype(np.float32),
+                   'Labels': np.concatenate(mapss).astype(np.float32)}
 
 if __name__ == '__main__':
     # res = loading_data(PKL_DIR+'100.bin')
