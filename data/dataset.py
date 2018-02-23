@@ -36,8 +36,8 @@ def get_train_input(params):
     def job(q, start, end):
         for i in range(start, end):
             q.put(loading_data(PKL_DIR+str(i)+'.bin'))
-    starts = [0, 400, 800]
-    ends = [400, 800, 1000]
+    starts = [0, 100, 200]
+    ends = [100, 200, 300]
 
     jobs = []
     for i in range(3):
@@ -47,7 +47,8 @@ def get_train_input(params):
     print(q.get())
     for i in range(3):
         jobs[i].join()
-
+    print(q.get())
+    print('end')
     with tf.device('/cpu:0'):
         features = {'input_img': tf.convert_to_tensor(np.ones((12, 512,512, 3)).astype(np.float32)),
                     'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))}
