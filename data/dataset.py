@@ -33,16 +33,17 @@ def loading_data(file, test_mode=False, real_test=False):
 
 q = mp.Queue()
 print('queue excuted')
+
+
+def enqueue(file_name):
+    img_name, img, maps, cnts = loading_data(file_name)
+    q.put({'input_img': img,
+           'Labels': maps.astype(np.float32)})
+    print('example' + str(i))
+
 def start_queue(params):
     thread_num = params.thread_num
     epoch = params.epoch
-
-    def enqueue(file_name):
-        img_name, img, maps, cnts = loading_data(file_name)
-        q.put({'input_img': img,
-               'Labels': maps.astype(np.float32)})
-        print('example'+str(i))
-
     file_names = os.listdir(PKL_DIR)*epoch
 
     print('start')
