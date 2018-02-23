@@ -34,9 +34,8 @@ q = mp.Queue()
 
 def enqueue(q, start, end):
     for i in range(start, end):
-        # q.put({'input_img': np.ones((12, 512,512, 3)).astype(np.float32),
-        #        'Labels': np.ones((12, 512,512,5)).astype(np.float32)})
-        q.put(i)
+        q.put({'input_img': np.ones((12, 512,512, 3)).astype(np.float32),
+               'Labels': np.ones((12, 512,512,5)).astype(np.float32)})
 
 starts = [0, 100, 200]
 ends = [100, 200, 300]
@@ -50,10 +49,8 @@ for i in range(3):
 
 def generator(q):
     while True:
-        # with tf.device('/cpu:0'):
-        #     features = {'input_img': tf.convert_to_tensor(np.ones((12, 512,512, 3)).astype(np.float32)),
-        #                 'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))}
         yield q.get()
+
 
 def get_train_input(params):
     return generator(q).__next__()
