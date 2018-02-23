@@ -38,21 +38,17 @@ def start_queue(params):
     thread_num = params.thread_num
     epoch = params.epoch
 
-    def enqueue(q, file_name):
+    def enqueue(file_name):
         img_name, img, maps, cnts = loading_data(file_name)
         q.put({'input_img': img,
                'Labels': maps.astype(np.float32)})
         print('example'+str(i))
 
     file_names = os.listdir(PKL_DIR)*epoch
-    qs = [q]*len(file_names)
-    args = []
-    for queue, name in zip(qs, file_names):
-        args.append((queue,name))
 
     p = mp.Pool(thread_num)
     print('start')
-    p.map(enqueue, args)
+    p.map(enqueue, file_names)
     print('end')
 
 def generator(q):
