@@ -60,8 +60,8 @@ def generator(params, aqueue):
             features = aqueue.get()
             img = features['input_img']
             maps = features['Labels']
-            imgs.append(img)
-            mapss.append(maps)
+            imgs.append(np.expand_dims(img,0))
+            mapss.append(np.expand_dims(maps,0))
         yield {'input_img': np.concatenate(imgs).astype(np.float32),
                 'Labels': np.concatenate(mapss).astype(np.float32)}
 
