@@ -29,14 +29,15 @@ def _data_label(ins):
 def loading_data(file, test_mode=False, real_test=False):
     return _data_label(_data_aug(_load_file(file), augment_rate=100, test_mode=test_mode, real_test=real_test))
 
-
+thread_num = 10
+batch_size = 10
 q = mp.Queue()
 
-def enqueue(q, start, end):
-    for i in range(start, end,2):
+def enqueue(q, start, end, batch_size):
+    for i in range(start, end, batch_size):
         imgs = []
         mapss = []
-        for j in range(2):
+        for j in range(batch_size):
             img_name, img, maps, cnts = loading_data(PKL_DIR+str(i+j)+'.bin')
             imgs.append(np.expand_dims(img,0))
             mapss.append(np.expand_dims(maps,0))
@@ -48,13 +49,14 @@ def enqueue(q, start, end):
         #        'Labels': np.ones((12, 512,512,5)).astype(np.float32)})
         # q.put(i)
 
-starts = [0, 100, 200]
-ends = [100, 200, 300]
+starts = np.array(list(range(thread_num)))*(1254//thread_num+1)
+ends = (np.array(list(range(thread_num)))+1)*(1254//thread_num+1)
+ends[-1] = 1254
 
 jobs = []
-for i in range(3):
-    jobs.append(mp.Process(target=enqueue, args=(q, starts[i], ends[i])))
-for i in range(3):
+for i in range(thread_num):
+    jobs.append(mp.Process(target=enqueue, args=(q, starts[i], ends[i], batch_size)))
+for i in range(thread_num):
     jobs[i].start()
 
 
