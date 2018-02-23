@@ -32,8 +32,7 @@ def loading_data(file, test_mode=False, real_test=False):
 
 
 q = mp.Queue()
-print('excuted')
-
+print('queue excuted')
 def start_queue(params):
     thread_num = params.thread_num
     epoch = params.epoch
@@ -52,22 +51,22 @@ def start_queue(params):
         pool.apply_async(enqueue, (file_name,))
     print('end')
 
-def generator(q):
+def generator(params, aqueue):
     while True:
-        yield q.get()
+        imgs = []
+        mapss = []
+        for i in range(params.batch_size):
+            features = aqueue.get()
+            img = features['input_img']
+            map = features['Lables']
+            imgs.append(img)
+            mapss.append(map)
+        yield {'input_img': np.concatenate(imgs).astype(np.float32),
+                   'Labels': np.concatenate(mapss).astype(np.float32)}
 
 
 def get_train_input(params):
-    imgs = []
-    mapss = []
-    for i in range(params.batch_size):
-        features = generator(q).__next__()
-        img = features['input_img']
-        map = features['Lables']
-        imgs.append(img)
-        mapss.append(map)
-    return {'input_img': np.concatenate(imgs).astype(np.float32),
-                   'Labels': np.concatenate(mapss).astype(np.float32)}
+    return generator(params, q).__next__()
 
 if __name__ == '__main__':
     # res = loading_data(PKL_DIR+'100.bin')
