@@ -63,7 +63,7 @@ def get_train_input(params):
             #                 'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))}
             yield q.get()
 
-    return  generator().__next__()
+    return  generator(q).__next__()
 
 if __name__ == '__main__':
     get_train_input('sdkfa')
