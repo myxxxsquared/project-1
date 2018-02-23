@@ -5,7 +5,7 @@ from data.data_labelling import data_churn
 import multiprocessing as mp
 import pickle
 
-PKL_DIR = '/home/lsb/data_cleaned/pkl/synthtext_chars/'
+PKL_DIR = '/home/rjq/data_cleaned/pkl/totaltext_train/'
 
 DA = DataAugmentor()
 labelling = data_churn()
