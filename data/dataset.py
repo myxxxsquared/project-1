@@ -58,6 +58,6 @@ def get_train_input(params):
     return generator(q).__next__()
 
 if __name__ == '__main__':
-    x = get_train_input('sdkfa')
+
     for i in range(300):
-        print(x)
+        print(get_train_input('sdkfa'))
