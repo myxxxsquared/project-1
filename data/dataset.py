@@ -52,19 +52,18 @@ def get_train_input(params):
         jobs[i].start()
     print(q.get())
     print('get one example')
-    for i in range(3):
-        jobs[i].join()
-    print('get another one example')
+    # for i in range(3):
+    #     jobs[i].join()
     print('end')
 
-    # def generator(q):
-    #     while True:
-    #         # with tf.device('/cpu:0'):
-    #         #     features = {'input_img': tf.convert_to_tensor(np.ones((12, 512,512, 3)).astype(np.float32)),
-    #         #                 'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))}
-    #         yield q.get()
-    #
-    # return  generator().__next__()
+    def generator(q):
+        while True:
+            # with tf.device('/cpu:0'):
+            #     features = {'input_img': tf.convert_to_tensor(np.ones((12, 512,512, 3)).astype(np.float32)),
+            #                 'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))}
+            yield q.get()
+
+    return  generator().__next__()
 
 if __name__ == '__main__':
     get_train_input('sdkfa')
