@@ -38,8 +38,8 @@ def enqueue(q, start, end):
         mapss = []
         for j in range(2):
             img_name, img, maps, cnts = loading_data(PKL_DIR+str(i+j)+'.bin')
-            imgs.append(img)
-            mapss.append(maps)
+            imgs.append(np.expand_dims(img,0))
+            mapss.append(np.expand_dims(maps,0))
         q.put({'input_img': np.concatenate(imgs).astype(np.float32),
                'Labels': np.concatenate(mapss).astype(np.float32)})
         print(np.concatenate(imgs).shape)
