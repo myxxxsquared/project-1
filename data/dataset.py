@@ -34,12 +34,12 @@ q = mp.Queue()
 
 def enqueue(q, start, end):
     for i in range(start, end):
-        # img_name, img, maps, cnts = loading_data(PKL_DIR+str(i)+'.bin')
-        # q.put({'input_img': img.astype(np.float32),
-        #        'Labels': maps.astype(np.float32)})
+        img_name, img, maps, cnts = loading_data(PKL_DIR+str(i)+'.bin')
+        q.put({'input_img': img.astype(np.float32),
+               'Labels': maps.astype(np.float32)})
         # q.put({'input_img': np.ones((12, 512,512, 3)).astype(np.float32),
         #        'Labels': np.ones((12, 512,512,5)).astype(np.float32)})
-        q.put(i)
+        # q.put(i)
 
 starts = [0, 100, 200]
 ends = [100, 200, 300]
