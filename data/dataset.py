@@ -51,13 +51,13 @@ def get_train_input(params):
     # print(q.get())
     # print('get another one example')
     # print('end')
-
-    while True:
-        with tf.device('/cpu:0'):
-            features = {'input_img': tf.convert_to_tensor(np.ones((12, 512,512, 3)).astype(np.float32)),
-                        'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))}
-        yield features
-
+    def generator():
+        while True:
+            with tf.device('/cpu:0'):
+                features = {'input_img': tf.convert_to_tensor(np.ones((12, 512,512, 3)).astype(np.float32)),
+                            'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))}
+            yield features
+    return  generator().__next__()
 
 if __name__ == '__main__':
     get_train_input('sdkfa')
