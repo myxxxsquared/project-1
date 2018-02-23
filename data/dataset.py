@@ -59,11 +59,11 @@ def generator(params, aqueue):
         for i in range(params.batch_size):
             features = aqueue.get()
             img = features['input_img']
-            maps = features['Lables']
+            maps = features['Labels']
             imgs.append(img)
             mapss.append(maps)
         yield {'input_img': np.concatenate(imgs).astype(np.float32),
-                   'Labels': np.concatenate(mapss).astype(np.float32)}
+                'Labels': np.concatenate(mapss).astype(np.float32)}
 
 
 def get_train_input(params):
