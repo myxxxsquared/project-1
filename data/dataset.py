@@ -31,32 +31,40 @@ def loading_data(file, test_mode=False, real_test=False):
 
 
 def get_train_input(params):
-    # q = mp.Queue()
-    #
+    q = mp.Queue()
+
     # def job(q, start, end):
     #     for i in range(start, end):
     #         q.put(loading_data(PKL_DIR+str(i)+'.bin'))
-    # starts = [0, 100, 200]
-    # ends = [100, 200, 300]
-    #
-    # jobs = []
+
+    def job(q, start, end):
+        for i in range(start, end):
+            q.put({'input_img': tf.convert_to_tensor(np.ones((12, 512,512, 3)).astype(np.float32)),
+                            'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))})
+
+    starts = [0, 100, 200]
+    ends = [100, 200, 300]
+
+    jobs = []
+    for i in range(3):
+        jobs.append(mp.Process(target=job, args=(q, starts[i], ends[i])))
+    for i in range(3):
+        jobs[i].start()
+    print(q.get())
     # for i in range(3):
-    #     jobs.append(mp.Process(target=job, args=(q, starts[i], ends[i])))
-    # for i in range(3):
-    #     jobs[i].start()
-    # print(q.get())
-    # # for i in range(3):
-    # #     jobs[i].join()
-    # print('get one example')
-    # print(q.get())
-    # print('get another one example')
-    # print('end')
-    def generator():
+    #     jobs[i].join()
+    print('get one example')
+    print(q.get())
+    print('get another one example')
+    print('end')
+
+    def generator(q):
         while True:
-            with tf.device('/cpu:0'):
-                features = {'input_img': tf.convert_to_tensor(np.ones((12, 512,512, 3)).astype(np.float32)),
-                            'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))}
-            yield features
+            # with tf.device('/cpu:0'):
+            #     features = {'input_img': tf.convert_to_tensor(np.ones((12, 512,512, 3)).astype(np.float32)),
+            #                 'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))}
+            yield q.get()
+
     return  generator().__next__()
 
 if __name__ == '__main__':
