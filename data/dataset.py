@@ -44,7 +44,7 @@ def enqueue(file_name):
 def start_queue(params):
     thread_num = params.thread_num
     epoch = params.epoch
-    file_names = os.listdir(PKL_DIR)*epoch
+    file_names = [PKL_DIR+name for name in os.listdir(PKL_DIR)]*epoch
 
     print('start')
     pool = mp.Pool(thread_num)
