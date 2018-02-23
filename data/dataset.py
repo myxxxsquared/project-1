@@ -42,6 +42,8 @@ def enqueue(q, start, end):
             mapss.append(maps)
         q.put({'input_img': np.concatenate(imgs).astype(np.float32),
                'Labels': np.concatenate(mapss).astype(np.float32)})
+        print(np.concatenate(imgs).shape)
+        print(np.concatenate(mapss).shape)
         # q.put({'input_img': np.ones((12, 512,512, 3)).astype(np.float32),
         #        'Labels': np.ones((12, 512,512,5)).astype(np.float32)})
         # q.put(i)
