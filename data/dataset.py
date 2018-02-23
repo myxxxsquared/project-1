@@ -33,10 +33,15 @@ def loading_data(file, test_mode=False, real_test=False):
 q = mp.Queue()
 
 def enqueue(q, start, end):
-    for i in range(start, end):
-        img_name, img, maps, cnts = loading_data(PKL_DIR+str(i)+'.bin')
-        q.put({'input_img': img.astype(np.float32),
-               'Labels': maps.astype(np.float32)})
+    for i in range(start, end,2):
+        imgs = []
+        mapss = []
+        for j in range(2):
+            img_name, img, maps, cnts = loading_data(PKL_DIR+str(i+j)+'.bin')
+            imgs.append(img)
+            mapss.append(maps)
+        q.put({'input_img': np.concatenate(imgs).astype(np.float32),
+               'Labels': np.concatenate(mapss).astype(np.float32)})
         # q.put({'input_img': np.ones((12, 512,512, 3)).astype(np.float32),
         #        'Labels': np.ones((12, 512,512,5)).astype(np.float32)})
         # q.put(i)
