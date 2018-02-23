@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
+from __future__ import print_function
+from __future__ import absolute_import
 
 import argparse
 import os
@@ -26,7 +28,7 @@ def default_parameters():
         thickness=0.15,
         crop_skel=1.0,
         neighbor=5,
-        device_list=[3,4,5],
+        device_list=[1,5],
         learning_rate_decay="noam",
         warmup_steps=2000,
         adam_beta1=0.9,
