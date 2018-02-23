@@ -39,8 +39,8 @@ def get_train_input(params):
 
     def job(q, start, end):
         for i in range(start, end):
-            q.put({'input_img': tf.convert_to_tensor(np.ones((12, 512,512, 3)).astype(np.float32)),
-                   'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))})
+            q.put({'input_img': np.ones((12, 512,512, 3)).astype(np.float32),
+                   'Labels': np.ones((12, 512,512,5)).astype(np.float32)})
 
     starts = [0, 100, 200]
     ends = [100, 200, 300]
