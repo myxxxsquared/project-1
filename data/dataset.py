@@ -32,6 +32,7 @@ def loading_data(file, test_mode=False, real_test=False):
 
 
 q = mp.Queue()
+print('excuted')
 
 def start_queue(params):
     thread_num = params.thread_num
@@ -46,10 +47,10 @@ def start_queue(params):
     file_names = os.listdir(PKL_DIR)*epoch
     qs = [q]*len(file_names)
     args = []
-    for q, name in zip(qs, file_names):
-        args.append((q,name))
+    for queue, name in zip(qs, file_names):
+        args.append((queue,name))
 
-    p = mp.Pool()
+    p = mp.Pool(thread_num)
     print('start')
     p.map(enqueue, args)
     print('end')
