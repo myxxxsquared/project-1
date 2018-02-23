@@ -46,9 +46,10 @@ def start_queue(params):
 
     file_names = os.listdir(PKL_DIR)*epoch
 
-    p = mp.Pool(thread_num)
     print('start')
-    p.map(enqueue, file_names)
+    pool = mp.Pool(thread_num)
+    for file_name in file_names:
+        pool.apply_async(enqueue, (file_name,))
     print('end')
 
 def generator(q):
