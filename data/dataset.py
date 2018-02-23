@@ -48,7 +48,8 @@ def start_queue(params):
 
     print('start')
     pool = mp.Pool(thread_num)
-    pool.map(enqueue, file_names)
+    for file_name in file_names:
+        pool.apply_async(enqueue, (file_name,))
     print('end')
 
 def generator(params, aqueue):
