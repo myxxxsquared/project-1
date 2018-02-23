@@ -40,7 +40,7 @@ def get_train_input(params):
     def job(q, start, end):
         for i in range(start, end):
             q.put({'input_img': tf.convert_to_tensor(np.ones((12, 512,512, 3)).astype(np.float32)),
-                            'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))})
+                   'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))})
 
     starts = [0, 100, 200]
     ends = [100, 200, 300]
@@ -51,21 +51,20 @@ def get_train_input(params):
     for i in range(3):
         jobs[i].start()
     print(q.get())
-    # for i in range(3):
-    #     jobs[i].join()
     print('get one example')
-    print(q.get())
+    for i in range(3):
+        jobs[i].join()
     print('get another one example')
     print('end')
 
-    def generator(q):
-        while True:
-            # with tf.device('/cpu:0'):
-            #     features = {'input_img': tf.convert_to_tensor(np.ones((12, 512,512, 3)).astype(np.float32)),
-            #                 'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))}
-            yield q.get()
-
-    return  generator().__next__()
+    # def generator(q):
+    #     while True:
+    #         # with tf.device('/cpu:0'):
+    #         #     features = {'input_img': tf.convert_to_tensor(np.ones((12, 512,512, 3)).astype(np.float32)),
+    #         #                 'Labels': tf.convert_to_tensor(np.ones((12, 512,512,5)).astype(np.float32))}
+    #         yield q.get()
+    #
+    # return  generator().__next__()
 
 if __name__ == '__main__':
     get_train_input('sdkfa')
