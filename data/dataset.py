@@ -33,28 +33,20 @@ def loading_data(file, test_mode=False, real_test=False):
 def get_train_input(params):
     q = mp.Queue()
 
-    # def job(q, start, end):
-    #     for i in range(start, end):
-    #         q.put(loading_data(PKL_DIR+str(i)+'.bin'))
-
-    def job(q, start, end):
+    def enqueue(q, start, end):
         for i in range(start, end):
-            q.put({'input_img': np.ones((12, 512,512, 3)).astype(np.float32),
-                   'Labels': np.ones((12, 512,512,5)).astype(np.float32)})
+            # q.put({'input_img': np.ones((12, 512,512, 3)).astype(np.float32),
+            #        'Labels': np.ones((12, 512,512,5)).astype(np.float32)})
+            q.put(i)
 
     starts = [0, 100, 200]
     ends = [100, 200, 300]
 
     jobs = []
     for i in range(3):
-        jobs.append(mp.Process(target=job, args=(q, starts[i], ends[i])))
+        jobs.append(mp.Process(target=enqueue, args=(q, starts[i], ends[i])))
     for i in range(3):
         jobs[i].start()
-    print(q.get())
-    print('get one example')
-    # for i in range(3):
-    #     jobs[i].join()
-    print('end')
 
     def generator(q):
         while True:
@@ -66,4 +58,6 @@ def get_train_input(params):
     return  generator(q).__next__()
 
 if __name__ == '__main__':
-    get_train_input('sdkfa')
+    x = get_train_input('sdkfa')
+    for i in range(300):
+        print(x)
