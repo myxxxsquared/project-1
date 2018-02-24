@@ -59,6 +59,7 @@ def default_parameters():
         batch_size=10,
         thread_num=10,
         epoch=10,
+        keep_top_checkpoint_max=5,
     )
     return params
 
