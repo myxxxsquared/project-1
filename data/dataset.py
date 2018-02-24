@@ -81,7 +81,7 @@ def get_eval_input():
             img_name, img, maps, cnts = loading_data(file_name, True, False)
 
             features = {}
-            features["input_img"] = img.astype(np.float32)
+            features["input_img"] = np.expand_dims(img,0).astype(np.float32)
             features["cnts"] = cnts
             features['is_text_cnts'] = True
             yield features
