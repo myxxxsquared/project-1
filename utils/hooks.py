@@ -151,8 +151,8 @@ def _evaluate(eval_fn, input_fn, path, config):
                 is_text_cnts = features['is_text_cnts']
                 prediction = sess.run(eval_op)
                 for i in range(img.shape[0]):
-                    maps = np.split(np.transpose(prediction[i], (2,0,1)),7)
-                    scores = evaluate(img[i,:,:,:],cnts,is_text_cnts,maps)
+                    maps = [np.squeeze(map) for map in np.split(np.transpose(prediction[i], (2,0,1)),7)]
+                    scores = evaluate(img[i],cnts,is_text_cnts,maps)
                     recall_list.append(scores[0])
                     precise_list.append(scores[1])
         ave_r = sum(recall_list)/len(recall_list)
