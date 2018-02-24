@@ -10,6 +10,7 @@ import operator
 import os
 
 import tensorflow as tf
+import numpy as np
 from utils.evaluate import evaluate
 
 
@@ -150,7 +151,9 @@ def _evaluate(eval_fn, input_fn, path, config):
                 is_text_cnts = features['is_text_cnts']
                 prediction = sess.run(eval_op)
                 for i in range(img.shape[0]):
-                    scores = evaluate(img[i,:,:,:],cnts,is_text_cnts,prediction[i,:,:,:])
+                    print(img.shape, prediction.shape)
+                    maps = np.split(np.transpose(prediction[i], (2,0,1)),0)
+                    scores = evaluate(img[i,:,:,:],cnts,is_text_cnts,maps)
                     recall_list.append(scores[0])
                     precise_list.append(scores[1])
         ave_r = sum(recall_list)/len(recall_list)
