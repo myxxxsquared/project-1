@@ -60,6 +60,9 @@ def default_parameters():
         thread_num=10,
         epoch=10,
         keep_top_checkpoint_max=5,
+        eval_secs=None,
+        eval_steps=100,
+
     )
     return params
 
