@@ -85,8 +85,9 @@ def get_eval_input():
             features["input_img"] = img
             features["cnts"] = cnts
             features['is_text_cnts'] = True
+            yield features
 
-    return generator_eval().get_next()
+    return generator_eval().__next__()
 
 
 
