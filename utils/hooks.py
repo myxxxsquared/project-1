@@ -144,6 +144,7 @@ def _evaluate(eval_fn, input_fn, path, config):
 
         recall_list, precise_list = [], []
         with tf.train.MonitoredSession(session_creator=sess_creator) as sess:
+            tf.logging.info('start evaluation')
             while not sess.should_stop():
                 eval_op = features['prediction']
                 img = features["input_img"]
