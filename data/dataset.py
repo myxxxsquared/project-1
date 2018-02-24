@@ -86,7 +86,7 @@ def get_eval_input():
             features["cnts"] = [cnt.astype(np.float32).tolist() for cnt in cnts]
             features['is_text_cnts'] = True
             yield features
-    iterator = get_eval_input()
+    iterator = generator_eval()
     return iterator.__next__()
 
 
