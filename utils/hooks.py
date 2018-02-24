@@ -134,16 +134,7 @@ def _evaluate(eval_fn, input_fn, path, config):
     graph = tf.Graph()
     with graph.as_default():
         features = input_fn()
-        img = features["input_img"]
-        cnts = features["cnts"]
-        is_text_cnts = features['is_text_cnts']
-        prediction = eval_fn(features)
-        results = {
-            "predictions": prediction,
-            "img":img,
-            "cnts":cnts,
-            "is_text_cnts":is_text_cnts
-        }
+        features['prediction'] = eval_fn(features)
 
         sess_creator = tf.train.ChiefSessionCreator(
             checkpoint_dir=path,
@@ -153,12 +144,11 @@ def _evaluate(eval_fn, input_fn, path, config):
         recall_list, precise_list = [], []
         with tf.train.MonitoredSession(session_creator=sess_creator) as sess:
             while not sess.should_stop():
-                outputs = sess.run(results)
-                # shape: [batch, len]
-                prediction = outputs["prediction"]
-                img = outputs["img"]
-                cnts = outputs["cnts"]
-                is_text_cnts = outputs['is_text_cnts']
+
+                prediction = sess.run(features['prediction'])
+                img = features["img"]
+                cnts = features["cnts"]
+                is_text_cnts = features['is_text_cnts']
                 scores = evaluate(img,cnts,is_text_cnts,prediction)
                 recall_list.append(scores[0])
                 precise_list.append(scores[1])
