@@ -33,7 +33,7 @@ def loading_data(file, test_mode=False, real_test=False):
     return _data_label(_data_aug(_load_file(file), augment_rate=100, test_mode=test_mode, real_test=real_test))
 
 
-q = mp.Queue()
+q = mp.Queue(maxsize=3000)
 print('queue excuted')
 
 
@@ -77,6 +77,7 @@ def get_train_input(params):
 def get_eval_input():
     def generator_eval():
         file_names = [PKL_DIR+TOTAL_TEST_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TEST_DIR)]
+        tf.data.Dataset.
         for file_name in file_names[:2]:
             img_name, img, maps, cnts = loading_data(file_name, True, False)
 
@@ -85,7 +86,7 @@ def get_eval_input():
             features["cnts"] = cnts
             features['is_text_cnts'] = True
 
-    return generator_eval().__next__()
+    return generator_eval().get_next()
 
 
 
