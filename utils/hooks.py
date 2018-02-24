@@ -145,7 +145,10 @@ def _evaluate(eval_fn, input_fn, path, config):
         recall_list, precise_list = [], []
         with tf.train.MonitoredSession(session_creator=sess_creator) as sess:
             tf.logging.info('start evaluation')
+            time = 0
             while not sess.should_stop():
+                time += 1
+                print('time', time)
                 eval_op = features['prediction']
                 img = features["input_img"]
                 cnts = features["cnts"]
