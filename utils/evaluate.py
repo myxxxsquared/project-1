@@ -271,52 +271,52 @@ if __name__ == '__main__':
     #     res = pickle.load(open(PKL_DIR+'synthtext/'+str(i)+'.bin', 'rb'))
 
     # ######test text cnts###############
-    for i in range(99, 100):
-        res = pickle.load(open(PKL_DIR + 'totaltext_train/' + str(i) + '.bin', 'rb'))
+    # for i in range(99, 100):
+    #     res = pickle.load(open(PKL_DIR + 'totaltext_train/' + str(i) + '.bin', 'rb'))
 
         # print(res['img_name'],
         #       res['contour'],
         #       res['img'],
         #       res['is_text_cnts'])
 
-        img_name = res['img_name']
-        img_name = img_name.replace('/', '_')
-        img = res['img']
-        cnts = res['contour']
-        is_text_cnts = res['is_text_cnts']
-
-        skels_points, radius_dict, score_dict, cos_theta_dict, sin_theta_dict, mask_fills = \
-            get_maps(img, cnts, is_text_cnts, 0.15, 1.0, 2)
-        TR = mask_fills[0]
-        for i in range(1, len(mask_fills)):
-            TR = np.bitwise_or(TR, mask_fills[i])
-        TCL = np.zeros(img.shape[:2], np.bool)
-        for point, _ in score_dict.items():
-            TCL[point[0], point[1]] = True
-        radius = np.zeros(img.shape[:2], np.float32)
-        for point, r in radius_dict.items():
-            radius[point[0], point[1]] = r
-        cos_theta = np.zeros(img.shape[:2], np.float32)
-        for point, c_t in cos_theta_dict.items():
-            cos_theta[point[0], point[1]] = c_t
-        sin_theta = np.zeros(img.shape[:2], np.float32)
-        for point, s_t in sin_theta_dict.items():
-            sin_theta[point[0], point[1]] = s_t
-
-        def save_heatmap(save_name, map):
-            map = np.array(map, np.float32)
-            if np.max(map) != 0.0 or np.max(map) != 0:
-                cv2.imwrite(save_name, (map * 255 / np.max(map)).astype(np.uint8))
-            else:
-                cv2.imwrite(save_name, map.astype(np.uint8))
-
-        maps = [TR, TCL, radius, cos_theta, sin_theta]
-        t1 = time.time()
-        totaltext_recall, totaltext_precision, pascal_recall, pascal_precision = \
-            evaluate(img, cnts, is_text_cnts, maps, True, img_name)
-        t2 = time.time()
-        print(totaltext_recall, totaltext_precision, pascal_recall, pascal_precision,
-              sep='\n')
-        print('time', t2 - t1)
+        # img_name = res['img_name']
+        # img_name = img_name.replace('/', '_')
+        # img = res['img']
+        # cnts = res['contour']
+        # is_text_cnts = res['is_text_cnts']
+        #
+        # skels_points, radius_dict, score_dict, cos_theta_dict, sin_theta_dict, mask_fills = \
+        #     get_maps(img, cnts, is_text_cnts, 0.15, 1.0, 2)
+        # TR = mask_fills[0]
+        # for i in range(1, len(mask_fills)):
+        #     TR = np.bitwise_or(TR, mask_fills[i])
+        # TCL = np.zeros(img.shape[:2], np.bool)
+        # for point, _ in score_dict.items():
+        #     TCL[point[0], point[1]] = True
+        # radius = np.zeros(img.shape[:2], np.float32)
+        # for point, r in radius_dict.items():
+        #     radius[point[0], point[1]] = r
+        # cos_theta = np.zeros(img.shape[:2], np.float32)
+        # for point, c_t in cos_theta_dict.items():
+        #     cos_theta[point[0], point[1]] = c_t
+        # sin_theta = np.zeros(img.shape[:2], np.float32)
+        # for point, s_t in sin_theta_dict.items():
+        #     sin_theta[point[0], point[1]] = s_t
+        #
+        # def save_heatmap(save_name, map):
+        #     map = np.array(map, np.float32)
+        #     if np.max(map) != 0.0 or np.max(map) != 0:
+        #         cv2.imwrite(save_name, (map * 255 / np.max(map)).astype(np.uint8))
+        #     else:
+        #         cv2.imwrite(save_name, map.astype(np.uint8))
+        #
+        # maps = [TR, TCL, radius, cos_theta, sin_theta]
+        # t1 = time.time()
+        # totaltext_recall, totaltext_precision, pascal_recall, pascal_precision = \
+        #     evaluate(img, cnts, is_text_cnts, maps, True, img_name)
+        # t2 = time.time()
+        # print(totaltext_recall, totaltext_precision, pascal_recall, pascal_precision,
+        #       sep='\n')
+        # print('time', t2 - t1)
 
 

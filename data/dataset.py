@@ -91,4 +91,5 @@ def get_eval_input():
 
 if __name__ == '__main__':
     for i in range(500):
-        print(get_train_input('x'))
+        res = get_eval_input()
+        print(res['input_img'].shape)
