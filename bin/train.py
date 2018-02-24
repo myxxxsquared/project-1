@@ -215,6 +215,7 @@ def main(args):
         #     # coord.request_stop()
             # coord.join(threads)
         with tf.Session(config=config) as sess:
+            sess.run(tf.global_variables_initializer())
             loss = sess.run(train_op)
             print(global_step, loss)
 
