@@ -41,7 +41,6 @@ def enqueue(file_name):
     img_name, img, maps, cnts = loading_data(PKL_DIR+file_name)
     q.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
-    print('example: ' + file_name)
 
 
 def start_queue(params):
