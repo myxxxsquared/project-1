@@ -244,9 +244,16 @@ def model_graph(features, mode, params):
         prediction = _add_prediction_block(params, pipe)
         total_loss, score_loss, geo_loss, geo_attr, TR_score_loss = _build_loss(Labels, prediction)
         loss = total_loss
+        return loss
+
+    elif mode == 'eval':
+        input_img = features['input_img']
+        pipe = _build_back_bone(params, input_img)
+        prediction = _add_prediction_block(params, pipe)
+
+        return prediction
     else:
-        loss = 0.0
-    return loss
+        raise NotImplementedError()
 
 
 class Model(object):
@@ -271,14 +278,14 @@ class Model(object):
                 params = copy.copy(self.parameters)
             else:
                 params = copy.copy(params)
-            params.dropout = 0.0
-            params.use_variational_dropout = False
-            params.label_smoothing = 0.0
+            # params.dropout = 0.0
+            # params.use_variational_dropout = False
+            # params.label_smoothing = 0.0
 
             with tf.variable_scope(self._scope):
-                score = model_graph(features, "eval", params)
+                prediction = model_graph(features, "eval", params)
 
-            return score
+            return prediction
 
         return evaluation_fn
 

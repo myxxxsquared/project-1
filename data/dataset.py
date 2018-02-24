@@ -8,6 +8,7 @@ import pickle
 
 PKL_DIR = '/home/rjq/data_cleaned/pkl/'
 TOTAL_TRAIN_DIR = 'totaltext_train/'
+TOTAL_TEST_DIR = 'totaltext_test/'
 
 DA = DataAugmentor()
 labelling = data_churn()
@@ -42,6 +43,7 @@ def enqueue(file_name):
            'Labels': maps.astype(np.float32)})
     print('example: ' + file_name)
 
+
 def start_queue(params):
     thread_num = params.thread_num
     epoch = params.epoch
@@ -52,6 +54,7 @@ def start_queue(params):
     for file_name in file_names:
         pool.apply_async(enqueue, (file_name,))
     print('end')
+
 
 def generator(params, aqueue):
     while True:
@@ -72,6 +75,18 @@ def get_train_input(params):
     return generator(params, q).__next__()
 
 
+def get_eval_input():
+    def generator_eval():
+        file_names = [PKL_DIR+TOTAL_TEST_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TEST_DIR)]
+        for file_name in file_names:
+            img_name, img, maps, cnts = loading_data(file_name, True, False)
+
+            features = {}
+            features["input_img"] = img
+            features["cnts"] = cnts
+            features['is_text_cnts'] = True
+
+    return generator_eval().__next__()
 
 
 
