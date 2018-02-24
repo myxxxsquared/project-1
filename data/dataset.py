@@ -77,7 +77,6 @@ def get_train_input(params):
 def get_eval_input():
     def generator_eval():
         file_names = [PKL_DIR+TOTAL_TEST_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TEST_DIR)]
-        tf.data.Dataset.
         for file_name in file_names[:2]:
             img_name, img, maps, cnts = loading_data(file_name, True, False)
 
@@ -88,7 +87,6 @@ def get_eval_input():
             yield features
 
     return generator_eval().__next__()
-
 
 
 if __name__ == '__main__':
