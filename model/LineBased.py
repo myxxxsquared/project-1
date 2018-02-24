@@ -239,6 +239,7 @@ def _build_loss(Labels, prediction):
 def model_graph(features, mode, params):
     if mode == 'train':
         input_img = features['input_img']
+        input_img = tf.to_float(input_img)
         Labels = features['Labels']
         pipe = _build_back_bone(params, input_img)
         prediction = _add_prediction_block(params, pipe)
@@ -248,6 +249,7 @@ def model_graph(features, mode, params):
 
     elif mode == 'eval':
         input_img = features['input_img']
+        input_img = tf.to_float(input_img)
         pipe = _build_back_bone(params, input_img)
         prediction = _add_prediction_block(params, pipe)
 
