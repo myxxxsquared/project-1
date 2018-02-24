@@ -145,7 +145,7 @@ def _evaluate(eval_fn, input_fn, path, config):
         with tf.train.MonitoredSession(session_creator=sess_creator) as sess:
             while not sess.should_stop():
                 eval_op = features['prediction']
-                img = features["img"]
+                img = features["input_img"]
                 cnts = features["cnts"]
                 is_text_cnts = features['is_text_cnts']
                 prediction = sess.run(eval_op)
