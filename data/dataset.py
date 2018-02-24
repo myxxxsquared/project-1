@@ -77,7 +77,7 @@ def get_train_input(params):
 def get_eval_input():
     def generator_eval():
         file_names = [PKL_DIR+TOTAL_TEST_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TEST_DIR)]
-        for file_name in file_names:
+        for file_name in file_names[:2]:
             img_name, img, maps, cnts = loading_data(file_name, True, False)
 
             features = {}
