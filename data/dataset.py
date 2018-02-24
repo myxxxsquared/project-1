@@ -71,7 +71,8 @@ def generator(params, aqueue):
 
 
 def get_train_input(params):
-    return generator(params, q).__next__()
+    iterator = generator(params, q)
+    return iterator.__next__()
 
 
 def get_eval_input():
@@ -82,11 +83,11 @@ def get_eval_input():
 
             features = {}
             features["input_img"] = np.expand_dims(img,0).astype(np.float32)
-            features["cnts"] = cnts
+            features["cnts"] = [cnt.astype(np.float32).tolist() for cnt in cnts]
             features['is_text_cnts'] = True
             yield features
-
-    return generator_eval().__next__()
+    iterator = get_eval_input()
+    return iterator.__next__()
 
 
 if __name__ == '__main__':
