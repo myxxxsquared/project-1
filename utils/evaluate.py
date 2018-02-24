@@ -45,7 +45,7 @@ def evaluate(img, cnts, is_text_cnts, maps,
     if not is_text_cnts:
         char_cnts, text_cnts = cnts
         cnts = text_cnts
-
+    print(img.shape[:2], maps[0].shape])
     assert img.shape[:2] == maps[0].shape
     row, col = img.shape[:2]
     [TCL_neg, TCL_pos, radius, cos_theta, sin_theta, TR_neg, TR_pos] = maps
