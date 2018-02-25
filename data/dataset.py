@@ -55,23 +55,21 @@ def start_queue(params):
     print('end')
 
 
-def generator(params, aqueue):
-    while True:
-        imgs = []
-        mapss = []
-        for i in range(params.batch_size):
-            features = aqueue.get()
-            img = features['input_img']
-            maps = features['Labels']
-            imgs.append(np.expand_dims(img,0))
-            mapss.append(np.expand_dims(maps,0))
-
-        yield {'input_img': np.concatenate(imgs).astype(np.float32),
-                'Labels': np.concatenate(mapss).astype(np.float32)}
-
-
 def get_generator(params, aqueue):
-    return generator(params, aqueue)
+    def func():
+        while True:
+            imgs = []
+            mapss = []
+            for i in range(params.batch_size):
+                features = aqueue.get()
+                img = features['input_img']
+                maps = features['Labels']
+                imgs.append(np.expand_dims(img,0))
+                mapss.append(np.expand_dims(maps,0))
+
+            yield {'input_img': np.concatenate(imgs).astype(np.float32),
+                    'Labels': np.concatenate(mapss).astype(np.float32)}
+    return func
 
 
 def get_train_input(params):
