@@ -53,7 +53,7 @@ def decompress(ins):
     return (name, img, maps, cnt)
 
 
-def loading_data(file, test_mode=False, real_test=False, is_syn=True):
+def loading_data(file, test_mode=False, real_test=False, is_syn=False):
     return _data_label(_data_aug(_load_file(file, is_syn), augment_rate=100, test_mode=test_mode, real_test=real_test))
 
 
@@ -64,14 +64,14 @@ print('queue excuted')
 
 
 def enqueue(file_name):
-    img_name, img, maps, cnts = loading_data(file_name)
+    img_name, img, maps, cnts = loading_data(PKL_DIR+file_name)
     q.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
 
 
 def start_queue(params):
     thread_num = params.thread_num
-    file_names = [SYN_DIR+name for name in os.listdir(SYN_DIR)]
+    file_names = [TOTAL_TRAIN_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TRAIN_DIR)]
 
     print('start')
     pool = mp.Pool(thread_num)
