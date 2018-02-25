@@ -5,7 +5,7 @@ import glob
 import numpy as np
 import imgaug as ia
 from imgaug import augmenters as iaa
-from random import shuffle, randint, choice, random,seed
+from random import shuffle, randint, choice, random, seed
 # the following three libraries only serve to test this module
 from multiprocessing import Pool
 from .data_labelling import data_churn
@@ -84,13 +84,24 @@ class DataAugmentor(object):
 
     def _get_seq(self, affine=False):
         if affine:
-            affine = [
-                iaa.Affine(rotate=360 * np.random.rand() - 180),
-                iaa.Affine(shear=80 * np.sin(np.random.rand() * np.pi / 2) - 40),
-                iaa.Affine(scale={"x": 0.6 * np.random.rand() + 0.7, "y": 0.6 * np.random.rand() + 0.7}),
+            affine_seq = [
+                iaa.Affine(rotate=360 * random() - 180),
+                iaa.Affine(shear=80 * np.sin(random() * np.pi / 2) - 40),
+                iaa.Noop(),
                 iaa.Noop()
             ]
-            return iaa.Sequential([choice(affine)] + [choice(affine)])
+            shuffle(affine_seq)
+            if random() < 0.5:
+                scale_seq = []
+            elif random() < 0.85:
+                scale_seq = [iaa.Affine(scale={"x": 0.6 * random() + 0.7, "y": 0.6 * random() + 0.7})
+                             ]
+            else:
+                x_scale = random()
+                y_scale = random()
+                scale_seq = [iaa.Affine(scale={"x": 0.6 * x_scale + 0.4, "y": 0.6 * y_scale + 0.4}),
+                             iaa.Affine(scale={"x": 1 / (0.6 * x_scale + 0.4), "y": 1 / (0.6 * y_scale + 0.4)})]
+            return iaa.Sequential(affine_seq[:2] + scale_seq)
         else:
             shuffle(self.add_augmentation_list)
             add_augmentation_list = self.add_augmentation_list[:randint(0, 1)]
@@ -110,7 +121,7 @@ class DataAugmentor(object):
             return iaa.Sequential(final_list[:2])
 
     @staticmethod
-    def _key_points(image_shape, point_list):
+    def __key_points(image_shape, point_list):
         """
         feed cnt and return ia.KeypointsOnImage object
         :param point_list: np.array size=(n,1,2)
@@ -124,7 +135,7 @@ class DataAugmentor(object):
                                    shape=ia.quokka(size=image_shape[:2]))
 
     @staticmethod
-    def _resize(input_data):
+    def __resize_512p(input_data):
         """
         resize the short side of images under 512P to 512
         :param input_data:
@@ -147,17 +158,17 @@ class DataAugmentor(object):
                 ])
                 input_data['img'] = seq.augment_image(input_data['img'])
 
-        if input_data['is_text_cnts']:
-            input_data['contour'] = [np.cast['int32'](contour * rate) for contour in input_data['contour']]
-        else:
+        if DataAugmentor._is_synthtext(input_data):
             input_data['contour'] = [[np.cast['int32'](contour * rate) for contour in contours] for contours in
                                      input_data['contour']]
+        else:
+            input_data['contour'] = [np.cast['int32'](contour * rate) for contour in input_data['contour']]
         input_data['center_point'] = [(np.cast['int32'](point[0] * rate),
                                        np.cast['int32'](point[1] * rate)) for point in input_data['center_point']]
         return input_data
 
     @staticmethod
-    def _resize_to_32x(input_data):
+    def __resize_to_32x(input_data):
         """
         resize image to multiples of 32, only for test on multiple aspect ratios
         :param input_data:
@@ -183,15 +194,16 @@ class DataAugmentor(object):
                 break
             p += 1
 
-        if input_data['is_text_cnts']:
-            input_data['contour'] = [np.cast['int32'](np.stack([contour[:, :, 0] * row / input_data['img'].shape[0],
-                                                                contour[:, :, 1] * col / input_data['img'].shape[1]],
-                                                               axis=-1)) for contour in input_data['contour']]
-        else:
+        if DataAugmentor._is_synthtext(input_data):
             input_data['contour'] = [[np.cast['int32'](np.stack([contour[:, :, 0] * row / input_data['img'].shape[0],
                                                                  contour[:, :, 1] * col / input_data['img'].shape[1]],
                                                                 axis=-1))
                                       for contour in contours] for contours in input_data['contour']]
+        else:
+            input_data['contour'] = [np.cast['int32'](np.stack([contour[:, :, 0] * row / input_data['img'].shape[0],
+                                                                contour[:, :, 1] * col / input_data['img'].shape[1]],
+                                                               axis=-1)) for contour in input_data['contour']]
+
         input_data['center_point'] = [(np.cast['int32'](point[0] * row / input_data['img'].shape[0]),
                                        np.cast['int32'](point[1] * col / input_data['img'].shape[1]))
                                       for point in input_data['center_point']]
@@ -204,7 +216,7 @@ class DataAugmentor(object):
         return input_data
 
     @staticmethod
-    def _resize_to_512(input_data):
+    def __resize_to_512(input_data):
         """
         resize image to 512*512, only for tests
         :param input_data:
@@ -212,15 +224,15 @@ class DataAugmentor(object):
         return scaled img
         """
 
-        if input_data['is_text_cnts']:
-            input_data['contour'] = [np.cast['int32'](np.stack([contour[:, :, 0] * 512 / input_data['img'].shape[0],
-                                                                contour[:, :, 1] * 512 / input_data['img'].shape[1]],
-                                                               axis=-1)) for contour in input_data['contour']]
-        else:
+        if DataAugmentor._is_synthtext(input_data):
             input_data['contour'] = [[np.cast['int32'](np.stack([contour[:, :, 0] * 512 / input_data['img'].shape[0],
                                                                  contour[:, :, 1] * 512 / input_data['img'].shape[1]],
                                                                 axis=-1))
                                       for contour in contours] for contours in input_data['contour']]
+        else:
+            input_data['contour'] = [np.cast['int32'](np.stack([contour[:, :, 0] * 512 / input_data['img'].shape[0],
+                                                                contour[:, :, 1] * 512 / input_data['img'].shape[1]],
+                                                               axis=-1)) for contour in input_data['contour']]
         input_data['center_point'] = [(np.cast['int32'](point[0] * 512 / input_data['img'].shape[0]),
                                        np.cast['int32'](point[1] * 512 / input_data['img'].shape[1]))
                                       for point in input_data['center_point']]
@@ -231,6 +243,15 @@ class DataAugmentor(object):
         input_data['img'] = seq.augment_image(input_data['img'])
 
         return input_data
+
+    def _resize(self, input_data, mode='train'):
+        if mode == 'train':
+            return DataAugmentor.__resize_512p(input_data)
+        elif mode == 'test':
+            return DataAugmentor.__resize_to_512(input_data)
+        elif mode == 'real_test':
+            return DataAugmentor.__resize_to_32x(input_data)
+        raise ValueError('Invalid resize mode given.')
 
     @staticmethod
     def _pad(input_data):
@@ -254,17 +275,17 @@ class DataAugmentor(object):
 
         input_data['img'] = np.pad(input_data['img'], ((up, down), (left, right), (0, 0)), mode='constant')
 
-        if input_data['is_text_cnts']:
-            input_data['contour'] = list(
-                map(lambda x: np.stack([x[:, :, 0] + up, x[:, :, 1] + left], axis=-1),  # x: np.array(n,1,2)
-                    input_data['contour']))
-        else:
+        if DataAugmentor._is_synthtext(input_data):
             input_data['contour'][0] = list(
                 map(lambda x: np.stack([x[:, :, 0] + up, x[:, :, 1] + left], axis=-1),  # x: np.array(n,1,2)
                     input_data['contour'][0]))
             input_data['contour'][1] = list(
                 map(lambda x: np.stack([x[:, :, 0] + up, x[:, :, 1] + left], axis=-1),  # x: np.array(n,1,2)
                     input_data['contour'][1]))
+        else:
+            input_data['contour'] = list(
+                map(lambda x: np.stack([x[:, :, 0] + up, x[:, :, 1] + left], axis=-1),  # x: np.array(n,1,2)
+                    input_data['contour']))
 
         input_data['center_point'] = list(
             map(lambda x: (x[0] + up, x[1] + left),
@@ -298,26 +319,44 @@ class DataAugmentor(object):
             3. shear
             4. aspect ratios
         doing affine transformation
+        trans_rate: probability of doing affine transformation
+
+        Steps:
+
+        (1) scaling + aspect ratios: TypeA: enlarge or reduce only once; TypeB: reduce first and then enlarge (so that the image is blurred, like a low-resolution one)
+        (2) rotate
+        (3) shear
+
         :return:
         """
         #input_data = copy.deepcopy(inputs)
 
         if random() > 1 - trans_rate:
-            if synth:
-                transformer = iaa.Sequential([choice([iaa.Affine(rotate=360 * np.random.rand() - 180),
-                                                      iaa.Affine(scale={"x": 0.6 * np.random.rand() + 0.7,
-                                                                        "y": 0.6 * np.random.rand() + 0.7})
-                                                      ])])
-            else:
-                transformer = self._get_seq(affine=True)
+            # obatin the transformer
+            transformer = self._get_seq(affine=True)
+
+            # doing the affine transformation
             input_data['img'] = transformer.augment_image(input_data['img'])
-            #t = time.time()
-            if input_data['is_text_cnts']:
+            if DataAugmentor._is_synthtext(input_data):
+                for t in range(2):
+                    contour_len = [cnt.shape[0] for cnt in input_data['contour'][t]]
+                    concatenated_cnt = np.concatenate(input_data['contour'][t], axis=0)
+                    splitting_point = [sum(contour_len[:i + 1]) for i in range(len(contour_len))]
+                    input_data['contour'][t] = transformer.augment_keypoints([
+                        self.__key_points(image_shape=input_data['img'].shape, point_list=concatenated_cnt)
+                    ])[0]
+
+                    input_data['contour'][t] = [np.array([[int(keypoints.y),
+                                                           int(keypoints.x)]])[:, ::-1]
+                                                for keypoints in input_data['contour'][t].keypoints]
+                    input_data['contour'][t] = np.stack(input_data['contour'][t], axis=0)
+                    input_data['contour'][t] = np.split(input_data['contour'][t], splitting_point[:-1])
+            else:
                 contour_len = [cnt.shape[0] for cnt in input_data['contour']]
                 concatenated_cnt = np.concatenate(input_data['contour'], axis=0)
                 splitting_point = [sum(contour_len[:i + 1]) for i in range(len(contour_len))]
                 input_data['contour'] = transformer.augment_keypoints([
-                    self._key_points(image_shape=input_data['img'].shape, point_list=concatenated_cnt)
+                    self.__key_points(image_shape=input_data['img'].shape, point_list=concatenated_cnt)
                 ])[0]
 
                 input_data['contour'] = [np.array([[int(keypoints.y),
@@ -326,38 +365,21 @@ class DataAugmentor(object):
                 input_data['contour'] = np.stack(input_data['contour'], axis=0)
                 input_data['contour'] = np.split(input_data['contour'], splitting_point[:-1])
 
-            else:
-                for t in range(2):
-                    contour_len = [cnt.shape[0] for cnt in input_data['contour'][t]]
-                    concatenated_cnt = np.concatenate(input_data['contour'][t], axis=0)
-                    splitting_point = [sum(contour_len[:i + 1]) for i in range(len(contour_len))]
-                    input_data['contour'][t] = transformer.augment_keypoints([
-                        self._key_points(image_shape=input_data['img'].shape, point_list=concatenated_cnt)
-                    ])[0]
-
-                    input_data['contour'][t] = [np.array([[int(keypoints.y),
-                                                           int(keypoints.x)]])[:, ::-1]
-                                                for keypoints in input_data['contour'][t].keypoints]
-                    input_data['contour'][t] = np.stack(input_data['contour'][t], axis=0)
-                    input_data['contour'][t] = np.split(input_data['contour'][t], splitting_point[:-1])
-
-            #print('keypoint:',time.time() - t)
-
+            # mapping center points
             input_data['center_point'][0] = \
                 transformer.augment_keypoints([
-                    self._key_points(image_shape=input_data['img'].shape,
-                                     point_list=np.array(
-                                         [[list(input_data['center_point'])[0]]]
+                    self.__key_points(image_shape=input_data['img'].shape,
+                                      point_list=np.array(
+                        [[list(input_data['center_point'])[0]]]
                     ))
                 ])[0].keypoints[0]
             input_data['center_point'][0] = (int(input_data['center_point'][0].y),
                                              int(input_data['center_point'][0].x))[::-1]
             input_data['center_point'][1] = transformer.augment_keypoints([
-                self._key_points(image_shape=input_data['img'].shape,
-                                 point_list=np.array(
+                self.__key_points(image_shape=input_data['img'].shape,
+                                  point_list=np.array(
                     [[list(input_data['center_point'])[1]]]
                 ))
-
             ])[0].keypoints[0]
             input_data['center_point'][1] = (int(input_data['center_point'][1].y),
                                              int(input_data['center_point'][1].x))[::-1]
@@ -375,13 +397,16 @@ class DataAugmentor(object):
         center1 = input_data['center_point'][0]
         center2 = input_data['center_point'][1]
         p = random()
-        x = center1[0] + int(p * (center2[0] - center1[0]))
-        y = center1[1] + int(p * (center2[1] - center1[1]))
-        return x, y
+        p1 = center1[0] + int(p * (center2[0] - center1[0]))
+        p2 = center1[1] + int(p * (center2[1] - center1[1]))
+        return p1, p2
+
+    @staticmethod
+    def _is_synthtext(ins):
+        return (not ins['is_text_cnts'])
 
     def augment(self, input_data, augment_rate=100, trans_rate=1, test_mode=False, real_test=False):
         """
-
         :param input_data:
                Dict{'img_name':str,   original_name
                 'img':np.uint8,
@@ -403,10 +428,32 @@ class DataAugmentor(object):
                 'char',
                 'left_top': tuple (x, y), x is row, y is col, please be careful about the order,
                 'right_bottom': tuple (x, y), x is row, y is col}
+
+        Augmentation Steps:
+
+        for synthtext data:
+            (1) resize the short side to 512pxl
+            (2) pad black background
+            (3) (optional) affine transformation
+            (4) crop along the central line
+
+        for other training data:
+            (1) resize the short side to 512pxl
+            (2) pad black background
+            (3) affine transformation
+            (4) add noises
+            (5) crop along the central line
+
+        for test data:
+            (1) resize to 512pxl*512pxl
+
+        for test data with original size:
+            (1) resize the short side to multiples of 512pxl
+
         """
-        seed(int(time.time()*1000))
+        seed(int(time.time() * 1000))
         # step 1: reversing the x,y order
-        if (not input_data['is_text_cnts']):
+        if DataAugmentor._is_synthtext(input_data):
             if len(input_data['contour'][0][0].shape) < 3:
                 for i in range(2):
                     input_data['contour'][i] = [np.stack([cnt], axis=1) for cnt in input_data['contour'][i]]
@@ -415,6 +462,7 @@ class DataAugmentor(object):
             if len(input_data['contour'][0].shape) < 3:
                 input_data['contour'] = [np.stack([cnt], axis=1) for cnt in input_data['contour']]
             input_data['contour'] = [cnt[:, :, ::-1] for cnt in input_data['contour']]
+
         # step 2: calculating the center line later for cropping
         if input_data['img'].shape[0] < input_data['img'].shape[1]:
             input_data['center_point'] = [(input_data['img'].shape[0] // 2, input_data['img'].shape[0] // 2),
@@ -423,8 +471,9 @@ class DataAugmentor(object):
             input_data['center_point'] = [(input_data['img'].shape[1] // 2, input_data['img'].shape[1] // 2),
                                           (input_data['img'].shape[0] - input_data['img'].shape[1] // 2, input_data['img'].shape[1] // 2)]
 
+        # step 3: resizing
         if real_test:
-            input_data = self._resize_to_32x(input_data)
+            input_data = self._resize(input_data, mode='real_test')
             input_data['contour'] = [cnt[:, :, ::-1] for cnt in input_data['contour']]
             return {
                 **input_data,
@@ -433,7 +482,7 @@ class DataAugmentor(object):
             }
 
         if test_mode:
-            input_data = self._resize_to_512(input_data)
+            input_data = self._resize(input_data, mode='test')
             input_data['contour'] = [cnt[:, :, ::-1] for cnt in input_data['contour']]
             return {
                 **input_data,
@@ -441,11 +490,13 @@ class DataAugmentor(object):
                 'right_bottom': (input_data['img'].shape[0], input_data['img'].shape[1])
             }
 
-        input_data = self._resize(input_data)
+        input_data = self._resize(input_data, mode='train')
 
+        # step 4-6: padding & augmentation & cropping
         if random() < (1.0 / augment_rate):
+            # only crop, without augmentation
             center_point = self._crop(input_data)
-            if (not input_data['is_text_cnts']):
+            if DataAugmentor._is_synthtext(input_data):
                 for i in range(2):
                     input_data['contour'][i] = [cnt[:, :, ::-1] for cnt in input_data['contour'][i]]
             else:
@@ -459,16 +510,19 @@ class DataAugmentor(object):
             }
 
         else:
+            # step 4: padding
             input_data = self._pad(input_data)
             input_data['img'] = np.transpose(input_data['img'], axes=[1, 0, 2])  # ？？？
-            if (not input_data['is_text_cnts']):
+            # step 5: augmentation
+            if DataAugmentor._is_synthtext(input_data):
                 transformed = self._affine_transformation(input_data, trans_rate=trans_rate,
                                                           synth=True)
             else:
                 transformed = self._affine_transformation(self._pixel_augmentation(input_data),
                                                           trans_rate=trans_rate, synth=False)
+            # step 6: cropping
             center_point = self._crop(transformed)
-            if (not input_data['is_text_cnts']):
+            if DataAugmentor._is_synthtext(input_data):
                 for i in range(2):
                     transformed['contour'][i] = [cnt[:, :, ::-1] for cnt in transformed['contour'][i]]
             else:
@@ -481,11 +535,10 @@ class DataAugmentor(object):
                     }
 
     @staticmethod
-    def demo(input_data_, show=True):
+    def demo(input_data_, cropped=True):
         """
-        show the image and the key points
         :param input_data:
-        :param crop_point_starting:
+        :param cropped: show the cropped img or not
         :return:
         """
         input_data = copy.deepcopy(input_data_)
@@ -503,7 +556,7 @@ class DataAugmentor(object):
                           input_data['center_point'][1][1] - 5:input_data['center_point'][1][1] + 5, :] = (255, 255, 0)
         input_data['img'][input_data['left_top'][0]:input_data['right_bottom'][0],
                           input_data['left_top'][1]:input_data['right_bottom'][1], :] += 30
-        if show:
+        if cropped:
             cv2.imshow('show', input_data['img'])  # np.transpose(img, axes=[1, 0, 2]))
         else:
             cv2.imshow('show', input_data['img'][input_data['left_top'][0]:input_data['right_bottom'][0],
@@ -514,7 +567,7 @@ class DataAugmentor(object):
 if __name__ == '__main__':
     # codes here are used to test the data augmentation module
     try:
-        images = glob.glob('/Users/longshangbang/Documents/Total-Text-Dataset-master/Images/Train/img%d.jpg' % (randint(0, 1255)))
+        images = glob.glob('/Users/jyouhoukun/Documents/PKU/courses/学校/2017-2018/深度学习算法应用/大作业/Total-Text-Dataset-master/Images/Train/img%d.jpg' % (randint(0, 1255)))
         shuffle(images)
         image1 = cv2.imread(images[0])
         image2 = cv2.imread(images[0])  # the second image is to check the performance when using multi-processes
@@ -541,47 +594,24 @@ if __name__ == '__main__':
     input_ = {
         'img_name': 'aaa',
         'img': image1,
-        'contour': [np.cast['int32'](np.array([[[100, 200]], [[110, 220]], [[109, 201]], [[120, 300]], [[300, 600]], [[100, 400]], [[110, 600]], [[210, 600]], [[200, 400]], [[200, 200]]] +
-                                              [[[100, 200]], [[110, 220]], [[109, 201]], [[120, 300]], [[300, 600]], [[100, 400]], [[110, 600]], [[210, 600]], [[200, 400]], [[200, 200]]] +
-                                              [[[100, 200]], [[110, 220]], [[109, 201]], [[120, 300]], [[300, 600]], [[100, 400]], [[110, 600]], [[210, 600]], [[200, 400]], [[200, 200]]] +
-                                              [[[100, 200]], [[110, 220]], [[109, 201]], [[120, 300]], [[300, 600]], [[100, 400]], [[110, 600]], [[210, 600]], [[200, 400]], [[200, 200]]] +
-                                              [[[100, 200]], [[110, 220]], [[109, 201]], [[120, 300]], [[300, 600]], [[100, 400]], [[110, 600]], [[210, 600]], [[200, 400]], [[200, 200]]]))] * 4,
+        'contour': [np.cast['int32'](np.array([[[100, 200]], [[110, 220]], [[109, 201]], [[120, 300]], [[300, 600]], [[100, 400]], [[110, 600]], [[210, 600]], [[200, 400]], [[200, 200]]]))],
         'type': 'tl',
         'is_text_cnts': True
     }
     input_['contour'] = [cnt[:, :, ::-1] for cnt in input_['contour']]
 
-    input__ = {
-        'img_name': 'bbb',
-        'img': image2,
-        'contour': [np.cast['int32'](np.array([[[100, 200]], [[100, 400]], [[110, 600]], [[210, 600]], [[200, 400]], [[200, 200]]]))],# * 20,
-        'type': 'tl',
-        'is_text_cnts': True
-    }
     _ = input('enter to see demo:')
-    #DA.demo(DA.augment(input_, augment_rate=100), True)
 
     total = 0  # record time
     i_ = 0     # counting how many times the augmentation runs
-    inp = [input__]#input_]#, input__]
     while i_ < 50:
         t0 = time.time()
-        p = Pool(2)
-        result = []
-        for i in range(1):
-            result.append(p.apply_async(process, args=(copy.deepcopy(inp[i]),)))
-        p.close()
-        p.join()
-        result = [i.get() for i in result]
+        result = [process(input_)]
         _ = input('enter to see the augmented image: ')
         DA.demo(result[0][0], True)
         _ = input('enter to see the cropped area: ')
         DA.demo(result[0][0], False)
-        for img___ in [result[0][3][:, :, 0], result[0][3][:, :, 1], result[0][3][:, :, 2],
-                       result[0][3][:, :, 3], result[0][3][:, :, 4]]:
-            _ = input('enter to see the labelled maps: ')
-            cv2.imshow('show', img___)
-            cv2.waitKey(1)
+
         i_ += 1
         total += time.time() - t0
     print(total / i_)
