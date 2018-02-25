@@ -34,49 +34,38 @@ def _data_aug(ins, augment_rate, test_mode=False, real_test=False):
 
 
 def _data_label(ins):
-    return labelling._data_labeling(ins['img_name'], ins['img'],
-                                    ins['contour'], ins['is_text_cnts'],
-                                    ins['left_top'], ins['right_bottom'],
-                                    ins.get('chars', None))
-
-def decompress(ins):
-    name = ins[0]
-    img = ins[1]
-    non_zero, radius, cos, sin = ins[2]
-    maps = np.zeros(shape=(*(img.shape[:2]), 5))
-    maps[:, :, 4] = np.cast['uint8'](ins[3])  # -->TR
-    maps[:, :, 0][non_zero] = 1               # -->TCL
-    maps[:, :, 1][non_zero] = radius          # -->radius
-    maps[:, :, 2][non_zero] = cos             # -->cos
-    maps[:, :, 3][non_zero] = sin             # -->TCL
-    cnt = ins[4]
-    return (name, img, maps, cnt)
+    try:
+        data = labelling._data_labeling(ins['img_name'], ins['img'],
+                                        ins['contour'], ins['is_text_cnts'],
+                                        ins['left_top'], ins['right_bottom'],
+                                        ins.get('chars', None))
+        return data
+    except:
+        return None, None, None, None
 
 
-def loading_data(file, test_mode=False, real_test=False, is_syn=False):
-    return _data_label(_data_aug(_load_file(file, is_syn), augment_rate=100, test_mode=test_mode, real_test=real_test))
-
-
+def loading_data(file, test_mode=False, real_test=False, syn=True):
+    return _data_label(_data_aug(_load_file(file, syn=syn), augment_rate=100, test_mode=test_mode, real_test=real_test))
 
 
 q = mp.Queue(maxsize=3000)
 print('queue excuted')
 
 
-def enqueue(file_name):
-    img_name, img, maps, cnts = loading_data(PKL_DIR+file_name)
+def enqueue(file_name, is_syn):
+    img_name, img, maps, cnts = loading_data(PKL_DIR+file_name, is_syn)
     q.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
 
 
 def start_queue(params):
     thread_num = params.thread_num
-    file_names = [TOTAL_TRAIN_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TRAIN_DIR)]
+    file_names = [PKL_DIR+name for name in os.listdir(PKL_DIR)]
 
     print('start')
     pool = mp.Pool(thread_num)
     for file_name in file_names:
-        pool.apply_async(enqueue, (file_name,))
+        pool.apply_async(enqueue, (file_name, True))
     print('end')
 
 
@@ -110,79 +99,6 @@ def get_train_input(params):
     features = iterator.get_next()
     return features
 
-# total_q = mp.Queue(maxsize=3000)
-# syn_q = mp.Queue(maxsize=3000)
-# print('queue excuted')
-#
-#
-# def enqueue_total(file_name, test_mode=False, real_test=False, if_decompress=False):
-#     if not if_decompress:
-#         img_name, img, maps, cnts = _data_label(_data_aug(pickle.load(open(file_name, 'rb')), 100, test_mode, real_test))
-#     else:
-#         img_name, img, maps, cnts = _data_label(_data_aug(decompress(pickle.load(open(file_name, 'rb'))), 100, test_mode, real_test))
-#     total_q.put({'input_img': img,
-#                 'Labels': maps.astype(np.float32)})
-#
-#
-# def enqueue_syn(file_name, test_mode=False, real_test=False, if_decompress=False):
-#     if not if_decompress:
-#         img_name, img, maps, cnts = _data_label(_data_aug(pickle.load(open(file_name, 'rb')), 100, test_mode, real_test))
-#     else:
-#         img_name, img, maps, cnts = _data_label(_data_aug(decompress(pickle.load(open(file_name, 'rb'))), 100, test_mode, real_test))
-#     syn_q.put({'input_img': img,
-#                 'Labels': maps.astype(np.float32)})
-#
-#
-# def start_queue(params):
-#     thread_num = params.thread_num
-#     file_names_total = [PKL_DIR+TOTAL_TRAIN_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TRAIN_DIR)]
-#     file_names_syn = []
-#     for name in os.listdir(SYN_DIR):
-#         if '.gz' not in name:
-#             file_names_syn.append(SYN_DIR+name)
-#
-#     print('start')
-#     pool1 = mp.Pool(thread_num)
-#     for file_name in file_names_syn:
-#         pool1.apply_async(enqueue_syn, (file_name, False, False, False))
-#
-#     # pool2 = mp.Pool(thread_num)
-#     # for file_name in file_names_total:
-#     #     pool2.apply_async(enqueue_total, (file_name, True, False, True))
-#     print('end')
-#
-#
-# def get_generator_syn():
-#     def func():
-#         while True:
-#             features = syn_q.get()
-#             yield {'input_img': features['input_img'].astype(np.float32),
-#                     'Labels': features['Labels'].astype(np.float32)}
-#     return func
-#
-#
-# def get_train_input(params):
-#     syn_g = get_generator_syn()
-#     syn_dataset = tf.data.Dataset.from_generator(syn_g, {'input_img':tf.float32,
-#                                                         'Labels': tf.float32},
-#                                                    {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
-#                                                     'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
-#                                                    )
-#     syn_dataset = syn_dataset.repeat(params.pre_epoch).batch(params.batch_size)
-#
-#     # total_g = get_generator(total_q)
-#     # total_dataset = tf.data.Dataset.from_generator(total_g, {'input_img':tf.float32,
-#     #                                                     'Labels': tf.float32},
-#     #                                                {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
-#     #                                                 'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
-#     #                                                )
-#     # total_dataset = total_dataset.batch(params.batch_size).repeat()
-#     # train_dataset = syn_dataset.concatenate(total_dataset)
-#     train_dataset = syn_dataset
-#     iterator = train_dataset.make_one_shot_iterator()
-#     features = iterator.get_next()
-#     return features
-
 
 def _pad_cnts(cnts, cnt_point_max):
     new = []
@@ -198,7 +114,6 @@ def generator_eval():
     file_names = [PKL_DIR+TOTAL_TEST_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TEST_DIR)]
     for file_name in file_names[:2]:
         img_name, img, maps, cnts = loading_data(file_name, True, False)
-
         features = {}
         features["input_img"] = np.expand_dims(img,0).astype(np.float32)
         lens = np.array([cnt.shape[0] for cnt in cnts], np.int32)
