@@ -63,7 +63,7 @@ def default_parameters():
         eval_secs=None,
         eval_steps=100,
         suffle_buffer=100
-
+        epoch=20,
     )
     return params
 

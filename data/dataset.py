@@ -60,10 +60,10 @@ def enqueue(file_name, test_mode, real_test, syn):
 def start_queue(params):
     thread_num = params.thread_num
     flag = []
-    file_names_syn = [SYN_DIR+name for name in os.listdir(SYN_DIR)]
+    file_names_syn = [SYN_DIR+name for name in os.listdir(SYN_DIR)]*params.pre_epoch
     for _ in range(len(file_names_syn)):
         flag.append(True)
-    file_names_total = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
+    file_names_total = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]*params.epoch
     for _ in range(len(file_names_total)):
         flag.append(False)
     file_names = file_names_syn+file_names_total
@@ -108,7 +108,7 @@ def get_train_input(params):
                                                     'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
                                                    )
     # train_dataset = train_dataset.shuffle(params.suffle_buffer)
-    train_dataset = train_dataset.batch(params.batch_size).repeat()
+    train_dataset = train_dataset.batch(params.batch_size)
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
     return features
