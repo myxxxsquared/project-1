@@ -64,7 +64,7 @@ def start_queue(params):
     print('start')
     pool = mp.Pool(thread_num)
     for file_name in file_names:
-        pool.apply_async(enqueue, (file_name, True))
+        pool.apply_async(enqueue, (file_name, False, False, True))
     print('end')
 
 
