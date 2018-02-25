@@ -72,7 +72,7 @@ def generator(params, aqueue):
 
 def get_train_input(params):
     iterator = generator(params, q)
-    return iterator.__next__()
+    return next(iterator)
 
 
 def generator_eval():
@@ -89,7 +89,7 @@ def generator_eval():
 
 def get_eval_input():
     iterator = generator_eval()
-    return iterator.__next__()
+    return next(iterator)
 
 
 if __name__ == '__main__':
