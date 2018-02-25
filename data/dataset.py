@@ -74,20 +74,28 @@ def start_queue(params):
 
 
 
+# def get_generator(params, aqueue):
+#     def func():
+#         while True:
+#             imgs = []
+#             mapss = []
+#             for i in range(params.batch_size):
+#                 features = aqueue.get()
+#                 img = features['input_img']
+#                 maps = features['Labels']
+#                 imgs.append(np.expand_dims(img,0))
+#                 mapss.append(np.expand_dims(maps,0))
+#
+#             yield {'input_img': np.concatenate(imgs).astype(np.float32),
+#                     'Labels': np.concatenate(mapss).astype(np.float32)}
+#     return func
 def get_generator(params, aqueue):
     def func():
         while True:
-            imgs = []
-            mapss = []
-            for i in range(params.batch_size):
-                features = aqueue.get()
-                img = features['input_img']
-                maps = features['Labels']
-                imgs.append(np.expand_dims(img,0))
-                mapss.append(np.expand_dims(maps,0))
+            features = aqueue.get()
 
-            yield {'input_img': np.concatenate(imgs).astype(np.float32),
-                    'Labels': np.concatenate(mapss).astype(np.float32)}
+            yield {'input_img': features['input_img'].astype(np.float32),
+                    'Labels': features['Labels'].astype(np.float32)}
     return func
 
 
@@ -95,11 +103,11 @@ def get_train_input(params):
     g = get_generator(params, q)
     train_dataset = tf.data.Dataset.from_generator(g, {'input_img':tf.float32,
                                                         'Labels': tf.float32},
-                                                   {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
-                                                    'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
+                                                   {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
+                                                    'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
                                                    )
     # train_dataset = train_dataset.shuffle(params.suffle_buffer)
-    train_dataset = train_dataset.repeat()
+    train_dataset = train_dataset.batch(params.batch_size).repeat()
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
     return features
