@@ -115,12 +115,13 @@ def get_eval_input():
                                                                   'cnts': tf.float32,
                                                                   'is_text_cnts': tf.bool},
                                                   {'input_img': (
-                                                  tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
-                                                  tf.Dimension(None)),
-                                                    'lens': (tf.Dimension(None),),
+                                                      tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
+                                                      tf.Dimension(None)),
+                                                   'lens': (tf.Dimension(None),),
                                                    'cnts': (
-                                                   tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
-                                                   tf.Dimension(None))}
+                                                       tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
+                                                       tf.Dimension(None)),
+                                                   'is_text_cnts':()}
                                                   )
     iterator = eval_dataset.make_one_shot_iterator()
     features = iterator.get_next()
