@@ -21,11 +21,14 @@ def _load_file(file, syn):
         else:
             return pickle.load(open(file, 'rb'))
     else:
+        # if file.endswith('gz'):
+        #     return pickle.load(gzip.open(file, 'rb'), encoding='latin1')
+        # else:
+        #     return pickle.load(open(file, 'rb'), encoding='latin1')
         if file.endswith('gz'):
-            return pickle.load(gzip.open(file, 'rb'), encoding='latin1')
+            return pickle.load(gzip.open(file, 'rb'))
         else:
-            return pickle.load(open(file, 'rb'), encoding='latin1')
-
+            return pickle.load(open(file, 'rb'))
 
 def _data_aug(ins, augment_rate, test_mode=False, real_test=False):
     return DA.augment(ins, augment_rate=augment_rate, test_mode=test_mode, real_test=real_test)
@@ -51,7 +54,7 @@ print('queue excuted')
 
 
 def enqueue(file_name, is_syn):
-    img_name, img, maps, cnts = loading_data(PKL_DIR+file_name, is_syn)
+    img_name, img, maps, cnts = loading_data(file_name, is_syn)
     q.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
 
@@ -64,7 +67,7 @@ def start_queue(params):
     print('start')
     pool = mp.Pool(thread_num)
     for file_name in file_names:
-        pool.apply_async(enqueue, (file_name, True))
+        pool.apply_async(enqueue, (file_name, False))
     print('end')
 
 

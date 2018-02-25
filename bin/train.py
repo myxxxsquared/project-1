@@ -56,7 +56,7 @@ def default_parameters():
         Predict_stage=4,
         predict_channels=[128, 64, 32, 32],
 
-        batch_size=10,
+        batch_size=32,
         thread_num=15,
         pre_epoch=1,
         keep_top_checkpoint_max=5,
