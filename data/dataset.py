@@ -29,6 +29,7 @@ def _data_label(ins):
                                     ins['left_top'], ins['right_bottom'],
                                     ins.get('chars', None))
 
+
 def loading_data(file, test_mode=False, real_test=False):
     return _data_label(_data_aug(_load_file(file), augment_rate=100, test_mode=test_mode, real_test=real_test))
 
@@ -53,7 +54,7 @@ print('queue excuted')
 
 def enqueue(file_name, aquque, test_mode=False, real_test=False, if_decompress=False):
     if not if_decompress:
-        img_name, img, maps, cnts = _data_label(_data_aug(pickle.load(open(file_name, 'rb')), augment_rate=100, test_mode=test_mode, real_test=real_test))
+        img_name, img, maps, cnts = _data_label(_data_aug(pickle.load(open(file_name, 'rb')), 100, test_mode, real_test))
     else:
         img_name, img, maps, cnts = _data_label(_data_aug(decompress(pickle.load(open(file_name, 'rb'))), 100, test_mode, real_test))
     aquque.put({'input_img': img,
