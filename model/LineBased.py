@@ -9,7 +9,7 @@ def _flatten(output):
     :param output: Dict(layer=tensor[batch,h,w,2]) for score map only
     :return: tensor[batch,C]
     """
-    shape = output.shape.as_list()
+    shape = list(output.shape)
     if shape[-1] == 2:
         return tf.reshape(output, shape=(-1, 2))
     else:
