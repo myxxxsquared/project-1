@@ -45,8 +45,7 @@ def enqueue(file_name):
 
 def start_queue(params):
     thread_num = params.thread_num
-    epoch = params.epoch
-    file_names = [TOTAL_TRAIN_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TRAIN_DIR)]*epoch
+    file_names = [TOTAL_TRAIN_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TRAIN_DIR)]
 
     print('start')
     pool = mp.Pool(thread_num)
@@ -79,7 +78,8 @@ def get_train_input(params):
                                                    {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
                                                     'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
                                                    )
-    train_dataset.prefetch(3000)
+    train_dataset = train_dataset.shuffle(params.suffle_buffer)
+    train_dataset = train_dataset.repeat()
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
     return features

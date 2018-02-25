@@ -190,7 +190,7 @@ class EvaluationHook(tf.train.SessionRunHook):
 
     def __init__(self, eval_fn, eval_input_fn, base_dir,
                  session_config, max_to_keep=5, eval_secs=None,
-                 eval_steps=None, metric="BLEU"):
+                 eval_steps=None, metric="f_score"):
         """ Initializes a `EvaluationHook`.
         :param eval_fn: A function with signature (feature)
         :param eval_input_fn: A function with signature ()
@@ -205,8 +205,8 @@ class EvaluationHook(tf.train.SessionRunHook):
         """
         tf.logging.info("Create EvaluationHook.")
 
-        if metric != "BLEU":
-            raise ValueError("Currently, EvaluationHook only support BLEU")
+        if metric != "f_score":
+            raise ValueError("Currently, EvaluationHook only support f_score")
 
         self._base_dir = base_dir.rstrip("/")
         self._session_config = session_config
