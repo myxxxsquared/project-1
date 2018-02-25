@@ -29,11 +29,6 @@ def _data_label(ins):
                                     ins['left_top'], ins['right_bottom'],
                                     ins.get('chars', None))
 
-
-def loading_data(file, test_mode=False, real_test=False):
-    return _data_label(_data_aug(_load_file(file), augment_rate=100, test_mode=test_mode, real_test=real_test))
-
-
 def decompress(ins):
     name = ins[0]
     img = ins[1]
@@ -46,6 +41,16 @@ def decompress(ins):
     maps[:, :, 3][non_zero] = sin             # -->TCL
     cnt = ins[4]
     return (name, img, maps, cnt)
+
+
+def loading_data(file, test_mode=False, real_test=False, if_decompress=False):
+    if if_decompress:
+        return _data_label(_data_aug(decompress(_load_file(file)), augment_rate=100, test_mode=test_mode, real_test=real_test))
+
+    return _data_label(_data_aug(_load_file(file), augment_rate=100, test_mode=test_mode, real_test=real_test))
+
+
+
 
 q = mp.Queue(maxsize=3000)
 print('queue excuted')
@@ -92,7 +97,7 @@ def get_train_input(params):
                                                    {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
                                                     'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
                                                    )
-    train_dataset = train_dataset.shuffle(params.suffle_buffer)
+    # train_dataset = train_dataset.shuffle(params.suffle_buffer)
     train_dataset = train_dataset.repeat()
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
