@@ -138,6 +138,28 @@ def get_train_input(params):
     return features
 
 
+def wrapper(file_name):
+    img_name, img, maps, cnts = load_pre_gen(file_name)
+    return {'input_img': img,
+           'Labels': maps.astype(np.float32)}
+
+
+
+def get_train_input(params):
+    file_names_syn = [SYN+name for name in os.listdir(SYN)]*params.pre_epoch
+    file_names_total = [TOTAL_TRAIN+name for name in os.listdir(TOTAL_TRAIN)]*params.epoch
+    file_names = file_names_syn+file_names_total
+
+    train_dataset = tf.data.Dataset.range(len(file_names))
+    train_dataset = train_dataset.map(lambda index: tuple(tf.py_func(
+        wrapper, [file_names[index]], {'input_img': tf.float32, 'Labels': tf.float32})))
+    iterator = train_dataset.make_one_shot_iterator()
+    features = iterator.get_next()
+    return features
+
+
+
+
 def _pad_cnts(cnts, cnt_point_max):
     new = []
     for cnt_ in cnts:
