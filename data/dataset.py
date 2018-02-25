@@ -8,6 +8,7 @@ import pickle
 import gzip
 
 TOTAL_TRAIN_DIR = '/home/rjq/data_cleaned/pkl/totaltext_train/'
+TOTAL_TEST_DIR = '/home/rjq/data_cleaned/pkl/totaltext_test/'
 SYN_DIR = '/media/sda/eccv2018/data/pkl/result2/'
 
 DA = DataAugmentor()
@@ -124,7 +125,7 @@ def _pad_cnts(cnts, cnt_point_max):
 
 
 def generator_eval():
-    file_names = [PKL_DIR+TOTAL_TEST_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TEST_DIR)]
+    file_names = [TOTAL_TEST_DIR+name for name in os.listdir(TOTAL_TEST_DIR)]
     for file_name in file_names[:2]:
         img_name, img, maps, cnts = loading_data(file_name, True, False)
         features = {}
