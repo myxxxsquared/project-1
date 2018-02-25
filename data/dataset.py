@@ -52,12 +52,21 @@ syn_q = mp.Queue(maxsize=3000)
 print('queue excuted')
 
 
-def enqueue(file_name, aquque, test_mode=False, real_test=False, if_decompress=False):
+def enqueue_total(file_name, test_mode=False, real_test=False, if_decompress=False):
     if not if_decompress:
         img_name, img, maps, cnts = _data_label(_data_aug(pickle.load(open(file_name, 'rb')), 100, test_mode, real_test))
     else:
         img_name, img, maps, cnts = _data_label(_data_aug(decompress(pickle.load(open(file_name, 'rb'))), 100, test_mode, real_test))
-    aquque.put({'input_img': img,
+    total_q.put({'input_img': img,
+                'Labels': maps.astype(np.float32)})
+
+
+def enqueue_syn(file_name, test_mode=False, real_test=False, if_decompress=False):
+    if not if_decompress:
+        img_name, img, maps, cnts = _data_label(_data_aug(pickle.load(open(file_name, 'rb')), 100, test_mode, real_test))
+    else:
+        img_name, img, maps, cnts = _data_label(_data_aug(decompress(pickle.load(open(file_name, 'rb'))), 100, test_mode, real_test))
+    syn_q.put({'input_img': img,
                 'Labels': maps.astype(np.float32)})
 
 
@@ -72,11 +81,11 @@ def start_queue(params):
     print('start')
     pool1 = mp.Pool(thread_num)
     for file_name in file_names_syn:
-        pool1.apply_async(enqueue, (file_name, syn_q, False, False, False))
+        pool1.apply_async(enqueue_total, (file_name, False, False, False))
 
     pool2 = mp.Pool(thread_num)
     for file_name in file_names_total:
-        pool2.apply_async(enqueue, (file_name, total_q, True, False, True))
+        pool2.apply_async(enqueue_syn, (file_name, True, False, True))
     print('end')
 
 
