@@ -85,9 +85,9 @@ def get_train_input(params):
     return features
 
 
-def _pad_cnt(cnt, cnt_point_max):
+def _pad_cnts(cnts, cnt_point_max):
     new = []
-    for cnt_ in cnt:
+    for cnt_ in cnts:
         if len(cnt_) < cnt_point_max:
             new.append(np.concatenate((cnt_, np.zeros([cnt_point_max-len(cnt_), 1, 2])), 0))
         else:
@@ -104,7 +104,7 @@ def generator_eval():
         features["input_img"] = np.expand_dims(img,0).astype(np.float32)
         lens = np.array([cnt.shape[0] for cnt in cnts], np.int32)
         features['lens'] = lens
-        features['cnts'] = np.concatenate([np.expand_dims(_pad_cnt(cnt, max(lens)),0) for cnt in cnts])
+        features['cnts'] = np.array(_pad_cnts(cnts, max(lens)), np.float32)
         features['is_text_cnts'] = True
         yield features
 
