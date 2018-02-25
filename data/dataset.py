@@ -47,78 +47,129 @@ def decompress(ins):
     cnt = ins[4]
     return (name, img, maps, cnt)
 
-# total_q = mp.Queue(maxsize=3000)
-syn_q = mp.Queue(maxsize=3000)
+q = mp.Queue(maxsize=3000)
 print('queue excuted')
 
 
-def enqueue_total(file_name, test_mode=False, real_test=False, if_decompress=False):
-    if not if_decompress:
-        img_name, img, maps, cnts = _data_label(_data_aug(pickle.load(open(file_name, 'rb')), 100, test_mode, real_test))
-    else:
-        img_name, img, maps, cnts = _data_label(_data_aug(decompress(pickle.load(open(file_name, 'rb'))), 100, test_mode, real_test))
-    total_q.put({'input_img': img,
-                'Labels': maps.astype(np.float32)})
-
-
-def enqueue_syn(file_name, test_mode=False, real_test=False, if_decompress=False):
-    if not if_decompress:
-        img_name, img, maps, cnts = _data_label(_data_aug(pickle.load(open(file_name, 'rb')), 100, test_mode, real_test))
-    else:
-        img_name, img, maps, cnts = _data_label(_data_aug(decompress(pickle.load(open(file_name, 'rb'))), 100, test_mode, real_test))
-    syn_q.put({'input_img': img,
-                'Labels': maps.astype(np.float32)})
+def enqueue(file_name):
+    img_name, img, maps, cnts = loading_data(PKL_DIR+file_name)
+    q.put({'input_img': img,
+           'Labels': maps.astype(np.float32)})
 
 
 def start_queue(params):
     thread_num = params.thread_num
-    file_names_total = [PKL_DIR+TOTAL_TRAIN_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TRAIN_DIR)]
-    file_names_syn = []
-    for name in os.listdir(SYN_DIR):
-        if '.gz' not in name:
-            file_names_syn.append(SYN_DIR+name)
+    file_names = [TOTAL_TRAIN_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TRAIN_DIR)]
 
     print('start')
-    pool1 = mp.Pool(thread_num)
-    for file_name in file_names_syn:
-        pool1.apply_async(enqueue_syn, (file_name, False, False, False))
-
-    # pool2 = mp.Pool(thread_num)
-    # for file_name in file_names_total:
-    #     pool2.apply_async(enqueue_total, (file_name, True, False, True))
+    pool = mp.Pool(thread_num)
+    for file_name in file_names:
+        pool.apply_async(enqueue, (file_name,))
     print('end')
 
 
-def get_generator_syn():
+def get_generator(params, aqueue):
     def func():
         while True:
-            features = syn_q.get()
-            yield {'input_img': features['input_img'].astype(np.float32),
-                    'Labels': features['Labels'].astype(np.float32)}
+            imgs = []
+            mapss = []
+            for i in range(params.batch_size):
+                features = aqueue.get()
+                img = features['input_img']
+                maps = features['Labels']
+                imgs.append(np.expand_dims(img,0))
+                mapss.append(np.expand_dims(maps,0))
+
+            yield {'input_img': np.concatenate(imgs).astype(np.float32),
+                    'Labels': np.concatenate(mapss).astype(np.float32)}
     return func
 
 
 def get_train_input(params):
-    syn_g = get_generator_syn()
-    syn_dataset = tf.data.Dataset.from_generator(syn_g, {'input_img':tf.float32,
+    g = get_generator(params, q)
+    train_dataset = tf.data.Dataset.from_generator(g, {'input_img':tf.float32,
                                                         'Labels': tf.float32},
-                                                   {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
-                                                    'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
+                                                   {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
+                                                    'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
                                                    )
-    syn_dataset = syn_dataset.repeat(params.pre_epoch).batch(params.batch_size)
-
-    # total_g = get_generator(total_q)
-    # total_dataset = tf.data.Dataset.from_generator(total_g, {'input_img':tf.float32,
-    #                                                     'Labels': tf.float32},
-    #                                                {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
-    #                                                 'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
-    #                                                )
-    # total_dataset = total_dataset.batch(params.batch_size).repeat()
-    # train_dataset = syn_dataset.concatenate(total_dataset)
-    train_dataset = syn_dataset
+    train_dataset = train_dataset.shuffle(params.suffle_buffer)
+    train_dataset = train_dataset.repeat()
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
     return features
+
+# total_q = mp.Queue(maxsize=3000)
+# syn_q = mp.Queue(maxsize=3000)
+# print('queue excuted')
+#
+#
+# def enqueue_total(file_name, test_mode=False, real_test=False, if_decompress=False):
+#     if not if_decompress:
+#         img_name, img, maps, cnts = _data_label(_data_aug(pickle.load(open(file_name, 'rb')), 100, test_mode, real_test))
+#     else:
+#         img_name, img, maps, cnts = _data_label(_data_aug(decompress(pickle.load(open(file_name, 'rb'))), 100, test_mode, real_test))
+#     total_q.put({'input_img': img,
+#                 'Labels': maps.astype(np.float32)})
+#
+#
+# def enqueue_syn(file_name, test_mode=False, real_test=False, if_decompress=False):
+#     if not if_decompress:
+#         img_name, img, maps, cnts = _data_label(_data_aug(pickle.load(open(file_name, 'rb')), 100, test_mode, real_test))
+#     else:
+#         img_name, img, maps, cnts = _data_label(_data_aug(decompress(pickle.load(open(file_name, 'rb'))), 100, test_mode, real_test))
+#     syn_q.put({'input_img': img,
+#                 'Labels': maps.astype(np.float32)})
+#
+#
+# def start_queue(params):
+#     thread_num = params.thread_num
+#     file_names_total = [PKL_DIR+TOTAL_TRAIN_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TRAIN_DIR)]
+#     file_names_syn = []
+#     for name in os.listdir(SYN_DIR):
+#         if '.gz' not in name:
+#             file_names_syn.append(SYN_DIR+name)
+#
+#     print('start')
+#     pool1 = mp.Pool(thread_num)
+#     for file_name in file_names_syn:
+#         pool1.apply_async(enqueue_syn, (file_name, False, False, False))
+#
+#     # pool2 = mp.Pool(thread_num)
+#     # for file_name in file_names_total:
+#     #     pool2.apply_async(enqueue_total, (file_name, True, False, True))
+#     print('end')
+#
+#
+# def get_generator_syn():
+#     def func():
+#         while True:
+#             features = syn_q.get()
+#             yield {'input_img': features['input_img'].astype(np.float32),
+#                     'Labels': features['Labels'].astype(np.float32)}
+#     return func
+#
+#
+# def get_train_input(params):
+#     syn_g = get_generator_syn()
+#     syn_dataset = tf.data.Dataset.from_generator(syn_g, {'input_img':tf.float32,
+#                                                         'Labels': tf.float32},
+#                                                    {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
+#                                                     'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
+#                                                    )
+#     syn_dataset = syn_dataset.repeat(params.pre_epoch).batch(params.batch_size)
+#
+#     # total_g = get_generator(total_q)
+#     # total_dataset = tf.data.Dataset.from_generator(total_g, {'input_img':tf.float32,
+#     #                                                     'Labels': tf.float32},
+#     #                                                {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
+#     #                                                 'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
+#     #                                                )
+#     # total_dataset = total_dataset.batch(params.batch_size).repeat()
+#     # train_dataset = syn_dataset.concatenate(total_dataset)
+#     train_dataset = syn_dataset
+#     iterator = train_dataset.make_one_shot_iterator()
+#     features = iterator.get_next()
+#     return features
 
 
 def _pad_cnts(cnts, cnt_point_max):
