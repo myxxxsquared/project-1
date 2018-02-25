@@ -47,7 +47,7 @@ def decompress(ins):
     cnt = ins[4]
     return (name, img, maps, cnt)
 
-total_q = mp.Queue(maxsize=3000)
+# total_q = mp.Queue(maxsize=3000)
 syn_q = mp.Queue(maxsize=3000)
 print('queue excuted')
 
@@ -105,7 +105,7 @@ def get_train_input(params):
                                                    {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
                                                     'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
                                                    )
-    # syn_dataset = syn_dataset.repeat(params.pre_epoch).batch(params.batch_size)
+    syn_dataset = syn_dataset.repeat(params.pre_epoch).batch(params.batch_size)
 
     # total_g = get_generator(total_q)
     # total_dataset = tf.data.Dataset.from_generator(total_g, {'input_img':tf.float32,
