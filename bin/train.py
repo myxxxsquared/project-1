@@ -62,7 +62,7 @@ def default_parameters():
         keep_top_checkpoint_max=5,
         eval_secs=None,
         eval_steps=100,
-        suffle_buffer=100,
+        buffer=150,
         epoch=10,
     )
     return params
