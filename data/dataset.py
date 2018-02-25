@@ -93,7 +93,6 @@ def get_generator_syn():
     def func():
         while True:
             features = syn_q.get()
-
             yield {'input_img': features['input_img'].astype(np.float32),
                     'Labels': features['Labels'].astype(np.float32)}
     return func
@@ -106,7 +105,7 @@ def get_train_input(params):
                                                    {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
                                                     'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
                                                    )
-    syn_dataset = syn_dataset.repeat(params.pre_epoch).batch(params.batch_size)
+    # syn_dataset = syn_dataset.repeat(params.pre_epoch).batch(params.batch_size)
 
     # total_g = get_generator(total_q)
     # total_dataset = tf.data.Dataset.from_generator(total_g, {'input_img':tf.float32,
