@@ -71,8 +71,11 @@ def generator(params, aqueue):
 
 
 def get_train_input(params):
-    iterator = generator(params, q)
-    return next(iterator)
+    train_dataset = tf.data.Dataset.from_generator(generator, {'input_img':tf.float32,
+                                                               'Labels': tf.float32})
+    iterator = train_dataset.make_one_shot_iterator()
+    features = iterator.get_next()
+    return features
 
 
 def generator_eval():
