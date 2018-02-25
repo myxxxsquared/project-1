@@ -78,14 +78,14 @@ def start_queue(params):
         if '.gz' not in name:
             file_names_syn.append(SYN_DIR+name)
 
-    # print('start')
-    # pool1 = mp.Pool(thread_num)
-    # for file_name in file_names_syn:
-    #     pool1.apply_async(enqueue_total, (file_name, False, False, False))
+    print('start')
+    pool1 = mp.Pool(thread_num)
+    for file_name in file_names_syn:
+        pool1.apply_async(enqueue_syn, (file_name, False, False, False))
 
-    pool2 = mp.Pool(thread_num)
-    for file_name in file_names_total:
-        pool2.apply_async(enqueue_syn, (file_name, True, False, True))
+    # pool2 = mp.Pool(thread_num)
+    # for file_name in file_names_total:
+    #     pool2.apply_async(enqueue_total, (file_name, True, False, True))
     print('end')
 
 
