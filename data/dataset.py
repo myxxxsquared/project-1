@@ -88,8 +88,10 @@ def generator_eval():
 
 
 def get_eval_input():
-    iterator = generator_eval()
-    return next(iterator)
+    eval_dataset = tf.data.Dataset.from_generator(generator_eval,(tf.float32,tf.float32,tf.bool))
+    iterator = eval_dataset.make_one_shot_iterator()
+    features = iterator.get_next()
+    return features
 
 
 if __name__ == '__main__':

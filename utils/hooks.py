@@ -135,8 +135,13 @@ def _evaluate(eval_fn, input_fn, path, config):
     graph = tf.Graph()
     with graph.as_default():
         features = input_fn()
-        features['prediction'] = eval_fn(features)
-
+        prediction = eval_fn(features)
+        results = {
+            'prediction': prediction,
+            'input_img': features['input_img'],
+            'cnts': features['cnts'],
+            'is_text_cnts': features['is_text_cnts']
+        }
         sess_creator = tf.train.ChiefSessionCreator(
             checkpoint_dir=path,
             config=config
@@ -149,11 +154,11 @@ def _evaluate(eval_fn, input_fn, path, config):
             while not sess.should_stop():
                 time += 1
                 print('time', time)
-                eval_op = features['prediction']
-                img = features["input_img"]
-                cnts = features["cnts"]
-                is_text_cnts = features['is_text_cnts']
-                prediction = sess.run(eval_op)
+                outputs = sess.run(results)
+                img = outputs['input_img']
+                prediction = outputs['prediction']
+                cnts = outputs['cnts']
+                is_text_cnts = outputs['is_text_cnts']
                 for i in range(img.shape[0]):
                     maps = [np.squeeze(map) for map in np.split(np.transpose(prediction[i], (2,0,1)),7)]
                     scores = evaluate(img[i],cnts,is_text_cnts,maps)
