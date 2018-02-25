@@ -79,6 +79,7 @@ def get_train_input(params):
                                                    {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
                                                     'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
                                                    )
+    train_dataset.prefetch(3000)
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
     return features
