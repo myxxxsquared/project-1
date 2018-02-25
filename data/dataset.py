@@ -89,10 +89,10 @@ def start_queue(params):
     print('end')
 
 
-def get_generator(aqueue):
+def get_generator_syn():
     def func():
         while True:
-            features = aqueue.get()
+            features = syn_q.get()
 
             yield {'input_img': features['input_img'].astype(np.float32),
                     'Labels': features['Labels'].astype(np.float32)}
@@ -100,7 +100,7 @@ def get_generator(aqueue):
 
 
 def get_train_input(params):
-    syn_g = get_generator(syn_q)
+    syn_g = get_generator_syn()
     syn_dataset = tf.data.Dataset.from_generator(syn_g, {'input_img':tf.float32,
                                                         'Labels': tf.float32},
                                                    {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
