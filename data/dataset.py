@@ -58,13 +58,13 @@ def enqueue(file_name, is_syn):
 
 def start_queue(params):
     thread_num = params.thread_num
-    file_names = [SYN_DIR+name for name in os.listdir(SYN_DIR)]
-    # file_names = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
+    # file_names = [SYN_DIR+name for name in os.listdir(SYN_DIR)]
+    file_names = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
 
     print('start')
     pool = mp.Pool(thread_num)
     for file_name in file_names:
-        pool.apply_async(enqueue, (file_name, False, False, True))
+        pool.apply_async(enqueue, (file_name, False, False, False))
     print('end')
 
 
