@@ -21,14 +21,11 @@ def _load_file(file, syn):
         else:
             return pickle.load(open(file, 'rb'))
     else:
-        # if file.endswith('gz'):
-        #     return pickle.load(gzip.open(file, 'rb'), encoding='latin1')
-        # else:
-        #     return pickle.load(open(file, 'rb'), encoding='latin1')
         if file.endswith('gz'):
-            return pickle.load(gzip.open(file, 'rb'))
+            return pickle.load(gzip.open(file, 'rb'), encoding='latin1')
         else:
-            return pickle.load(open(file, 'rb'))
+            return pickle.load(open(file, 'rb'), encoding='latin1')
+
 
 def _data_aug(ins, augment_rate, test_mode=False, real_test=False):
     return DA.augment(ins, augment_rate=augment_rate, test_mode=test_mode, real_test=real_test)
@@ -61,13 +58,13 @@ def enqueue(file_name, is_syn):
 
 def start_queue(params):
     thread_num = params.thread_num
-    # file_names = [SYN_DIR+name for name in os.listdir(SYN_DIR)]
-    file_names = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
+    file_names = [SYN_DIR+name for name in os.listdir(SYN_DIR)]
+    # file_names = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
 
     print('start')
     pool = mp.Pool(thread_num)
     for file_name in file_names:
-        pool.apply_async(enqueue, (file_name, False))
+        pool.apply_async(enqueue, (file_name, True))
     print('end')
 
 
