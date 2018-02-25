@@ -15,6 +15,10 @@ DA = DataAugmentor()
 labelling = data_churn()
 
 
+def _load_file(file):
+    return pickle.load(open(file, 'rb'))
+
+
 def _data_aug(ins, augment_rate, test_mode=False, real_test=False):
     return DA.augment(ins, augment_rate=augment_rate, test_mode=test_mode, real_test=real_test)
 
@@ -24,6 +28,10 @@ def _data_label(ins):
                                     ins['contour'], ins['is_text_cnts'],
                                     ins['left_top'], ins['right_bottom'],
                                     ins.get('chars', None))
+
+def loading_data(file, test_mode=False, real_test=False):
+    return _data_label(_data_aug(_load_file(file), augment_rate=100, test_mode=test_mode, real_test=real_test))
+
 
 def decompress(ins):
     name = ins[0]
