@@ -69,9 +69,12 @@ def generator(params, aqueue):
         yield {'input_img': np.concatenate(imgs).astype(np.float32),
                 'Labels': np.concatenate(mapss).astype(np.float32)}
 
+def get_generator(params, aqueue):
+    return generator(params, aqueue)
 
 def get_train_input(params):
-    train_dataset = tf.data.Dataset.from_generator(generator, {'input_img':tf.float32,
+    g = get_generator(params, q)
+    train_dataset = tf.data.Dataset.from_generator(g, {'input_img':tf.float32,
                                                                'Labels': tf.float32})
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
