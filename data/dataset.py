@@ -79,6 +79,7 @@ print('queue excuted')
 
 def enqueue(file_name, test_mode, real_test, syn):
     img_name, img, maps, cnts = load_pre_gen(file_name)
+    print(img_name)
     q.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
 
