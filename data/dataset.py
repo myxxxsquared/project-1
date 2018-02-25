@@ -124,18 +124,18 @@ def get_generator(params, aqueue):
     return func
 
 
-def get_train_input(params):
-    g = get_generator(params, q)
-    train_dataset = tf.data.Dataset.from_generator(g, {'input_img':tf.float32,
-                                                        'Labels': tf.float32},
-                                                   {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
-                                                    'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
-                                                   )
-    # train_dataset = train_dataset.shuffle(params.suffle_buffer)
-    train_dataset = train_dataset.batch(params.batch_size).prefetch(500)
-    iterator = train_dataset.make_one_shot_iterator()
-    features = iterator.get_next()
-    return features
+# def get_train_input(params):
+#     g = get_generator(params, q)
+#     train_dataset = tf.data.Dataset.from_generator(g, {'input_img':tf.float32,
+#                                                         'Labels': tf.float32},
+#                                                    {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
+#                                                     'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
+#                                                    )
+#     # train_dataset = train_dataset.shuffle(params.suffle_buffer)
+#     train_dataset = train_dataset.batch(params.batch_size).prefetch(500)
+#     iterator = train_dataset.make_one_shot_iterator()
+#     features = iterator.get_next()
+#     return features
 
 
 def wrapper(file_name):
