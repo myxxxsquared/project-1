@@ -51,12 +51,34 @@ def loading_data(file, test_mode=False, real_test=False, syn=True):
     return _data_label(_data_aug(_load_file(file, syn=syn), augment_rate=1, test_mode=test_mode, real_test=real_test))
 
 
+def decompress(ins):
+    name = ins[0]
+    img = ins[1]
+    non_zero, radius, cos, sin = ins[2]
+    maps = np.zeros(shape=(*(img.shape[:2]), 5))
+    maps[:, :, 4] = np.cast['uint8'](ins[3])  # -->TR
+    maps[:, :, 0][non_zero] = 1               # -->TCL
+    maps[:, :, 1][non_zero] = radius          # -->radius
+    maps[:, :, 2][non_zero] = cos             # -->cos
+    maps[:, :, 3][non_zero] = sin             # -->TCL
+    cnt = ins[4]
+    return (name, img, maps, cnt)
+
+
+def load_pre_gen(file):
+    return decompress(pickle.load(gzip.open(file, 'rb')))
+
 q = mp.Queue(maxsize=3000)
 print('queue excuted')
 
 
+# def enqueue(file_name, test_mode, real_test, syn):
+#     img_name, img, maps, cnts = loading_data(file_name, test_mode, real_test, syn)
+#     q.put({'input_img': img,
+#            'Labels': maps.astype(np.float32)})
+
 def enqueue(file_name, test_mode, real_test, syn):
-    img_name, img, maps, cnts = loading_data(file_name, test_mode, real_test, syn)
+    img_name, img, maps, cnts = load_pre_gen(file_name)
     q.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
 
