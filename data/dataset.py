@@ -126,7 +126,7 @@ def _pad_cnts(cnts, cnt_point_max):
 
 def generator_eval():
     file_names = [TOTAL_TEST_DIR+name for name in os.listdir(TOTAL_TEST_DIR)]
-    for file_name in file_names[:2]:
+    for file_name in file_names:
         img_name, img, maps, cnts = loading_data(file_name, True, False)
         features = {}
         features["input_img"] = np.expand_dims(img,0).astype(np.float32)
