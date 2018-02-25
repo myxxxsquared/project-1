@@ -75,17 +75,19 @@ def get_train_input(params):
     return iterator.__next__()
 
 
-def get_eval_input():
-    def generator_eval():
-        file_names = [PKL_DIR+TOTAL_TEST_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TEST_DIR)]
-        for file_name in file_names[:2]:
-            img_name, img, maps, cnts = loading_data(file_name, True, False)
+def generator_eval():
+    file_names = [PKL_DIR+TOTAL_TEST_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TEST_DIR)]
+    for file_name in file_names[:2]:
+        img_name, img, maps, cnts = loading_data(file_name, True, False)
 
-            features = {}
-            features["input_img"] = np.expand_dims(img,0).astype(np.float32)
-            features["cnts"] = [cnt.astype(np.float32).tolist() for cnt in cnts]
-            features['is_text_cnts'] = True
-            yield features
+        features = {}
+        features["input_img"] = np.expand_dims(img,0).astype(np.float32)
+        features["cnts"] = [cnt.astype(np.float32).tolist() for cnt in cnts]
+        features['is_text_cnts'] = True
+        yield features
+
+
+def get_eval_input():
     iterator = generator_eval()
     return iterator.__next__()
 

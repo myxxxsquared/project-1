@@ -159,6 +159,8 @@ def _evaluate(eval_fn, input_fn, path, config):
                     scores = evaluate(img[i],cnts,is_text_cnts,maps)
                     recall_list.append(scores[0])
                     precise_list.append(scores[1])
+                    tf.logging.info('recall: '+str(scores[0]))
+                    tf.logging.info('precise: '+str(scores[1]))
             tf.logging.info('end evaluation')
         ave_r = sum(recall_list)/len(recall_list)
         ave_p = sum(precise_list)/len(precise_list)
