@@ -50,15 +50,15 @@ q = mp.Queue(maxsize=3000)
 print('queue excuted')
 
 
-def enqueue(file_name, is_syn):
-    img_name, img, maps, cnts = loading_data(file_name, is_syn)
+def enqueue(file_name, test_mode, real_test, syn):
+    img_name, img, maps, cnts = loading_data(file_name, test_mode, real_test, syn)
     q.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
 
 
 def start_queue(params):
     thread_num = params.thread_num
-    # file_names = [SYN_DIR+name for name in os.listdir(SYN_DIR)]
+
     file_names = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
 
     print('start')
@@ -66,6 +66,8 @@ def start_queue(params):
     for file_name in file_names:
         pool.apply_async(enqueue, (file_name, False, False, False))
     print('end')
+
+    # file_names = [SYN_DIR+name for name in os.listdir(SYN_DIR)]
 
 
 def get_generator(params, aqueue):
