@@ -130,6 +130,12 @@ def _add_to_record(records, record, max_to_keep):
 
     return added, removed, records
 
+def _depad(cnts, lens):
+    news = []
+    for i in range(lens):
+        news.append(cnts[i][:lens[i], :, :])
+    return news
+
 
 def _evaluate(eval_fn, input_fn, path, config):
     graph = tf.Graph()
@@ -139,6 +145,7 @@ def _evaluate(eval_fn, input_fn, path, config):
         results = {
             'prediction': prediction,
             'input_img': features['input_img'],
+            'lens': features['lens'],
             'cnts': features['cnts'],
             'is_text_cnts': features['is_text_cnts']
         }
@@ -157,7 +164,9 @@ def _evaluate(eval_fn, input_fn, path, config):
                 outputs = sess.run(results)
                 img = outputs['input_img']
                 prediction = outputs['prediction']
+                lens = outputs['lens']
                 cnts = outputs['cnts']
+                cnts = _depad(cnts, lens)
                 is_text_cnts = outputs['is_text_cnts']
                 for i in range(img.shape[0]):
                     maps = [np.squeeze(map) for map in np.split(np.transpose(prediction[i], (2,0,1)),7)]

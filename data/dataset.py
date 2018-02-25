@@ -85,6 +85,16 @@ def get_train_input(params):
     return features
 
 
+def _pad_cnt(cnt, cnt_point_max):
+    new = []
+    for cnt_ in cnt:
+        if len(cnt_) < cnt_point_max:
+            new.append(np.concatenate((cnt_, np.zeros([cnt_point_max-len(cnt_), 1, 2])), 0))
+        else:
+            new.append(cnt_)
+    return new
+
+
 def generator_eval():
     file_names = [PKL_DIR+TOTAL_TEST_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TEST_DIR)]
     for file_name in file_names[:2]:
@@ -92,15 +102,26 @@ def generator_eval():
 
         features = {}
         features["input_img"] = np.expand_dims(img,0).astype(np.float32)
-        features["cnts"] = [cnt.astype(np.float32).tolist() for cnt in cnts]
+        lens = np.array([cnt.shape[0] for cnt in cnts], np.int32)
+        features['lens'] = lens
+        features['cnts'] = np.concatenate([np.expand_dims(_pad_cnt(cnt, max(lens)),0) for cnt in cnts])
         features['is_text_cnts'] = True
         yield features
 
 
 def get_eval_input():
     eval_dataset = tf.data.Dataset.from_generator(generator_eval,{'input_img': tf.float32,
+                                                                  'lens': tf.int32,
                                                                   'cnts': tf.float32,
-                                                                  'is_text_cnts': tf.bool})
+                                                                  'is_text_cnts': tf.bool},
+                                                  {'input_img': (
+                                                  tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
+                                                  tf.Dimension(None)),
+                                                    'lens': (tf.Dimension(None),),
+                                                   'cnts': (
+                                                   tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
+                                                   tf.Dimension(None))}
+                                                  )
     iterator = eval_dataset.make_one_shot_iterator()
     features = iterator.get_next()
     return features
