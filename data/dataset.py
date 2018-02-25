@@ -7,9 +7,7 @@ import multiprocessing as mp
 import pickle
 import gzip
 
-PKL_DIR = '/home/rjq/data_cleaned/pkl/'
-TOTAL_TRAIN_DIR = 'totaltext_train/'
-TOTAL_TEST_DIR = 'totaltext_test/'
+TOTAL_TRAIN_DIR = '/home/rjq/data_cleaned/pkl/totaltext_train/'
 SYN_DIR = '/media/sda/eccv2018/data/pkl/result2/'
 
 DA = DataAugmentor()
@@ -60,7 +58,8 @@ def enqueue(file_name, is_syn):
 
 def start_queue(params):
     thread_num = params.thread_num
-    file_names = [SYN_DIR+name for name in os.listdir(SYN_DIR)]
+    # file_names = [SYN_DIR+name for name in os.listdir(SYN_DIR)]
+    file_names = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
 
     print('start')
     pool = mp.Pool(thread_num)
