@@ -11,6 +11,10 @@ TOTAL_TRAIN_DIR = '/home/rjq/data_cleaned/pkl/totaltext_train/'
 TOTAL_TEST_DIR = '/home/rjq/data_cleaned/pkl/totaltext_test/'
 SYN_DIR = '/media/sda/eccv2018/data/pkl/result2/'
 
+SYN = '/home/lsb/pre_labelled_data/synthtext_chars/'
+TOTAL_TRAIN = '/home/lsb/pre_labelled_data/totaltext_train/'
+
+
 DA = DataAugmentor()
 labelling = data_churn()
 
@@ -44,7 +48,7 @@ def _data_label(ins):
 
 
 def loading_data(file, test_mode=False, real_test=False, syn=True):
-    return _data_label(_data_aug(_load_file(file, syn=syn), augment_rate=10000000, test_mode=test_mode, real_test=real_test))
+    return _data_label(_data_aug(_load_file(file, syn=syn), augment_rate=1, test_mode=test_mode, real_test=real_test))
 
 
 q = mp.Queue(maxsize=3000)
@@ -60,10 +64,10 @@ def enqueue(file_name, test_mode, real_test, syn):
 def start_queue(params):
     thread_num = params.thread_num
     flag = []
-    file_names_syn = [SYN_DIR+name for name in os.listdir(SYN_DIR)]*params.pre_epoch
+    file_names_syn = [SYN+name for name in os.listdir(SYN)]*params.pre_epoch
     for _ in range(len(file_names_syn)):
         flag.append(True)
-    file_names_total = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]*params.epoch
+    file_names_total = [TOTAL_TRAIN+name for name in os.listdir(TOTAL_TRAIN)]*params.epoch
     for _ in range(len(file_names_total)):
         flag.append(False)
     file_names = file_names_syn+file_names_total
