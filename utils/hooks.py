@@ -133,7 +133,7 @@ def _add_to_record(records, record, max_to_keep):
 
 def _depad(cnts, lens):
     news = []
-    for i in range(lens):
+    for i in range(len(lens)):
         news.append(cnts[i][:lens[i], :, :])
     return news
 
