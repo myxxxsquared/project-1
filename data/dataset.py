@@ -55,7 +55,7 @@ def decompress(ins):
     name = ins[0]
     img = ins[1]
     non_zero, radius, cos, sin = ins[2]
-    maps = np.zeros(shape=(*(img.shape[:2]), 5))
+    maps = np.zeros((*(img.shape[:2]), 5), np.float32)
     maps[:, :, 4] = np.cast['uint8'](ins[3])  # -->TR
     maps[:, :, 0][non_zero] = 1               # -->TCL
     maps[:, :, 1][non_zero] = radius          # -->radius
@@ -73,45 +73,47 @@ q = mp.Queue(maxsize=3000)
 print('queue excuted')
 
 
-def enqueue(file_name, test_mode, real_test, syn):
-    img_name, img, maps, cnts = loading_data(file_name, test_mode, real_test, syn)
+# def enqueue(file_name, test_mode, real_test, syn):
+#     img_name, img, maps, cnts = loading_data(file_name, test_mode, real_test, syn)
+#     q.put({'input_img': img,
+#            'Labels': maps.astype(np.float32)})
+#
+#
+# def start_queue(params):
+#     thread_num = params.thread_num
+#     flag = []
+#     file_names_syn = [SYN_DIR+name for name in os.listdir(SYN_DIR)]*params.pre_epoch
+#     for _ in range(len(file_names_syn)):
+#         flag.append(True)
+#     file_names_total = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]*params.epoch
+#     for _ in range(len(file_names_total)):
+#         flag.append(False)
+#     file_names = file_names_syn+file_names_total
+#     print('start')
+#     pool = mp.Pool(thread_num)
+#     for file_name, f in zip(file_names,flag):
+#         pool.apply_async(enqueue, (file_name, False, False, f))
+#     print('end')
+
+def enqueue(file_name):
+    img_name, img, maps, cnts = load_pre_gen(file_name)
     q.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
 
 
 def start_queue(params):
     thread_num = params.thread_num
-    flag = []
-    file_names_syn = [SYN_DIR+name for name in os.listdir(SYN_DIR)]*params.pre_epoch
-    for _ in range(len(file_names_syn)):
-        flag.append(True)
-    file_names_total = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]*params.epoch
-    for _ in range(len(file_names_total)):
-        flag.append(False)
+    file_names_syn = [SYN+name for name in os.listdir(SYN)]*params.pre_epoch
+    file_names_total = [TOTAL_TRAIN+name for name in os.listdir(TOTAL_TRAIN)]*params.epoch
     file_names = file_names_syn+file_names_total
     print('start')
     pool = mp.Pool(thread_num)
     for file_name, f in zip(file_names,flag):
-        pool.apply_async(enqueue, (file_name, False, False, f))
+        pool.apply_async(enqueue, (file_name,))
     print('end')
 
 
 
-# def get_generator(params, aqueue):
-#     def func():
-#         while True:
-#             imgs = []
-#             mapss = []
-#             for i in range(params.batch_size):
-#                 features = aqueue.get()
-#                 img = features['input_img']
-#                 maps = features['Labels']
-#                 imgs.append(np.expand_dims(img,0))
-#                 mapss.append(np.expand_dims(maps,0))
-#
-#             yield {'input_img': np.concatenate(imgs).astype(np.float32),
-#                     'Labels': np.concatenate(mapss).astype(np.float32)}
-#     return func
 def get_generator(params, aqueue):
     def func():
         while True:
