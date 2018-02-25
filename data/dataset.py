@@ -78,10 +78,10 @@ def start_queue(params):
         if '.gz' not in name:
             file_names_syn.append(SYN_DIR+name)
 
-    print('start')
-    pool1 = mp.Pool(thread_num)
-    for file_name in file_names_syn:
-        pool1.apply_async(enqueue_total, (file_name, False, False, False))
+    # print('start')
+    # pool1 = mp.Pool(thread_num)
+    # for file_name in file_names_syn:
+    #     pool1.apply_async(enqueue_total, (file_name, False, False, False))
 
     pool2 = mp.Pool(thread_num)
     for file_name in file_names_total:
@@ -108,14 +108,15 @@ def get_train_input(params):
                                                    )
     syn_dataset = syn_dataset.repeat(params.pre_epoch).batch(params.batch_size)
 
-    total_g = get_generator(total_q)
-    total_dataset = tf.data.Dataset.from_generator(total_g, {'input_img':tf.float32,
-                                                        'Labels': tf.float32},
-                                                   {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
-                                                    'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
-                                                   )
-    total_dataset = total_dataset.batch(params.batch_size).repeat()
-    train_dataset = syn_dataset.concatenate(total_dataset)
+    # total_g = get_generator(total_q)
+    # total_dataset = tf.data.Dataset.from_generator(total_g, {'input_img':tf.float32,
+    #                                                     'Labels': tf.float32},
+    #                                                {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
+    #                                                 'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
+    #                                                )
+    # total_dataset = total_dataset.batch(params.batch_size).repeat()
+    # train_dataset = syn_dataset.concatenate(total_dataset)
+    train_dataset = syn_dataset
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
     return features
