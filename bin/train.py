@@ -58,7 +58,7 @@ def default_parameters():
 
         batch_size=10,
         thread_num=20,
-        epoch=10,
+        pre_epoch=1,
         keep_top_checkpoint_max=5,
         eval_secs=None,
         eval_steps=100,
