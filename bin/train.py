@@ -35,7 +35,7 @@ def default_parameters():
         adam_beta1=0.9,
         adam_beta2=0.999,
         adam_epsilon=1e-8,
-        train_steps=10000,
+        train_steps=100000,
 
         initializer="uniform",
         clip_grad_norm=5.0,

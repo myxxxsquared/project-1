@@ -44,7 +44,7 @@ def _data_label(ins):
 
 
 def loading_data(file, test_mode=False, real_test=False, syn=True):
-    return _data_label(_data_aug(_load_file(file, syn=syn), augment_rate=100, test_mode=test_mode, real_test=real_test))
+    return _data_label(_data_aug(_load_file(file, syn=syn), augment_rate=10000000, test_mode=test_mode, real_test=real_test))
 
 
 q = mp.Queue(maxsize=3000)
