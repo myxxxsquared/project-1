@@ -88,7 +88,9 @@ def generator_eval():
 
 
 def get_eval_input():
-    eval_dataset = tf.data.Dataset.from_generator(generator_eval,(tf.float32,tf.float32,tf.bool))
+    eval_dataset = tf.data.Dataset.from_generator(generator_eval,{'input_img': tf.float32,
+                                                                  'cnts': tf.float32,
+                                                                  'is_text_cnts': tf.bool})
     iterator = eval_dataset.make_one_shot_iterator()
     features = iterator.get_next()
     return features
