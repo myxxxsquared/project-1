@@ -5,6 +5,7 @@ from data.data_augmentation import DataAugmentor
 from data.data_labelling import data_churn
 import multiprocessing as mp
 import pickle
+import gzip
 
 PKL_DIR = '/home/rjq/data_cleaned/pkl/'
 TOTAL_TRAIN_DIR = 'totaltext_train/'
@@ -15,8 +16,17 @@ DA = DataAugmentor()
 labelling = data_churn()
 
 
-def _load_file(file):
-    return pickle.load(open(file, 'rb'))
+def _load_file(file, syn):
+    if not syn:
+        if file.endswith('gz'):
+            return pickle.load(gzip.open(file, 'rb'))
+        else:
+            return pickle.load(open(file, 'rb'))
+    else:
+        if file.endswith('gz'):
+            return pickle.load(gzip.open(file, 'rb'), encoding='latin1')
+        else:
+            return pickle.load(open(file, 'rb'), encoding='latin1')
 
 
 def _data_aug(ins, augment_rate, test_mode=False, real_test=False):
@@ -43,11 +53,8 @@ def decompress(ins):
     return (name, img, maps, cnt)
 
 
-def loading_data(file, test_mode=False, real_test=False, if_decompress=False):
-    if if_decompress:
-        return _data_label(_data_aug(decompress(_load_file(file)), augment_rate=100, test_mode=test_mode, real_test=real_test))
-
-    return _data_label(_data_aug(_load_file(file), augment_rate=100, test_mode=test_mode, real_test=real_test))
+def loading_data(file, test_mode=False, real_test=False, is_syn=True):
+    return _data_label(_data_aug(_load_file(file, is_syn), augment_rate=100, test_mode=test_mode, real_test=real_test))
 
 
 
@@ -57,14 +64,14 @@ print('queue excuted')
 
 
 def enqueue(file_name):
-    img_name, img, maps, cnts = loading_data(PKL_DIR+file_name)
+    img_name, img, maps, cnts = loading_data(file_name)
     q.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
 
 
 def start_queue(params):
     thread_num = params.thread_num
-    file_names = [TOTAL_TRAIN_DIR+name for name in os.listdir(PKL_DIR+TOTAL_TRAIN_DIR)]
+    file_names = [SYN_DIR+name for name in os.listdir(SYN_DIR)]
 
     print('start')
     pool = mp.Pool(thread_num)
