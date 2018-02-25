@@ -70,12 +70,13 @@ def start_queue(params):
             file_names_syn.append(SYN_DIR+name)
 
     print('start')
-    pool = mp.Pool(thread_num)
+    pool1 = mp.Pool(thread_num)
     for file_name in file_names_syn:
-        pool.apply_async(enqueue, (file_name, syn_q, False, False, False))
+        pool1.apply_async(enqueue, (file_name, syn_q, False, False, False))
 
+    pool2 = mp.Pool(thread_num)
     for file_name in file_names_total:
-        pool.apply_async(enqueue, (file_name, total_q, True, False, True))
+        pool2.apply_async(enqueue, (file_name, total_q, True, False, True))
     print('end')
 
 
