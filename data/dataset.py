@@ -69,8 +69,8 @@ def load_pre_gen(file):
     return decompress(pickle.load(gzip.open(file, 'rb')))
 
 
-q = mp.Queue(maxsize=3000)
-print('queue excuted')
+# q = mp.Queue(maxsize=3000)
+# print('queue excuted')
 
 
 # def enqueue(file_name, test_mode, real_test, syn):
@@ -114,14 +114,14 @@ def start_queue(params):
 
 
 
-def get_generator(params, aqueue):
-    def func():
-        while True:
-            features = aqueue.get()
-
-            yield {'input_img': features['input_img'].astype(np.float32),
-                    'Labels': features['Labels'].astype(np.float32)}
-    return func
+# def get_generator(params, aqueue):
+#     def func():
+#         while True:
+#             features = aqueue.get()
+#
+#             yield {'input_img': features['input_img'].astype(np.float32),
+#                     'Labels': features['Labels'].astype(np.float32)}
+#     return func
 
 
 # def get_train_input(params):
@@ -157,8 +157,8 @@ def get_train_input(params):
 
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
-    features = {'input_img':features[0],
-                'Labels':features[1]}
+    features = {'input_img':tf.reshape(features[0], [-1]+params.input_size),
+                'Labels':tf.reshape(features[1], [-1]+params.Label_size}
     return features
 
 
