@@ -99,9 +99,9 @@ def load_pre_gen(file):
 Q = mp.Queue(maxsize=3000)
 print('queue excuted')
 
-def enqueue(file_name,aqueue):
+def enqueue(file_name):
     img_name, img, maps, cnts = load_pre_gen(file_name)
-    aqueue.put({'input_img': img,
+    Q.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
 
 
@@ -114,7 +114,7 @@ def start_queue(params):
     print('start')
     pool = mp.Pool(thread_num)
     for file_name in file_names:
-        pool.apply_async(enqueue, (file_name,Q))
+        pool.apply_async(enqueue, (file_name,))
     print('end')
 
 
