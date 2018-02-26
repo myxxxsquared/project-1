@@ -158,7 +158,7 @@ def get_train_input(params):
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
     features = {'input_img':tf.reshape(features[0], [-1]+params.input_size),
-                'Labels':tf.reshape(features[1], [-1]+params.Label_size}
+                'Labels':tf.reshape(features[1], [-1]+params.Label_size)}
     return features
 
 
