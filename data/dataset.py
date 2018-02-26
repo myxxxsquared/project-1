@@ -141,7 +141,9 @@ def start_queue(params):
 def wrapper(index, file_names):
 
     img_name, img, maps, cnts = load_pre_gen(file_names[index])
-    return img, maps.astype(np.float32)
+    # return img, maps.astype(np.float32)
+    return {'input_img': img,
+           'Labels': maps.astype(np.float32)}
 
 
 
@@ -151,15 +153,15 @@ def get_train_input(params):
     file_names = file_names_syn+file_names_total
 
     train_dataset = tf.data.Dataset.range(len(file_names))
-    train_dataset = train_dataset.map(lambda index: tuple(tf.py_func(
-        wrapper, [index, file_names], (tf.uint8, tf.float32))),
-          num_parallel_calls=params.thread_num).batch(params.batch_size).prefetch(params.buffer)
+    # train_dataset = train_dataset.map(lambda index: tuple(tf.py_func(
+    #     wrapper, [index, file_names], (tf.uint8, tf.float32))),
+    #       num_parallel_calls=params.thread_num).batch(params.batch_size).prefetch(params.buffer)
 
     train_dataset = train_dataset.map(lambda index: wrapper(index, file_names))
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
-    features = {'input_img':tf.reshape(features[0], [-1]+params.input_size),
-                'Labels':tf.reshape(features[1], [-1]+params.Label_size)}
+    # features = {'input_img':tf.reshape(features[0], [-1]+params.input_size),
+    #             'Labels':tf.reshape(features[1], [-1]+params.Label_size)}
     return features
 
 
