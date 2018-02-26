@@ -153,7 +153,7 @@ def get_train_input(params):
 
     train_dataset = tf.data.Dataset.range(len(file_names))
     train_dataset = train_dataset.map(lambda index: tuple(tf.py_func(
-        wrapper, [index, file_names], {'input_img': tf.float32, 'Labels': tf.float32})),
+        wrapper, [index, file_names], (tf.float32, tf.float32))),
           num_parallel_calls=params.thread_num).batch(params.batch_size).prefetch(params.buffer)
 
     iterator = train_dataset.make_one_shot_iterator()
