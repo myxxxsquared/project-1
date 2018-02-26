@@ -69,8 +69,6 @@ def load_pre_gen(file):
     return decompress(pickle.load(gzip.open(file, 'rb')))
 
 
-# q = mp.Queue(maxsize=3000)
-# print('queue excuted')
 
 
 # def enqueue(file_name, test_mode, real_test, syn):
@@ -95,9 +93,12 @@ def load_pre_gen(file):
 #         pool.apply_async(enqueue, (file_name, False, False, f))
 #     print('end')
 
-def enqueue(file_name):
+
+
+
+def enqueue(file_name,aqueue):
     img_name, img, maps, cnts = load_pre_gen(file_name)
-    q.put({'input_img': img,
+    aqueue.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
 
 
@@ -106,64 +107,64 @@ def start_queue(params):
     file_names_syn = [SYN+name for name in os.listdir(SYN)]*params.pre_epoch
     file_names_total = [TOTAL_TRAIN+name for name in os.listdir(TOTAL_TRAIN)]*params.epoch
     file_names = file_names_syn+file_names_total
+    q = mp.Queue(maxsize=3000)
+    print('queue excuted')
+
     print('start')
     pool = mp.Pool(thread_num)
     for file_name in file_names:
-        pool.apply_async(enqueue, (file_name,))
+        pool.apply_async(enqueue, (file_name,q))
     print('end')
 
-
-
-# def get_generator(params, aqueue):
-#     def func():
-#         while True:
-#             features = aqueue.get()
-#
-#             yield {'input_img': features['input_img'].astype(np.float32),
-#                     'Labels': features['Labels'].astype(np.float32)}
-#     return func
-
-
-# def get_train_input(params):
-#     g = get_generator(params, q)
-#     train_dataset = tf.data.Dataset.from_generator(g, {'input_img':tf.float32,
-#                                                         'Labels': tf.float32},
-#                                                    {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
-#                                                     'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
-#                                                    )
-#     # train_dataset = train_dataset.shuffle(params.suffle_buffer)
-#     train_dataset = train_dataset.batch(params.batch_size).prefetch(500)
-#     iterator = train_dataset.make_one_shot_iterator()
-#     features = iterator.get_next()
-#     return features
-
-
-def wrapper(index, file_names):
-
-    img_name, img, maps, cnts = load_pre_gen(file_names[index])
-    return img, maps.astype(np.float32)
-    # return {'input_img': img,
-    #        'Labels': maps.astype(np.float32)}
-
+def get_generator(params, aqueue):
+    def func():
+        while True:
+            features = aqueue.get()
+            yield {'input_img': features['input_img'].astype(np.float32),
+                    'Labels': features['Labels'].astype(np.float32)}
+    return func
 
 
 def get_train_input(params):
-    file_names_syn = [SYN+name for name in os.listdir(SYN)]*params.pre_epoch
-    file_names_total = [TOTAL_TRAIN+name for name in os.listdir(TOTAL_TRAIN)]*params.epoch
-    file_names = file_names_syn+file_names_total
-
-    train_dataset = tf.data.Dataset.range(len(file_names))
-
-    train_dataset = train_dataset.map(lambda index: tuple(tf.py_func(
-        wrapper, [index, file_names], (tf.uint8, tf.float32))),
-          num_parallel_calls=params.thread_num).prefetch(params.buffer).batch(params.batch_size)
-
-    # train_dataset = train_dataset.map(lambda index: wrapper(index, file_names))
+    g = get_generator(params, q)
+    train_dataset = tf.data.Dataset.from_generator(g, {'input_img':tf.float32,
+                                                        'Labels': tf.float32},
+                                                   {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
+                                                    'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
+                                                   )
+    # train_dataset = train_dataset.shuffle(params.suffle_buffer)
+    train_dataset = train_dataset.batch(params.batch_size).prefetch(500)
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
-    features = {'input_img':tf.reshape(features[0], [-1]+params.input_size),
-                'Labels':tf.reshape(features[1], [-1]+params.Label_size)}
     return features
+
+########solution map###############
+# def wrapper(index, file_names):
+#
+#     img_name, img, maps, cnts = load_pre_gen(file_names[index])
+#     return img, maps.astype(np.float32)
+#     # return {'input_img': img,
+#     #        'Labels': maps.astype(np.float32)}
+#
+#
+#
+# def get_train_input(params):
+#     file_names_syn = [SYN+name for name in os.listdir(SYN)]*params.pre_epoch
+#     file_names_total = [TOTAL_TRAIN+name for name in os.listdir(TOTAL_TRAIN)]*params.epoch
+#     file_names = file_names_syn+file_names_total
+#
+#     train_dataset = tf.data.Dataset.range(len(file_names))
+#
+#     train_dataset = train_dataset.map(lambda index: tuple(tf.py_func(
+#         wrapper, [index, file_names], (tf.uint8, tf.float32))),
+#           num_parallel_calls=params.thread_num).prefetch(params.buffer).batch(params.batch_size)
+#
+#     # train_dataset = train_dataset.map(lambda index: wrapper(index, file_names))
+#     iterator = train_dataset.make_one_shot_iterator()
+#     features = iterator.get_next()
+#     features = {'input_img':tf.reshape(features[0], [-1]+params.input_size),
+#                 'Labels':tf.reshape(features[1], [-1]+params.Label_size)}
+#     return features
 
 
 
