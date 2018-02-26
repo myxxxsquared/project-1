@@ -141,8 +141,7 @@ def get_generator(params, aqueue):
 def wrapper(index, file_names):
 
     img_name, img, maps, cnts = load_pre_gen(file_names[index])
-    return {'input_img': img,
-           'Labels': maps.astype(np.float32)}
+    return img, maps.astype(np.float32)
 
 
 
@@ -158,6 +157,8 @@ def get_train_input(params):
 
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
+    features = {'input_img':features[0],
+                'Labels':features[1]}
     return features
 
 
