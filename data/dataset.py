@@ -51,7 +51,7 @@ def loading_data(file, test_mode=False, real_test=False, syn=True):
     return _data_label(_data_aug(_load_file(file, syn=syn), augment_rate=1, test_mode=test_mode, real_test=real_test))
 
 
-def decompress(ins):
+def _decompress(ins):
     name = ins[0]
     img = ins[1]
     non_zero, radius, cos, sin = ins[2]
@@ -66,7 +66,7 @@ def decompress(ins):
 
 
 def load_pre_gen(file):
-    return decompress(pickle.load(gzip.open(file, 'rb')))
+    return _decompress(pickle.load(gzip.open(file, 'rb')))
 
 
 
