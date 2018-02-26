@@ -117,6 +117,7 @@ def start_queue(params):
         pool.apply_async(enqueue, (file_name,Q))
     print('end')
 
+
 def get_generator(params, aqueue):
     def func():
         while True:
@@ -133,7 +134,6 @@ def get_train_input(params):
                                                    {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
                                                     'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
                                                    )
-    # train_dataset = train_dataset.shuffle(params.suffle_buffer)
     train_dataset = train_dataset.batch(params.batch_size).prefetch(params.buffer)
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
