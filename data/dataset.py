@@ -153,9 +153,10 @@ def get_train_input(params):
     file_names = file_names_syn+file_names_total
 
     train_dataset = tf.data.Dataset.range(len(file_names))
-    train_dataset = train_dataset.batch(params.batch_size).map(lambda index: tuple(tf.py_func(
+
+    train_dataset = train_dataset.map(lambda index: tuple(tf.py_func(
         wrapper, [index, file_names], (tf.uint8, tf.float32))),
-          num_parallel_calls=params.thread_num).prefetch(params.buffer)
+          num_parallel_calls=params.thread_num).prefetch(params.buffer).batch(params.batch_size)
 
     # train_dataset = train_dataset.map(lambda index: wrapper(index, file_names))
     iterator = train_dataset.make_one_shot_iterator()
