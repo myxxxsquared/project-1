@@ -70,7 +70,7 @@ def load_pre_gen(file):
 
 
 
-
+#####on line data gen###########
 # def enqueue(file_name, test_mode, real_test, syn):
 #     img_name, img, maps, cnts = loading_data(file_name, test_mode, real_test, syn)
 #     q.put({'input_img': img,
@@ -95,6 +95,9 @@ def load_pre_gen(file):
 
 
 
+#######solution mp.queue##########
+Q = mp.Queue(maxsize=3000)
+print('queue excuted')
 
 def enqueue(file_name,aqueue):
     img_name, img, maps, cnts = load_pre_gen(file_name)
@@ -107,13 +110,11 @@ def start_queue(params):
     file_names_syn = [SYN+name for name in os.listdir(SYN)]*params.pre_epoch
     file_names_total = [TOTAL_TRAIN+name for name in os.listdir(TOTAL_TRAIN)]*params.epoch
     file_names = file_names_syn+file_names_total
-    q = mp.Queue(maxsize=3000)
-    print('queue excuted')
 
     print('start')
     pool = mp.Pool(thread_num)
     for file_name in file_names:
-        pool.apply_async(enqueue, (file_name,q))
+        pool.apply_async(enqueue, (file_name,Q))
     print('end')
 
 def get_generator(params, aqueue):
@@ -126,7 +127,7 @@ def get_generator(params, aqueue):
 
 
 def get_train_input(params):
-    g = get_generator(params, q)
+    g = get_generator(params, Q)
     train_dataset = tf.data.Dataset.from_generator(g, {'input_img':tf.float32,
                                                         'Labels': tf.float32},
                                                    {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
