@@ -171,11 +171,11 @@ def _evaluate(eval_fn, input_fn, path, config):
                 is_text_cnts = outputs['is_text_cnts']
                 for i in range(img.shape[0]):
                     maps = [np.squeeze(map) for map in np.split(np.transpose(prediction[i], (2,0,1)),7)]
-                    scores = evaluate(img[i],cnts,is_text_cnts,maps)
-                    recall_list.append(scores[0])
-                    precise_list.append(scores[1])
-                    tf.logging.info('recall: '+str(scores[0]))
-                    tf.logging.info('precise: '+str(scores[1]))
+                    res = evaluate(img[i],cnts,is_text_cnts,maps)
+                    recall_list.append(res[0])
+                    precise_list.append(res[1])
+                    tf.logging.info('recall: '+str(res[0]))
+                    tf.logging.info('precise: '+str(res[1]))
             tf.logging.info('end evaluation')
         ave_r = sum(recall_list)/len(recall_list)
         ave_p = sum(precise_list)/len(precise_list)

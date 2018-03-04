@@ -7,20 +7,16 @@ import multiprocessing as mp
 import pickle
 import gzip
 
-TOTAL_TRAIN_DIR = '/home/rjq/data_cleaned/pkl/totaltext_train/'
-TOTAL_TEST_DIR = '/home/rjq/data_cleaned/pkl/totaltext_test/'
-SYN_DIR = '/media/sda/eccv2018/data/pkl/result2/'
-
-SYN = '/home/lsb/pre_labelled_data/synthtext_chars/'
-TOTAL_TRAIN = '/home/lsb/pre_labelled_data/totaltext_train/'
+TOTAL_TRAIN_DIR = '/home/rjq/data_cleaned/pkl/totaltext_train_care/'
+TOTAL_TEST_DIR = '/home/rjq/data_cleaned/pkl/totaltext_test_care/'
 
 
 DA = DataAugmentor()
 labelling = data_churn()
 
 
-def _load_file(file, syn):
-    if not syn:
+def _load_file(file, is_syn):
+    if not is_syn:
         if file.endswith('gz'):
             return pickle.load(gzip.open(file, 'rb'))
         else:
@@ -36,19 +32,25 @@ def _data_aug(ins, augment_rate, test_mode=False, real_test=False):
     return DA.augment(ins, augment_rate=augment_rate, test_mode=test_mode, real_test=real_test)
 
 
-def _data_label(ins):
-    try:
+def _data_label(ins, is_pixellink):
+    if is_pixellink:
+        data = labelling._pixellink_labeling(ins['img_name'], ins['img'],
+                                        ins['contour'], ins['is_text_cnts'],
+                                        ins['left_top'], ins['right_bottom'],
+                                        ins.get('chars', None), ins['care'])
+    else:
         data = labelling._data_labeling(ins['img_name'], ins['img'],
                                         ins['contour'], ins['is_text_cnts'],
                                         ins['left_top'], ins['right_bottom'],
-                                        ins.get('chars', None))
-        return data
-    except:
-        return None, None, None, None
+                                        ins.get('chars', None), ins['care'])
+    return data
 
 
-def loading_data(file, test_mode=False, real_test=False, syn=True):
-    return _data_label(_data_aug(_load_file(file, syn=syn), augment_rate=1, test_mode=test_mode, real_test=real_test))
+def loading_data(file, test_mode=False, real_test=False, is_syn=False, is_pixellink=True):
+    return _data_label(_data_aug(_load_file(
+        file, is_syn=is_syn),
+        augment_rate=500, test_mode=test_mode, real_test=real_test),
+        is_pixellink)
 
 
 def _decompress(ins):
@@ -70,53 +72,25 @@ def load_pre_gen(file):
 
 
 
-#####on line data gen###########
-# def enqueue(file_name, test_mode, real_test, syn):
-#     img_name, img, maps, cnts = loading_data(file_name, test_mode, real_test, syn)
-#     q.put({'input_img': img,
-#            'Labels': maps.astype(np.float32)})
-#
-#
-# def start_queue(params):
-#     thread_num = params.thread_num
-#     flag = []
-#     file_names_syn = [SYN_DIR+name for name in os.listdir(SYN_DIR)]*params.pre_epoch
-#     for _ in range(len(file_names_syn)):
-#         flag.append(True)
-#     file_names_total = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]*params.epoch
-#     for _ in range(len(file_names_total)):
-#         flag.append(False)
-#     file_names = file_names_syn+file_names_total
-#     print('start')
-#     pool = mp.Pool(thread_num)
-#     for file_name, f in zip(file_names,flag):
-#         pool.apply_async(enqueue, (file_name, False, False, f))
-#     print('end')
-
-
-
-#######solution mp.queue##########
+####on line data###########
 Q = mp.Queue(maxsize=3000)
 print('queue excuted')
 
-def enqueue(file_name):
-    img_name, img, maps, cnts = load_pre_gen(file_name)
-    Q.put({'input_img': img,
+def enqueue(file_name, test_mode, real_test, is_syn, is_pixellink):
+    img_name, img, maps, cnts = loading_data(file_name, test_mode, real_test, is_syn, is_pixellink)
+    q.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
 
 
 def start_queue(params):
     thread_num = params.thread_num
-    file_names_syn = [SYN+name for name in os.listdir(SYN)]*params.pre_epoch
-    file_names_total = [TOTAL_TRAIN+name for name in os.listdir(TOTAL_TRAIN)]*params.epoch
-    file_names = file_names_syn+file_names_total
+    file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]*params.pre_epoch
 
     print('start')
     pool = mp.Pool(thread_num)
-    for file_name in file_names:
-        pool.apply_async(enqueue, (file_name,))
+    for file_name in file_names_totaltext_train:
+        pool.apply_async(enqueue, (file_name, False, False, False, True))
     print('end')
-
 
 def get_generator(params, aqueue):
     def func():
@@ -138,6 +112,51 @@ def get_train_input(params):
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
     return features
+
+
+#######solution mp.queue##########
+# Q = mp.Queue(maxsize=3000)
+# print('queue excuted')
+#
+# def enqueue(file_name):
+#     img_name, img, maps, cnts = load_pre_gen(file_name)
+#     Q.put({'input_img': img,
+#            'Labels': maps.astype(np.float32)})
+#
+#
+# def start_queue(params):
+#     thread_num = params.thread_num
+#     file_names_syn = [SYN+name for name in os.listdir(SYN)]*params.pre_epoch
+#     file_names_total = [TOTAL_TRAIN+name for name in os.listdir(TOTAL_TRAIN)]*params.epoch
+#     file_names = file_names_syn+file_names_total
+#
+#     print('start')
+#     pool = mp.Pool(thread_num)
+#     for file_name in file_names:
+#         pool.apply_async(enqueue, (file_name,))
+#     print('end')
+#
+#
+# def get_generator(params, aqueue):
+#     def func():
+#         while True:
+#             features = aqueue.get()
+#             yield {'input_img': features['input_img'].astype(np.float32),
+#                     'Labels': features['Labels'].astype(np.float32)}
+#     return func
+#
+#
+# def get_train_input(params):
+#     g = get_generator(params, Q)
+#     train_dataset = tf.data.Dataset.from_generator(g, {'input_img':tf.float32,
+#                                                         'Labels': tf.float32},
+#                                                    {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
+#                                                     'Labels': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None))}
+#                                                    )
+#     train_dataset = train_dataset.batch(params.batch_size).prefetch(params.buffer)
+#     iterator = train_dataset.make_one_shot_iterator()
+#     features = iterator.get_next()
+#     return features
 
 ########solution map###############
 # def wrapper(index, file_names):
@@ -213,6 +232,5 @@ def get_eval_input():
 
 
 if __name__ == '__main__':
-    for i in range(500):
-        res = get_eval_input()
-        print(res['input_img'].shape)
+    file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
+    loading_data(file_names_totaltext_train[0],False,False,False,True)

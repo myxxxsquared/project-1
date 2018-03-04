@@ -280,9 +280,6 @@ class Model(object):
                 params = copy.copy(self.parameters)
             else:
                 params = copy.copy(params)
-            # params.dropout = 0.0
-            # params.use_variational_dropout = False
-            # params.label_smoothing = 0.0
 
             with tf.variable_scope(self._scope):
                 prediction = model_graph(features, "eval", params)
