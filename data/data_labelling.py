@@ -93,8 +93,8 @@ class data_churn(object):
             base = cv2.drawContours(np.zeros(img.shape[:2]), cnts, cnt_index, 255, 1).astype(np.bool)
             for i in range(8):
                 mask_ = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 7-i)], 0, 255, 1).astype(np.bool)
-                print(base&mask_)
                 links[i][base&mask_] = 1.0
+            cv2.imwrite('img'+str(i)+'.jpg', links[i])
             # mask_0 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 7)], 0, 255, 1)
             # mask_1 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 6)], 0, 255, 1)
             # mask_2 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 5)], 0, 255, 1)
