@@ -71,9 +71,12 @@ class data_churn(object):
             return None, None, None, None
 
     def _pixellink_labeling(self, img_name, img, cnts, is_text_cnts, left_top, right_bottom, chars, care):
+
+        # mask
         mask = cv2.drawContours(np.zeros(img.shape[:2]), cnts, -1, 255, 1)
         mask = np.sign(mask).astype(np.float32)
 
+        # links
         links = [np.zeros(img.shape[:2], np.float32) for _ in range(8)]
         '''
         0 1 2
@@ -94,8 +97,9 @@ class data_churn(object):
             for i in range(8):
                 mask_ = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 7-i)], 0, 255, 1).astype(np.bool)
                 links[i][base&mask_] = 1.0
+
         for i in range(8):
-            cv2.imwrite('img'+str(i)+'.jpg', links[i])
+            cv2.imwrite('img'+str(i)+'.jpg', links[i]*255)
             # mask_0 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 7)], 0, 255, 1)
             # mask_1 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 6)], 0, 255, 1)
             # mask_2 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 5)], 0, 255, 1)
