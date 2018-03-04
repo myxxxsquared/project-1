@@ -90,9 +90,10 @@ class data_churn(object):
             return cnt+directs[dir]
 
         for cnt_index in range(len(cnts)):
-            base = cv2.drawContours(np.zeros(img.shape[:2]), cnts, cnt_index, 255, 1)
+            base = cv2.drawContours(np.zeros(img.shape[:2]), cnts, cnt_index, 255, 1).astype(np.bool)
             for i in range(8):
-                mask_ = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 7-i)], 0, 255, 1)
+                mask_ = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 7-i)], 0, 255, 1).astype(np.bool)
+                print(base&mask_)
                 links[i][base&mask_] = 1.0
             # mask_0 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 7)], 0, 255, 1)
             # mask_1 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 6)], 0, 255, 1)
