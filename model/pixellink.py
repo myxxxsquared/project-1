@@ -115,7 +115,7 @@ class PixelLinkNetwork:
             ffsize = (ff.shape[0], ff.shape[1])
             if not ffsize[0] or not ffsize[1]:
                 ffsize = dynamic_shape[1:2]
-            prediction = tf.image.resize_bilinear(prediction, ffsize)  \
+            prediction = tf.image.resize_images(prediction, ffsize)  \
                 + self.conv2d(maps[i], (1, 1, maps[i].shape[3],
                                         ochannels), 'conv_%d' % (i,))
         return self.conv2d(prediction, (1, 1, ochannels, ochannels), 'conv_o')
