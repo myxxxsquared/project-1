@@ -250,8 +250,10 @@ def get_infer_generator(path):
         file_names = [path + name for name in os.listdir(path)]
         for file_name in file_names:
             features = dict()
-            features["input_img"] = cv2.imread(file_name).astype(np.float32)
-            yield features
+            img = cv2.imread(file_name).astype(np.float32)
+            if img:
+                features["input_img"] = cv2.imread(file_name).astype(np.float32)
+                yield features
     return func
 
 
