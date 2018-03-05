@@ -73,8 +73,8 @@ def load_pre_gen(file):
 
 
 ####on line data###########
-Q = mp.Queue(maxsize=3000)
-print('queue excuted')
+# Q = mp.Queue(maxsize=3000)
+# print('queue excuted')
 
 def enqueue(file_name, test_mode=False, real_test=False, is_syn=False, is_pixellink=True):
     img_name, img, cnts, mask, links, weight = loading_data(file_name, test_mode, real_test, is_syn, is_pixellink)
@@ -237,11 +237,6 @@ def get_eval_input():
 
 
 if __name__ == '__main__':
-    file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
-    # loading_data(file_names_totaltext_train[0],False,False,False,True)
-    start_queue('dasklfj')
-
-    thread_num = 10#params.thread_num
     file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)] #*params.pre_epoch
 
     for file_name in file_names_totaltext_train:
