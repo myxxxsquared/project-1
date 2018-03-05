@@ -12,7 +12,7 @@ import os
 import tensorflow as tf
 import numpy as np
 from utils.evaluate import evaluate
-import postprocessing
+# import postprocessing
 
 
 def _get_saver():
