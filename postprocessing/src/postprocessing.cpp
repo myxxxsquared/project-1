@@ -255,4 +255,15 @@ bool PostProcessor::postprocess_pixellink()
             it->second.at<uchar>(curpt) = 255;
         }
     }
+
+    vector<vector<Point> > newctn;
+    vector<Vec4i> h_useless;
+
+    for(auto& cnt: contours)
+    {
+        findContours(cnt.second, newctn, h_useless, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_KCOS);
+        regions.emplace_back();
+        auto &back = regions.back();
+        back.contours = newctn;
+    }
 }

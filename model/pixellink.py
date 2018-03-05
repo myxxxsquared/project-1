@@ -31,7 +31,7 @@ class PixelLinkNetwork:
             name=name)
 
     def pool(self, input, stride, name):
-        tf.nn.max_pool(
+        return tf.nn.max_pool(
             input,
             ksize=(1, 2, 2, 1),
             strides=stride,
