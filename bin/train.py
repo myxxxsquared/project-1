@@ -182,6 +182,7 @@ def main(args):
 
         tf.summary.scalar("learning_rate", learning_rate)
         tf.summary.scalar("loss", loss)
+
         print('create opt')
         # Create optimizer
         opt = tf.train.AdamOptimizer(learning_rate,
