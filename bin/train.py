@@ -219,7 +219,7 @@ def main(args):
                     max_to_keep=params.keep_checkpoint_max,
                     sharded=False
                 )
-            )
+            ),
             tf.train.SummarySaverHook(
                 save_steps=2,
                 save_secs=None,
