@@ -242,6 +242,11 @@ def get_eval_input():
     return features
 
 
+def get_inference_input(params):
+    feature = dict()
+    return feature
+
+
 if __name__ == '__main__':
     # start_queue('dlakfj')
     pass

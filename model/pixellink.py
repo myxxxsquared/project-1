@@ -107,17 +107,15 @@ class PixelLinkNetwork:
         return tf.concat([T, L], axis=3)
 
     def prediction_block(self, maps, ochannels):
-        # print(maps)
         prediction = self.conv2d(
             maps[0], (1, 1, maps[0].shape[3], ochannels), 'conv_0')
         for i in range(1, len(maps)):
             ff = maps[i]
             dynamic_shape = tf.shape(ff)
-            # ffsize = (ff.shape[1].values, ff.shape[2].values)
-            # if not ffsize[0] or not ffsize[1]:
-            ffsize = tf.convert_to_tensor(
-                (dynamic_shape[1], dynamic_shape[2]))
-                # print(ffsize)
+            ffsize = (ff.shape[1], ff.shape[2])
+            if not ffsize[0] or not ffsize[1]:
+                ffsize = tf.convert_to_tensor(
+                    (dynamic_shape[1], dynamic_shape[2]))
             prediction = tf.image.resize_images(prediction, ffsize)  \
                 + self.conv2d(maps[i], (1, 1, maps[i].shape[3],
                                         ochannels), 'conv_%d' % (i,))
@@ -152,16 +150,13 @@ class PixelLinkNetwork:
             k = tf.cast(tf.reduce_min(
                 (r*posnum + 1, negsum)), tf.int32)
 
-            # print(k.shape, k.dtype)
-            # print('-----')
+            print(k.shape, k.dtype)
+            print('-----')
             weighted_loss = cross_entropy[0] * weights
             pos_loss = pos_region * weighted_loss
             neg_loss = neg_region * weighted_loss
-            # print(neg_loss.dtype)
-            # print(tf.nn.top_k(neg_loss, k=k).shape)
-            # print(tf.nn.top_k(neg_loss, k=k).dtype)
             T_loss = (tf.reduce_sum(pos_loss) +
-                      tf.reduce_sum(tf.nn.top_k(neg_loss, k=k).values)) / (1 + r)
+                      tf.reduce_sum(tf.nn.top_k(neg_loss, k=k))) / (1 + r)
             T_loss = lambda_ * T_loss
 
         with tf.name_scope('L'):
@@ -189,7 +184,7 @@ class PixelLinkNetwork:
             imgsummary.append(tf.summary.image('inputimg', input[0]))
             for i in range(9):
                 imgsummary.append(tf.summary.image('map_%d'%(i,), maps[0, :, :, i:i+1]))
-                imgsummary.append(tf.summary.image('predict_%d'%(i,), tf.nn.softmax(prediction[0, :, :, 2*i:2*i+2])[:, :, 1:2]))
+                imgsummary.append(tf.summary.image('predict_%d'%(i,), tf.nn.softmax(prediction[0, :, :, 2*i:2*i+2])[:, :, :, 1:2]))
 
             losssummary = []
             losssummary.append(tf.summary.scalar('T_loss', T_loss))
