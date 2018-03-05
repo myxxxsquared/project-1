@@ -86,8 +86,8 @@ def enqueue(file_name, test_mode, real_test, is_syn, is_pixellink):
 
 
 def start_queue(params):
-    thread_num = params.thread_num
-    file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]*params.pre_epoch
+    thread_num = 10#params.thread_num
+    file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)] #*params.pre_epoch
 
     print('start')
     pool = mp.Pool(thread_num)
@@ -237,3 +237,4 @@ def get_eval_input():
 if __name__ == '__main__':
     file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
     # loading_data(file_names_totaltext_train[0],False,False,False,True)
+    start_queue('dasklfj')
