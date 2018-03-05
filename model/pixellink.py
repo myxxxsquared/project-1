@@ -153,17 +153,15 @@ class PixelLinkNetwork:
             k = tf.cast(tf.reduce_min(
                 (r*posnum + 1, negsum)), tf.int32)
 
-            print(k.shape, k.dtype)
-            print('-----')
             weighted_loss = cross_entropy[0] * weights
             pos_loss = pos_region * weighted_loss
-            neg_loss = neg_region * weighted_loss
+            neg_loss = neg_region * cross_entropy[0]
             pos_loss, neg_loss = tf.squeeze(pos_loss, 1), tf.squeeze(neg_loss, 1)
             # print(neg_loss.dtype)
             # print(tf.nn.top_k(neg_loss, k=k).shape)
             # print(tf.nn.top_k(neg_loss, k=k).dtype)
             T_loss = (tf.reduce_sum(pos_loss) +
-                      tf.reduce_sum(tf.nn.top_k(neg_loss, k=k).values)) / (1 + r)
+                      tf.reduce_mean(tf.nn.top_k(neg_loss, k=k).values) * r) / (1 + r)
             T_loss = lambda_ * T_loss
 
         with tf.name_scope('L'):
@@ -176,7 +174,7 @@ class PixelLinkNetwork:
             L_loss = tf.reduce_sum(pos_weights*link_loss) / (tf.reduce_sum(pos_weights) + 1e-5) + \
                 tf.reduce_sum(neg_weights*link_loss) / \
                 (tf.reduce_sum(neg_weights) + 1e-5)
-            L_loss = L_loss * tf.reduce_sum(maps[:, 0])
+            L_loss = L_loss
 
         return T_loss, L_loss, T_loss + L_loss
 
@@ -222,7 +220,7 @@ class PixelLinkNetwork:
             if params is None:
                 params = self.parameters
             with tf.variable_scope(self._scope, initializer=initializer,
-                                   reuse=reuse, custom_getter=cpu_variable_getter):
+                                   reuse=reuse):
                 loss, summary = self.loss(
                     features['input_img'], features['Labels'][:, :, :, 0:9], features['Labels'][:, :, :, 9], not bool(reuse))
                 return loss
@@ -239,7 +237,7 @@ class PixelLinkNetwork:
             # params.label_smoothing = 0.0
 
             with tf.variable_scope(self._scope):
-                prediction = model_graph(features, "eval", params)
+                prediction = self.infer(features)
 
             return prediction
 

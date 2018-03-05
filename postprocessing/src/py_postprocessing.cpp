@@ -41,15 +41,32 @@ static PyObject *py_postprocessing(PyObject *self, PyObject *args, PyObject *kw)
                     &pymaps, &pyconfig))
         return NULL;
 #pragma GCC diagnostic pop
-
-    if (!processor.map.init(pymaps))
-        return NULL;
     if (!processor.config.load_from(pyconfig))
         return NULL;
 
+    if(processor.config.is_pixellink)
     {
-        // PyAllowThreads allowthreads;
-        if (!processor.postprocess())
+        InferenceMap<Pixel_PixelLink> map;
+        if(!map.init(pymaps))
+            return NULL;
+        processor.inferencemap = &map;
+
+        PyAllowThreads allowthreads;
+        if (!processor.postprocess_pixellink())
+        {
+            failmsg("process failed.");
+            return NULL;
+        }
+    }
+    else
+    {
+        InferenceMap<Pixel_TCL> map;
+        if(!map.init(pymaps))
+            return NULL;
+        processor.inferencemap = &map;
+
+        PyAllowThreads allowthreads;
+        if (!processor.postprocess_tcl())
         {
             failmsg("process failed.");
             return NULL;
