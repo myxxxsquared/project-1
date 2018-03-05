@@ -65,6 +65,8 @@ def default_parameters():
         eval_steps=100,
         buffer=150,
         epoch=10,
+
+        output_scalar=2
     )
     return params
 

@@ -96,9 +96,9 @@ class PixelLinkNetwork:
     def prediction(self, vgg):
         maps = [vgg[x] for x in
                 {
-                    "2s": ['relu2_2', 'relu3_3', 'relu4_3', 'relu5_3', 'relu6_2'],
-                    "4s": ['relu3_3', 'relu4_3', 'relu5_3', 'relu6_2']}
-                [self.configs.output_scalar][::-1]]
+                    2: ['relu2_2', 'relu3_3', 'relu4_3', 'relu5_3', 'relu6_2'],
+                    4: ['relu3_3', 'relu4_3', 'relu5_3', 'relu6_2']}
+                [self.parameters.output_scalar][::-1]]
 
         with tf.variable_scope('T'):
             T = self.prediction_block(maps, 2)
