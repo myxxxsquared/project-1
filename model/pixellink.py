@@ -143,7 +143,7 @@ class PixelLinkNetwork:
             print(maps[:, i:i+1].shape)
             print(tf.stack([1 - maps[:, i:i+1], maps[:, i:i+1]], axis=-1).shape)
             cross_entropy.append(tf.losses.softmax_cross_entropy(
-                tf.stack([1 - maps[:, i:i+1], maps[:, i:i+1]], axis=-1), prediction[:, 2*i:2*i+1], reduction=tf.losses.Reduction.NONE))
+                tf.concat([1 - maps[:, i:i+1], maps[:, i:i+1]], axis=0), prediction[:, 2*i:2*i+1], reduction=tf.losses.Reduction.NONE))
 
         with tf.name_scope('T'):
             pos_region = maps[:, 0]
