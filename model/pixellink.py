@@ -109,7 +109,6 @@ class PixelLinkNetwork:
         return tf.concat([T, L], axis=3)
 
     def prediction_block(self, maps, ochannels):
-        # print(maps)
         prediction = self.conv2d(
             maps[0], (1, 1, maps[0].shape[3], ochannels), 'conv_0')
         for i in range(1, len(maps)):
@@ -154,8 +153,8 @@ class PixelLinkNetwork:
             k = tf.cast(tf.reduce_min(
                 (r*posnum + 1, negsum)), tf.int32)
 
-            # print(k.shape, k.dtype)
-            # print('-----')
+            print(k.shape, k.dtype)
+            print('-----')
             weighted_loss = cross_entropy[0] * weights
             pos_loss = pos_region * weighted_loss
             neg_loss = neg_region * weighted_loss
@@ -164,7 +163,7 @@ class PixelLinkNetwork:
             # print(tf.nn.top_k(neg_loss, k=k).shape)
             # print(tf.nn.top_k(neg_loss, k=k).dtype)
             T_loss = (tf.reduce_sum(pos_loss) +
-                      tf.reduce_sum(tf.nn.top_k(neg_loss, k=k).values)) / (1 + r)
+                      tf.reduce_sum(tf.nn.top_k(neg_loss, k=k))) / (1 + r)
             T_loss = lambda_ * T_loss
 
         with tf.name_scope('L'):

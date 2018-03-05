@@ -12,11 +12,14 @@ import os
 
 import numpy as np
 import tensorflow as tf
-import thumt.data.dataset as dataset
 import thumt.data.vocab as vocabulary
 import thumt.models as models
 import thumt.utils.inference as inference
 import thumt.utils.parallel as parallel
+
+import model.pixellink as pixellink
+import data.dataset as dataset
+import utils.parallel as parallel
 
 
 def parse_args():
@@ -142,9 +145,6 @@ def main(args):
             reader = tf.train.load_checkpoint(checkpoint)
 
             for (name, shape) in var_list:
-                if not name.startswith(model_cls_list[i].get_name()):
-                    continue
-
                 if name.find("losses_avg") >= 0:
                     continue
 
@@ -157,31 +157,26 @@ def main(args):
         model_fns = []
 
         for i in range(len(args.checkpoints)):
-            name = model_cls_list[i].get_name()
-            model = model_cls_list[i](params_list[i], name + "_%d" % i)
+            model = pixellink.PixelLinkNetwork(params_list[i], 'PixelLinkNetwork' + "_%d" % i)
             model_fn = model.get_inference_func()
             model_fns.append(model_fn)
 
         params = params_list[0]
-        # Read input file
-        sorted_keys, sorted_inputs = dataset.sort_input_file(args.input)
         # Build input queue
-        features = dataset.get_inference_input(sorted_inputs, params)
+        features = dataset.get_inference_input(params)
         # Create placeholders
         placeholders = []
 
         for i in range(len(params.device_list)):
             placeholders.append({
-                "source": tf.placeholder(tf.int32, [None, None],
-                                         "source_%d" % i),
-                "source_length": tf.placeholder(tf.int32, [None],
-                                                "source_length_%d" % i)
+                "input_img": tf.placeholder(tf.float32, [None, None, None],
+                                            "input_img_%d" % i)
             })
 
         # A list of outputs
         predictions = parallel.data_parallelism(
             params.device_list,
-            lambda f: inference.create_inference_graph(model_fns, f, params),
+            model_fns,
             placeholders)
 
         # Create assign ops
@@ -191,14 +186,13 @@ def main(args):
 
         for i in range(len(args.checkpoints)):
             un_init_var_list = []
-            name = model_cls_list[i].get_name()
 
             for v in all_var_list:
-                if v.name.startswith(name + "_%d" % i):
+                if v.name.startswith('PixelLinkNetwork' + "_%d" % i):
                     un_init_var_list.append(v)
 
             ops = set_variables(un_init_var_list, model_var_lists[i],
-                                name + "_%d" % i)
+                                'PixelLinkNetwork' + "_%d" % i)
             assign_ops.extend(ops)
 
         assign_op = tf.group(*assign_ops)
@@ -218,55 +212,52 @@ def main(args):
                     results.append(sess.run(predictions, feed_dict=feed_dict))
                     message = "Finished batch %d" % len(results)
                     tf.logging.log(tf.logging.INFO, message)
+                    #TODO: reconstruct and save
                 except tf.errors.OutOfRangeError:
                     break
 
-        # Convert to plain text
-        vocab = params.vocabulary["target"]
-        outputs = []
-        scores = []
-
-        for result in results:
-            for item in result[0]:
-                outputs.append(item.tolist())
-            for item in result[1]:
-                scores.append(item.tolist())
-
-        outputs = list(itertools.chain(*outputs))
-        scores = list(itertools.chain(*scores))
-
-        restored_inputs = []
-        restored_outputs = []
-        restored_scores = []
-
-        for index in range(len(sorted_inputs)):
-            restored_inputs.append(sorted_inputs[sorted_keys[index]])
-            restored_outputs.append(outputs[sorted_keys[index]])
-            restored_scores.append(scores[sorted_keys[index]])
-
-        # Write to file
-        with open(args.output, "w") as outfile:
-            count = 0
-            for outputs, scores in zip(restored_outputs, restored_scores):
-                for output, score in zip(outputs, scores):
-                    decoded = []
-                    for idx in output:
-                        if idx == params.mapping["target"][params.eos]:
-                            break
-                        decoded.append(vocab[idx])
-
-                    decoded = " ".join(decoded)
-
-                    if not args.verbose:
-                        outfile.write("%s\n" % decoded)
-                        break
-                    else:
-                        pattern = "%d ||| %s ||| %s ||| %f\n"
-                        source = restored_inputs[count]
-                        values = (count, source, decoded, score)
-                        outfile.write(pattern % values)
-
-                count += 1
+        # # Convert to plain text
+        # vocab = params.vocabulary["target"]
+        # outputs = []
+        # scores = []
+        #
+        # for result in results:
+        #     for item in result[0]:
+        #         outputs.append(item.tolist())
+        #     for item in result[1]:
+        #         scores.append(item.tolist())
+        #
+        # outputs = list(itertools.chain(*outputs))
+        # scores = list(itertools.chain(*scores))
+        #
+        # restored_inputs = []
+        # restored_outputs = []
+        # restored_scores = []
+        #
+        #
+        # # Write to file
+        # with open(args.output, "w") as outfile:
+        #     count = 0
+        #     for outputs, scores in zip(restored_outputs, restored_scores):
+        #         for output, score in zip(outputs, scores):
+        #             decoded = []
+        #             for idx in output:
+        #                 if idx == params.mapping["target"][params.eos]:
+        #                     break
+        #                 decoded.append(vocab[idx])
+        #
+        #             decoded = " ".join(decoded)
+        #
+        #             if not args.verbose:
+        #                 outfile.write("%s\n" % decoded)
+        #                 break
+        #             else:
+        #                 pattern = "%d ||| %s ||| %s ||| %f\n"
+        #                 source = restored_inputs[count]
+        #                 values = (count, source, decoded, score)
+        #                 outfile.write(pattern % values)
+        #
+        #         count += 1
 
 
 if __name__ == "__main__":
