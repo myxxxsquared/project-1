@@ -195,7 +195,7 @@ class PixelLinkNetwork:
         if withsum:
             return loss, self.summary(input, maps, weights, prediction, T_loss, L_loss, loss)
         else:
-            return loss
+            return loss, None
 
     def __init__(self, params):
         self.parameters = params
@@ -207,7 +207,8 @@ class PixelLinkNetwork:
                 params = self.parameters
             with tf.variable_scope(self._scope, initializer=initializer,
                                    reuse=reuse, custom_getter=cpu_variable_getter):
-                return self.loss(features['img'], features['maps'], features['weights'])
+                loss, summary = self.loss(features['img'], features['maps'], features['weights'], bool(reuse))
+                return loss
         return training_fn
 
     def get_evaluation_func(self):
