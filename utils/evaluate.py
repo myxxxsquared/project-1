@@ -84,9 +84,6 @@ def evaluate(img, cnts, is_text_cnts, maps,
         zeros = np.zeros((row, col), np.uint8)
         for x, y in instance:
             r = radius[x, y]
-            # print(r)
-            # print(type(r))
-            # be careful, in cv2, coordination is (col, row)
             zeros = cv2.circle(zeros, (y, x), r, (255), -1)
         _, cnt, _ = cv2.findContours(zeros, 1, 2)
         if len(cnt) > 1:
@@ -256,7 +253,7 @@ def evaluate(img, cnts, is_text_cnts, maps,
     pascal_precision = np.sum(pascal_pred_score) / re_cnts_num
 
     return totaltext_recall, totaltext_precision, \
-        pascal_recall, pascal_precision
+        pascal_recall, pascal_precision, reconstructed_cnts, viz
 
 
 if __name__ == '__main__':

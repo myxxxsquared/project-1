@@ -531,7 +531,8 @@ class DataAugmentor(object):
             y_left = max(0, center_point[1] - 256)
             return {**transformed,
                     'left_top': (x_top, y_left),
-                    'right_bottom': (x_top + 512, y_left + 512)
+                    'right_bottom': (x_top + 512, y_left + 512),
+                    'care': input_data['care']
                     }
 
     @staticmethod
