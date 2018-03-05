@@ -1,21 +1,10 @@
 #!/usr/bin/env python
 # coding=utf-8
-# Copyright 2018 The THUMT Authors
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import argparse
-import itertools
 import os
 
-import numpy as np
 import tensorflow as tf
-import thumt.data.vocab as vocabulary
-import thumt.models as models
-import thumt.utils.inference as inference
-import thumt.utils.parallel as parallel
 
 import model.pixellink as pixellink
 import data.dataset as dataset
@@ -24,7 +13,7 @@ import utils.parallel as parallel
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Infering pic using existing models",
+        description="Infering images using existing models",
         usage="infer.py [<args>] [-h | --help]"
     )
 
@@ -35,16 +24,7 @@ def parse_args():
                         help="Path of output file")
     parser.add_argument("--checkpoints", type=str, nargs="+", required=True,
                         help="Path of trained models")
-    parser.add_argument("--vocabulary", type=str, nargs=2, required=True,
-                        help="Path of source and target vocabulary")
 
-    # model and configuration
-    parser.add_argument("--models", type=str, required=True, nargs="+",
-                        help="Name of the model")
-    parser.add_argument("--parameters", type=str,
-                        help="Additional hyper parameters")
-    parser.add_argument("--verbose", action="store_true",
-                        help="Enable verbose output")
 
     return parser.parse_args()
 
