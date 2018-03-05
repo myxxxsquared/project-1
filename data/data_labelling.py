@@ -99,7 +99,7 @@ class data_churn(object):
             base = cv2.fillPoly(np.zeros(img.shape[:2]), [cnts[cnt_index]], 255).astype(np.bool)
             temp = base > 0
             weight[temp] = 1/np.sum(temp)/len(cnts)
-            print(weight)
+            print(1/np.sum(temp)/len(cnts))
             for i in range(8):
                 mask_ = cv2.fillPoly(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 7-i)], 255).astype(np.bool)
                 links[i][base&mask_] = 1.0
