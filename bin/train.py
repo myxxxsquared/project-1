@@ -228,6 +228,7 @@ def main(args):
             )
         ]
 
+
         config = session_config(params)
 
         train_hooks.append(
