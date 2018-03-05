@@ -198,7 +198,7 @@ def main(args):
             colocate_gradients_with_ops=True
         )
 
-        summary_op = tf.summary.merge_all()
+        # summary_op = tf.summary.merge_all()
         print('create hooks')
         # Add hooks
         train_hooks = [
@@ -220,11 +220,11 @@ def main(args):
                     sharded=False
                 )
             ),
-            tf.train.SummarySaverHook(
-                save_steps=2,
-                save_secs=None,
-                # output_dir=params.output,
-                summary_op=summary_op
+            # tf.train.SummarySaverHook(
+            #     save_steps=2,
+            #     save_secs=None,
+            #     # output_dir=params.output,
+            #     summary_op=summary_op
             )
         ]
 
