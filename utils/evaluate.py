@@ -25,7 +25,7 @@ def _intersection(re_mask_list):
     return score
 
 
-def evaluate(img, cnts, reconstructed_cnts, care, fsk=0.8, tp=0.4, tr=0.8, merge_th=0.2):
+def evaluate_discard(img, cnts, reconstructed_cnts, care, fsk=0.8, tp=0.4, tr=0.8, merge_th=0.2):
 
     reconstructed_cnts = [np.reshape(np.array(reconstructed_cnt, np.float32), (-1, 1, 2))
                           for reconstructed_cnt in reconstructed_cnts]
@@ -189,6 +189,162 @@ def evaluate(img, cnts, reconstructed_cnts, care, fsk=0.8, tp=0.4, tr=0.8, merge
 
     return totaltext_recall, totaltext_precision, \
         pascal_recall, pascal_precision, reconstructed_cnts, viz
+
+
+def evaluate(img, cnts, resultcnts, care):
+    row, col = img.shape[:2]
+    def drawcontour(cnt):
+        img = np.zeros((row, col, 1), dtype=np.uint8)
+        cv2.drawContours(img, [cnt], -1, 255, -1)
+        return img
+    cnts_mask = [drawcontour(cnt) for cnt in cnts]
+    merged_re_cnts_mask = [drawcontour(cnt) for cnt in resultcnts]
+    cnts_num = len(cnts)
+    re_cnts_num = len(resultcnts)
+
+    fsk = 0.8
+    tp = 0.4
+    tr = 0.8
+
+    precise = np.zeros((cnts_num, re_cnts_num), np.float32)
+    for i in range(cnts_num):
+        for j in range(re_cnts_num):
+            precise[i, j] = np.sum(
+                cnts_mask[i] & merged_re_cnts_mask[j]) / np.sum(merged_re_cnts_mask[j])
+
+    recall = np.zeros((cnts_num, re_cnts_num), np.float32)
+    for i in range(cnts_num):
+        for j in range(re_cnts_num):
+            recall[i, j] = np.sum(
+                cnts_mask[i] & merged_re_cnts_mask[j]) / np.sum(cnts_mask[i])
+
+    IOU = np.zeros((cnts_num, re_cnts_num), np.float32)
+    for i in range(cnts_num):
+        for j in range(re_cnts_num):
+            IOU[i, j] = np.sum(cnts_mask[i] & merged_re_cnts_mask[j]) / \
+                np.sum(cnts_mask[i] | merged_re_cnts_mask[j])
+
+    # print(precise, recall, IOU)
+
+    gt_score = np.zeros(cnts_num, np.float32)
+    pred_score = np.zeros(re_cnts_num, np.float32)
+    flag_gt = np.zeros(cnts_num, np.int32)
+    flag_pred = np.zeros(re_cnts_num, np.int32)
+
+    not_care_gt = []
+    not_care_pred = []
+    # one to one
+    for i in range(cnts_num):
+        match_r_num = np.sum(recall[i,:]>=tr)
+        match_p_num = np.sum(precise[i,:]>=tp)
+        if match_p_num==1 and match_r_num==1:
+            gt_score[i] = 1.0
+            flag_gt[i] = 1
+            j = int(np.argwhere(precise[i,:]>=tp))
+            if care[i] == 0:
+                not_care_gt.append(i)
+                not_care_pred.append(j)
+            pred_score[j] = 1.0
+            flag_pred[j] = 1
+
+    # one to many
+    for i in range(cnts_num):
+        if flag_gt[i] >0:
+            continue
+        index_list = []
+        for j in range(re_cnts_num):
+            if precise[i,j] >= tp and flag_pred[j] == 0:
+                index_list.append(j)
+        r_sum = 0.0
+        for j in index_list:
+            r_sum += recall[i,j]
+        if r_sum >= tr:
+            if len(index_list) > 1:
+                gt_score[i] = fsk
+                flag_gt[i] = 1
+                for j in index_list:
+                    pred_score[j] = fsk
+                    flag_pred[j] = 1
+                if care[i] == 0:
+                    not_care_gt.append(i)
+                    for j in index_list:
+                        not_care_pred.append(j)
+
+    # many to one
+    for j in range(re_cnts_num):
+        if flag_pred[j] >0:
+            continue
+        index_list = []
+        for i in range(cnts_num):
+            if recall[i,j] >= tr and flag_gt[i] == 0:
+                index_list.append(i)
+        p_sum = 0.0
+        for i in index_list:
+            p_sum += precise[i,j]
+        if p_sum >= tp:
+            if len(index_list) > 1:
+                pred_score[j] = fsk
+                flag_pred[j] = 1
+                for i in index_list:
+                    gt_score[i] = fsk
+                    flag_gt[i] = 1
+
+    # the rest not care i
+    for i in range(cnts_num):
+        if care[i] ==0:
+            not_care_gt.append(i)
+
+    temp_gt_score =[]
+    for i in range(cnts_num):
+        if i not in not_care_gt:
+            temp_gt_score.append(gt_score[i])
+    temp_pred_score =[]
+    for j in range(re_cnts_num):
+        if j not in not_care_pred:
+            temp_pred_score.append(pred_score[j])
+    gt_score = temp_gt_score
+    pred_score = temp_pred_score
+
+    TR = np.sum(gt_score) / len(gt_score) if len(gt_score) > 0 else 0
+    TP = np.sum(pred_score) / len(pred_score)  if len(pred_score) > 0 else 0
+
+    pascal_not_care_gt = []
+    pascal_not_care_pred = []
+
+    pascal_gt_score = np.zeros((cnts_num), np.float32)
+    pascal_pred_score = np.zeros((re_cnts_num), np.float32)
+    for i in range(cnts_num):
+        for j in range(re_cnts_num):
+            if IOU[i, j] >= 0.5:
+                if pascal_gt_score[i] < 0.5 and pascal_pred_score[j] < 0.5:
+                    if care[i] == 0:
+                        pascal_not_care_gt.append(i)
+                        pascal_not_care_pred.append(j)
+                    pascal_pred_score[j] = 1.0
+                    pascal_gt_score[i] = 1.0
+
+    # the rest not care i
+    for i in range(cnts_num):
+        if care[i] ==0:
+            pascal_not_care_gt.append(i)
+
+    pascal_temp_gt_score =[]
+    for i in range(cnts_num):
+        if i not in pascal_not_care_gt:
+            pascal_temp_gt_score.append(pascal_gt_score[i])
+
+    pascal_temp_pred_score =[]
+    for j in range(re_cnts_num):
+        if j not in pascal_not_care_pred:
+            pascal_temp_pred_score.append(pascal_pred_score[j])
+
+    pascal_gt_score = pascal_temp_gt_score
+    pascal_pred_score = pascal_temp_pred_score
+
+    PR = np.sum(pascal_gt_score) / len(pascal_gt_score) if cnts_num > 0 else 0
+    PP = np.sum(pascal_pred_score) / len(pascal_pred_score) if re_cnts_num > 0 else 0
+
+    return TR, TP, len(gt_score), len(pred_score),  PR, PP, len(pascal_gt_score), len(pascal_pred_score)
 
 
 if __name__ == '__main__':

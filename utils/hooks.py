@@ -156,7 +156,7 @@ def _evaluate(eval_fn, input_fn, path, config):
             config=config
         )
 
-        recall_list, precise_list = [], []
+        recall_sum, gt_n_sum, precise_sum, pred_n_sum = 0,0,0,0
         with tf.train.MonitoredSession(session_creator=sess_creator) as sess:
             tf.logging.info('start evaluation')
             time = 0
@@ -172,17 +172,20 @@ def _evaluate(eval_fn, input_fn, path, config):
                 care = outputs['care']
                 imname = outputs['imname']
                 print(imname)
-                # for i in range(img.shape[0]):
-                #     re_cnts = reconstruct(img[i], prediction)
-                #     res = evaluate(img[i],cnts,re_cnts,care)
-                    # recall_list.append(res[0])
-                    # precise_list.append(res[1])
-                    # tf.logging.info('recall: '+str(res[0]))
-                    # tf.logging.info('precise: '+str(res[1]))
-            # tf.logging.info('end evaluation')
-        # ave_r = sum(recall_list)/len(recall_list)
-        # ave_p = sum(precise_list)/len(precise_list)
-        # ave_f = 1/(1/ave_r+1/ave_p)
+                for i in range(img.shape[0]):
+                    re_cnts = reconstruct(img[i], prediction)
+                    TR, TP, T_gt_n, T_pred_n, PR, PP, P_gt_n, P_pred_n = \
+                        evaluate(img[i],cnts,re_cnts,care)
+                    tf.logging.info(imname+' recall: '+str(TR)+'; precise: '+str(TP))
+                    recall_sum+=TR*T_gt_n
+                    precise_sum+=TP*T_pred_n
+                    gt_n_sum+=T_gt_n
+                    pred_n_sum+=T_pred_n
+        ave_r = recall_sum/gt_n_sum
+        ave_p = precise_sum/pred_n_sum
+        ave_f = 1/(1/ave_r+1/ave_p)
+        tf.logging.info('ave recall:{}, precise:{}, f:{}'.format(ave_r,ave_p,ave_f))
+        tf.logging.info('end evaluation')
         return ave_f
 
 
