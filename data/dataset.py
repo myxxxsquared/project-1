@@ -240,3 +240,13 @@ if __name__ == '__main__':
     file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
     # loading_data(file_names_totaltext_train[0],False,False,False,True)
     start_queue('dasklfj')
+
+    thread_num = 10#params.thread_num
+    file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)] #*params.pre_epoch
+
+    print('start')
+    pool = mp.Pool(thread_num)
+    for file_name in file_names_totaltext_train:
+        print(file_name)
+        pool.apply_async(enqueue, (file_name, False, False, False, True))
+    print(Q.qsize())
