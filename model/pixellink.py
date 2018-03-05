@@ -112,8 +112,8 @@ class PixelLinkNetwork:
         for i in range(1, len(maps)):
             ff = maps[i]
             dynamic_shape = tf.shape(ff)
-            ffsize = (ff.shape[0] or dynamic_shape[0],
-                      ff.shape[1] or dynamic_shape[1])
+            ffsize = tf.pack((ff.shape[0] or dynamic_shape[0],
+                      ff.shape[1] or dynamic_shape[1]))
             prediction = tf.image.resize_bilinear(prediction, ffsize)  \
                 + self.conv2d(maps[i], (1, 1, maps[i].shape[3],
                                         ochannels), 'conv_%d' % (i,))
