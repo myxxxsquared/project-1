@@ -179,8 +179,9 @@ def main(args):
         learning_rate = get_learning_rate_decay(params.learning_rate,
                                                 global_step, params)
         learning_rate = tf.convert_to_tensor(learning_rate, dtype=tf.float32)
-        tf.summary.scalar("learning_rate", learning_rate)
 
+        tf.summary.scalar("learning_rate", learning_rate)
+        tf.summary.scalar("loss", loss)
         print('create opt')
         # Create optimizer
         opt = tf.train.AdamOptimizer(learning_rate,
