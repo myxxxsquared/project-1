@@ -152,9 +152,12 @@ class PixelLinkNetwork:
             negsum = tf.reduce_sum(neg_region) + 1e-5
             k = tf.cast(tf.reduce_min(
                 (r*posnum + 1, negsum)), tf.int32)
+            print(k.shape, k.dtype)
             weighted_loss = cross_entropy[0] * weights
             pos_loss = pos_region * weighted_loss
             neg_loss = neg_region * weighted_loss
+            print(tf.reduce_sum(tf.nn.top_k(neg_loss, k=k)).shape)
+            print(tf.reduce_sum(tf.nn.top_k(neg_loss, k=k)).dtype)
             T_loss = (tf.reduce_sum(pos_loss) +
                       tf.reduce_sum(tf.nn.top_k(neg_loss, k=k))) / (1 + r)
             T_loss = lambda_ * T_loss
