@@ -112,9 +112,9 @@ class PixelLinkNetwork:
         for i in range(1, len(maps)):
             ff = maps[i]
             dynamic_shape = tf.shape(ff)
-            ffsize = (ff.shape[0], ff.shape[1])
+            ffsize = (ff.shape[1], ff.shape[2])
             if not ffsize[0] or not ffsize[1]:
-                ffsize = dynamic_shape[1:2]
+                ffsize = (dynamic_shape[1], dynamic_shape[2])
             prediction = tf.image.resize_images(prediction, ffsize)  \
                 + self.conv2d(maps[i], (1, 1, maps[i].shape[3],
                                         ochannels), 'conv_%d' % (i,))
