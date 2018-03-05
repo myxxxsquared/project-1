@@ -93,6 +93,7 @@ def start_queue(params):
     pool = mp.Pool(thread_num)
     for file_name in file_names_totaltext_train:
         pool.apply_async(enqueue, (file_name, False, False, False, True))
+    print(Q.qsize())
     print('end')
 
 def get_generator(params, aqueue):
