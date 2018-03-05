@@ -77,8 +77,7 @@ Q = mp.Queue(maxsize=3000)
 print('queue excuted')
 
 def enqueue(file_name, test_mode=False, real_test=False, is_syn=False, is_pixellink=True):
-    img_name, img, cnts, mask, links, weight = loading_data(file_name, test_mode, real_test, is_syn, is_pixellink)
-    maps = np.stack([mask, links, weight],-1)
+    img_name, img, cnts, maps = loading_data(file_name, test_mode, real_test, is_syn, is_pixellink)
     print(img.shape)
     print(maps.shape)
     Q.put({'input_img': img,
