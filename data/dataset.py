@@ -6,6 +6,7 @@ from data.data_labelling import data_churn
 import multiprocessing as mp
 import pickle
 import gzip
+import cv2
 
 TOTAL_TRAIN_DIR = '/home/rjq/data_cleaned/pkl/totaltext_train_care/'
 TOTAL_TEST_DIR = '/home/rjq/data_cleaned/pkl/totaltext_test_care/'
@@ -242,9 +243,28 @@ def get_eval_input():
     return features
 
 
-def get_inference_input(params):
-    feature = dict()
-    return feature
+
+
+def get_infer_generator(path):
+    def func():
+        file_names = [path + name for name in os.listdir(path)]
+        for file_name in file_names:
+            features = dict()
+            features["input_img"] = cv2.imread(file_name).astype(np.float32)
+            yield features
+    return func
+
+
+def get_inference_input(path):
+    g = get_infer_generator(path)
+    infer_dataset = tf.data.Dataset.from_generator(g,{'input_img': tf.float32},
+                                                  {'input_img': (
+                                                      tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
+                                                      tf.Dimension(None))}
+                                                  )
+    iterator = infer_dataset.make_one_shot_iterator()
+    features = iterator.get_next()
+    return features
 
 
 if __name__ == '__main__':
