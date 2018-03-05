@@ -173,8 +173,8 @@ def _evaluate(eval_fn, input_fn, path, config):
                 imname = outputs['imname']
                 print(imname)
                 # for i in range(img.shape[0]):
-                    # re_cnts = reconstruct(img[i], prediction)
-                    # res = evaluate(img[i],cnts,re_cnts,care)
+                #     re_cnts = reconstruct(img[i], prediction)
+                #     res = evaluate(img[i],cnts,re_cnts,care)
                     # recall_list.append(res[0])
                     # precise_list.append(res[1])
                     # tf.logging.info('recall: '+str(res[0]))

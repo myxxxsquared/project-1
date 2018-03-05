@@ -86,11 +86,12 @@ def enqueue(file_name, test_mode=False, real_test=False, is_syn=False, is_pixell
 
 def start_queue(params):
     thread_num = params.thread_num
-    file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)] *params.pre_epoch
+    file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)] #*params.pre_epoch
 
     print('start')
     pool = mp.Pool(thread_num)
-    pool.map_async(enqueue,file_names_totaltext_train)
+    # pool.map_async(enqueue,file_names_totaltext_train)
+    pool.map(enqueue,file_names_totaltext_train)
     print(Q.qsize())
     print('end')
 
