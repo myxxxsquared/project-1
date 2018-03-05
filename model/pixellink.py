@@ -107,15 +107,17 @@ class PixelLinkNetwork:
         return tf.concat([T, L], axis=3)
 
     def prediction_block(self, maps, ochannels):
+        # print(maps)
         prediction = self.conv2d(
             maps[0], (1, 1, maps[0].shape[3], ochannels), 'conv_0')
         for i in range(1, len(maps)):
             ff = maps[i]
             dynamic_shape = tf.shape(ff)
-            ffsize = (ff.shape[1], ff.shape[2])
-            if not ffsize[0] or not ffsize[1]:
-                ffsize = tf.convert_to_tensor(
-                    (dynamic_shape[1], dynamic_shape[2]))
+            # ffsize = (ff.shape[1].values, ff.shape[2].values)
+            # if not ffsize[0] or not ffsize[1]:
+            ffsize = tf.convert_to_tensor(
+                (dynamic_shape[1], dynamic_shape[2]))
+                # print(ffsize)
             prediction = tf.image.resize_images(prediction, ffsize)  \
                 + self.conv2d(maps[i], (1, 1, maps[i].shape[3],
                                         ochannels), 'conv_%d' % (i,))
