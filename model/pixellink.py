@@ -161,7 +161,7 @@ class PixelLinkNetwork:
             weights = tf.reshape(weights, (-1, 1))
             pos_weights = pos_region * weights
             neg_weights = neg_region * weights
-            L_loss = tf.reduce_sum(pos_weights*link_loss) / tf.reduce_sum(pos_weights) + tf.reduce_sum(neg_weights*link_loss) / tf.reduce_sum(neg_weights)
+            L_loss = tf.reduce_sum(pos_weights*link_loss) / (tf.reduce_sum(pos_weights) + 1e-5) + tf.reduce_sum(neg_weights*link_loss) / (tf.reduce_sum(neg_weights) + 1e-5)
             L_loss = L_loss * tf.reduce_sum(maps[:, 0])
 
         return T_loss, L_loss, T_loss + L_loss
