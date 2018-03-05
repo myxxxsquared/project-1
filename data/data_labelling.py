@@ -75,13 +75,18 @@ class data_churn(object):
         # cv2.imwrite('img.jpg', img)
         # cv2.imwrite('cnts.jpg', cv2.drawContours(img, cnts, -1,255,1))
 
+        map_shape = (img.shape[0]//2, img.shape[1]//2)
+        left_top = [left_top[0]//2, left_top[1]//2]
+        right_bottom = [right_bottom[0]//2,right_bottom[1]//2]
+        cnts = [cnt//2 for cnt in cnts]
+
         # mask
-        mask = cv2.drawContours(np.zeros(img.shape[:2]), cnts, -1, 255, 1)
+        mask = cv2.drawContours(np.zeros(map_shape), cnts, -1, 255, 1)
         mask = np.sign(mask).astype(np.float32)
 
         # links & weight
-        links = [np.zeros(img.shape[:2], np.float32) for _ in range(8)]
-        weight = np.zeros(img.shape[:2], np.float32)
+        links = [np.zeros(map_shape, np.float32) for _ in range(8)]
+        weight = np.zeros(map_shape, np.float32)
 
         def _move(cnt, dir):
             '''
@@ -96,16 +101,18 @@ class data_churn(object):
             return cnt+directs[dir]
 
         for cnt_index in range(len(cnts)):
-            base = cv2.fillPoly(np.zeros(img.shape[:2]), [cnts[cnt_index]], 255).astype(np.bool)
+            base = cv2.fillPoly(np.zeros(map_shape), [cnts[cnt_index]], 255).astype(np.bool)
             temp = base > 0
             weight[temp] = 1/np.sum(temp)/len(cnts)
             # print(1/np.sum(temp)/len(cnts))
             for i in range(8):
-                mask_ = cv2.fillPoly(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 7-i)], 255).astype(np.bool)
+                mask_ = cv2.fillPoly(np.zeros(map_shape), [_move(cnts[cnt_index], 7-i)], 255).astype(np.bool)
                 links[i][base&mask_] = 1.0
 
         # for i in range(8):
         #     cv2.imwrite('img'+str(i)+'.jpg', links[i]*255)
 
         maps = np.stack([mask]+ links+[weight], -1)
+        img = img[left_top[0]:right_bottom[0], left_top[1]:right_bottom[1], :]
+        maps = maps[left_top[0]:right_bottom[0], left_top[1]:right_bottom[1], :]
         return img_name, img, cnts, maps

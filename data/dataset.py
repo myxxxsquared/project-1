@@ -85,8 +85,8 @@ def enqueue(file_name, test_mode=False, real_test=False, is_syn=False, is_pixell
 
 
 def start_queue(params):
-    thread_num = 10#params.thread_num
-    file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)] #*params.pre_epoch
+    thread_num = 10# params.thread_num
+    file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]# *params.pre_epoch
 
     print('start')
     pool = mp.Pool(thread_num)
@@ -94,7 +94,7 @@ def start_queue(params):
     print(Q.qsize())
     print('end')
 
-def get_generator(params, aqueue):
+def get_generator(aqueue):
     def func():
         while True:
             features = aqueue.get()
@@ -104,7 +104,7 @@ def get_generator(params, aqueue):
 
 
 def get_train_input(params):
-    g = get_generator(params, Q)
+    g = get_generator(Q)
     train_dataset = tf.data.Dataset.from_generator(g, {'input_img':tf.float32,
                                                         'Labels': tf.float32},
                                                    {'input_img': (tf.Dimension(None),tf.Dimension(None),tf.Dimension(None)),
@@ -232,8 +232,8 @@ def get_eval_input():
 
 
 if __name__ == '__main__':
-    start_queue('dkslafj')
-
+    start_queue('dlakfj')
+    pass
     # file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
     #
     # for file_name in file_names_totaltext_train:
