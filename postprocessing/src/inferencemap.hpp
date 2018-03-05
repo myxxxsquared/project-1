@@ -3,9 +3,15 @@
 
 #include "pythonheader.hpp"
 
-struct InferencePixel
+struct Pixel_TCL
 {
     float tcl, radius, cos, sin, tr;
+};
+
+struct Pixel_PixelLink
+{
+    float tr;
+    float link[8];
 };
 
 template <typename PIXEL_T>

@@ -22,14 +22,20 @@ class PostProcessor
 {
   public:
     ProcessConfig config;
-    InferenceMap map;
+    void *inferencemap;
     Mat search_mark;
     Mat result;
     Mat trmap;
+    int width;
+    int height;
 
     vector<RegionInfo> regions;
 
-    bool postprocess();
+    bool postprocess_pixellink();
+    bool postprocess_tcl();
+
+    Point2i topoint(int i);
+    int toint(Point2i pt);
 
     static vector<Point2i> generate_random_vector(int rows, int cols);
     void search_contour(Point2i pt);
