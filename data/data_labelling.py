@@ -72,8 +72,9 @@ class data_churn(object):
 
     def _pixellink_labeling(self, img_name, img, cnts, is_text_cnts, left_top, right_bottom, chars, care):
 
-        cv2.imwrite('img.jpg', img)
-        cv2.imwrite('cnts.jpg', cv2.drawContours(img, cnts, -1,255,1))
+        # cv2.imwrite('img.jpg', img)
+        # cv2.imwrite('cnts.jpg', cv2.drawContours(img, cnts, -1,255,1))
+
         # mask
         mask = cv2.drawContours(np.zeros(img.shape[:2]), cnts, -1, 255, 1)
         mask = np.sign(mask).astype(np.float32)
@@ -81,13 +82,12 @@ class data_churn(object):
         # links & weight
         links = [np.zeros(img.shape[:2], np.float32) for _ in range(8)]
         weight = np.zeros(img.shape[:2], np.float32)
-        '''
-        0 1 2
-        3 x 4
-        5 6 7
-        '''
+
         def _move(cnt, dir):
             '''
+            0 1 2
+            3 x 4
+            5 6 7
             :param cnt: np shape (n, 1, 2) ord: (col, row)
             :param direct:
             :return:
@@ -99,7 +99,7 @@ class data_churn(object):
             base = cv2.fillPoly(np.zeros(img.shape[:2]), [cnts[cnt_index]], 255).astype(np.bool)
             temp = base > 0
             weight[temp] = 1/np.sum(temp)/len(cnts)
-            print(1/np.sum(temp)/len(cnts))
+            # print(1/np.sum(temp)/len(cnts))
             for i in range(8):
                 mask_ = cv2.fillPoly(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 7-i)], 255).astype(np.bool)
                 links[i][base&mask_] = 1.0
@@ -107,6 +107,4 @@ class data_churn(object):
         for i in range(8):
             cv2.imwrite('img'+str(i)+'.jpg', links[i]*255)
 
-
-        maps = 0
-        return img_name, img, maps, cnts
+        return img_name, img, cnts, mask, links, weight

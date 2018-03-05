@@ -77,8 +77,11 @@ Q = mp.Queue(maxsize=3000)
 print('queue excuted')
 
 def enqueue(file_name, test_mode, real_test, is_syn, is_pixellink):
-    img_name, img, maps, cnts = loading_data(file_name, test_mode, real_test, is_syn, is_pixellink)
-    q.put({'input_img': img,
+    img_name, img, cnts, mask, links, weight = loading_data(file_name, test_mode, real_test, is_syn, is_pixellink)
+    maps = np.stack([mask, links, weight],-1)
+    print(img.shape)
+    print(maps.shape)
+    Q.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
 
 
@@ -233,4 +236,4 @@ def get_eval_input():
 
 if __name__ == '__main__':
     file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
-    loading_data(file_names_totaltext_train[0],False,False,False,True)
+    # loading_data(file_names_totaltext_train[0],False,False,False,True)
