@@ -78,8 +78,9 @@ class data_churn(object):
         mask = cv2.drawContours(np.zeros(img.shape[:2]), cnts, -1, 255, 1)
         mask = np.sign(mask).astype(np.float32)
 
-        # links
+        # links & weight
         links = [np.zeros(img.shape[:2], np.float32) for _ in range(8)]
+        weight = np.zeros(img.shape[:2], np.float32)
         '''
         0 1 2
         3 x 4
@@ -96,23 +97,15 @@ class data_churn(object):
 
         for cnt_index in range(len(cnts)):
             base = cv2.fillPoly(np.zeros(img.shape[:2]), [cnts[cnt_index]], 255).astype(np.bool)
+            temp = base > 0
+            weight[temp] = 1/np.sum(temp)/len(cnts)
+            print(weight)
             for i in range(8):
                 mask_ = cv2.fillPoly(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 7-i)], 255).astype(np.bool)
                 links[i][base&mask_] = 1.0
 
         for i in range(8):
             cv2.imwrite('img'+str(i)+'.jpg', links[i]*255)
-
-        # weight
-
-            # mask_0 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 7)], 0, 255, 1)
-            # mask_1 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 6)], 0, 255, 1)
-            # mask_2 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 5)], 0, 255, 1)
-            # mask_3 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 4)], 0, 255, 1)
-            # mask_4 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 3)], 0, 255, 1)
-            # mask_5 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 2)], 0, 255, 1)
-            # mask_6 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 1)], 0, 255, 1)
-            # mask_7 = cv2.drawContours(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 0)], 0, 255, 1)
 
 
         maps = 0
