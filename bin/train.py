@@ -135,7 +135,7 @@ def main(args):
     with tf.Graph().as_default():
         dataset.start_queue(params)
         features = dataset.get_train_input(params)
-
+        print(features)
         # Build model
         initializer = get_initializer(params)
         # model = LineBased.Model(params)
