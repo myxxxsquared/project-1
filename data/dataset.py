@@ -76,7 +76,7 @@ def load_pre_gen(file):
 Q = mp.Queue(maxsize=3000)
 print('queue excuted')
 
-def enqueue(file_name, test_mode, real_test, is_syn, is_pixellink):
+def enqueue(file_name, test_mode=False, real_test=False, is_syn=False, is_pixellink=True):
     img_name, img, cnts, mask, links, weight = loading_data(file_name, test_mode, real_test, is_syn, is_pixellink)
     maps = np.stack([mask, links, weight],-1)
     print(img.shape)
@@ -93,7 +93,7 @@ def start_queue(params):
     pool = mp.Pool(thread_num)
     for file_name in file_names_totaltext_train:
         print(file_name)
-        pool.apply_async(enqueue, (file_name, False, False, False, True))
+        pool.apply_async(enqueue, (file_name, ))
     print(Q.qsize())
     print('end')
 
