@@ -77,6 +77,16 @@ def override_parameters(params, args):
     return params
 
 
+def export_params(output_dir, name, params):
+    if not tf.gfile.Exists(output_dir):
+        tf.gfile.MkDir(output_dir)
+
+    # Save params as params.json
+    filename = os.path.join(output_dir, name)
+    with tf.gfile.Open(filename, "w") as fd:
+        fd.write(params.to_json())
+
+
 def get_initializer(params):
     if params.initializer == "uniform":
         max_val = params.initializer_gain
@@ -131,7 +141,7 @@ def main(args):
     tf.logging.set_verbosity(tf.logging.INFO)
     params = default_parameters()
     override_parameters(params, args)
-
+    export_params(params.output, "params.json", params)
 
     # Build Graph
     with tf.Graph().as_default():

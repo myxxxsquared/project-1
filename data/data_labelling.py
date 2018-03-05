@@ -76,8 +76,7 @@ class data_churn(object):
         # cv2.imwrite('cnts.jpg', cv2.drawContours(img, cnts, -1,255,1))
 
         map_shape = (img.shape[0]//2, img.shape[1]//2)
-        left_top = [left_top[0]//2, left_top[1]//2]
-        right_bottom = [right_bottom[0]//2,right_bottom[1]//2]
+
         cnts = [cnt//2 for cnt in cnts]
 
         # mask
@@ -114,5 +113,7 @@ class data_churn(object):
 
         maps = np.stack([mask]+ links+[weight], -1)
         img = img[left_top[0]:right_bottom[0], left_top[1]:right_bottom[1], :]
+        left_top = [left_top[0]//2, left_top[1]//2]
+        right_bottom = [right_bottom[0]//2,right_bottom[1]//2]
         maps = maps[left_top[0]:right_bottom[0], left_top[1]:right_bottom[1], :]
         return img_name, img, cnts, maps
