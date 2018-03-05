@@ -1,4 +1,5 @@
 
+import copy
 import tensorflow as tf
 import numpy as np
 from tensorflow.contrib.layers import xavier_initializer_conv2d as xavier
@@ -26,9 +27,6 @@ class PixelLinkNetwork:
             strides=stride,
             padding="SAME",
             name=name)
-
-    def __init__(self, configs):
-        self.configs = configs
 
     def pre_processing(self, image):
         return (image - np.reshape((123.68, 116.78, 103.94), (1, 1, 1, 3))) / 256
@@ -119,35 +117,42 @@ class PixelLinkNetwork:
         5 6 7
         """
 
-        # NOTE: config r
-        r = 3
+        # NOTE: config r, lambda
+        r = tf.constant(3, dtype=tf.float32, name='param_r')
+        lambda_ = tf.constant(2, dtype=tf.float32, name='param_lambda')
 
         prediction = tf.reshape(prediction, (-1, 18))
         maps = tf.reshape(maps, (-1, 9))
-        weights = tf.reshape(weights, (-1, 1))
+        weights = tf.reshape(weights, (-1))
 
         cross_entropy = []
         for i in range(9):
             cross_entropy.append(tf.losses.softmax_cross_entropy(
                 tf.concat([1 - maps[:, i:i+1], maps[:, i:i+1]], axis=1), prediction[:, 2*i:2*i+1], reduction=tf.losses.Reduction.NONE))
 
-        pos_region = maps[:, 0]
-        neg_region = 1 - pos_region
-
         with tf.name_scope('T'):
+            pos_region = maps[:, 0]
+            neg_region = 1 - pos_region
             posnum = tf.reduce_sum(pos_region) + 1e-5
             negsum = tf.reduce_sum(neg_region) + 1e-5
             k = tf.cast(tf.reduce_min(
                 (r*posnum + 1, tf.int32, negsum)), tf.int32).values
-            pos_loss = pos_region * cross_entropy[0]
-            neg_loss = neg_region * cross_entropy[0]
+            weighted_loss = cross_entropy[0] * weights
+            pos_loss = pos_region * weighted_loss
+            neg_loss = neg_region * weighted_loss
             T_loss = (tf.reduce_sum(pos_loss) +
                       tf.reduce_sum(tf.nn.top_k(neg_loss, k=k))) / (1 + r)
 
         with tf.name_scope('L'):
-            pass
-            # TODO: add l loss
-            tf.concat()
+            pos_region = maps[:, 1:9]
+            neg_region = 1 - pos_region
+            link_loss= tf.concat([tf.expand_dims(x, 1) for x in cross_entropy[1:9]], 1)
+            weights = tf.reshape(weights, (-1, 1))
+            pos_weights = pos_region * weights
+            neg_weights = neg_region * weights
+            L_loss = pos_weights*link_loss / tf.reduce_sum(pos_weights) + neg_weights*link_loss / tf.reduce_sum(neg_weights)
+            
+        return lambda_ * T_loss + L_loss * tf.reduce_sum(maps[:, 0])
 
     def infer(self, input):
         with tf.variable_scope('vgg_base'):
@@ -161,3 +166,52 @@ class PixelLinkNetwork:
         with tf.variable_scope('loss'):
             loss = self.build_loss(prediction, maps, weights)
         return loss
+
+
+    def __init__(self, params):
+        self.parameters = params
+        self._scope = 'PixelLinkNetwork'
+
+    def get_training_func(self, initializer):
+        def training_fn(features, params=None, reuse=None):
+            if params is None:
+                params = self.parameters
+            with tf.variable_scope(self._scope, initializer=initializer,
+                                   reuse=reuse, custom_getter=cpu_variable_getter):
+                return self.loss(features['img'], features['maps'], features['weights'])
+        return training_fn
+
+    def get_evaluation_func(self):
+        def evaluation_fn(features, params=None):
+            if params is None:
+                params = copy.copy(self.parameters)
+            else:
+                params = copy.copy(params)
+            # params.dropout = 0.0
+            # params.use_variational_dropout = False
+            # params.label_smoothing = 0.0
+
+            with tf.variable_scope(self._scope):
+                prediction = model_graph(features, "eval", params)
+
+            return prediction
+
+        return evaluation_fn
+
+    def get_inference_func(self):
+        def inference_fn(features, params=None):
+            if params is None:
+                params = copy.copy(self.parameters)
+            else:
+                params = copy.copy(params)
+            params.dropout = 0.0
+            params.use_variational_dropout = False
+            params.label_smoothing = 0.0
+
+            with tf.variable_scope(self._scope):
+                logits = model_graph(features, "infer", params)
+
+            return logits
+
+        return inference_fn
+
