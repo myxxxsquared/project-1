@@ -25,73 +25,8 @@ def _intersection(re_mask_list):
     return score
 
 
-def evaluate(img, cnts, is_text_cnts, maps,
-             TCL_threshold=0.5, TR_threshold=0.5, fsk=0.8, tp=0.4, tr=0.8, merge_th=0.2):
-    '''
-    :param img: ndarrray, np.uint8,
-    :param cnts:
-        if is_text_cnts is True: list(ndarray), ndarray: dtype np.float32, shape [n, 1, 2]
-        if is_text_cnts is False: list(list(ndarray), list(ndarray)), for [char_cnts, text_cnts]
-    :param is_text_cnts: bool
-    :param maps:
-        maps: [neg-TCL, TCL, radius, cos_theta, sin_theta, neg-TR, TR], all of them are 2-d array,
-        TR: np.bool; TCL: np.bool; radius: np.float32; cos_theta/sin_theta: np.float32
-    :param is_viz: bool
-    :param save_name
-           if is_viz is True, save_name is used to save viz pics
-    :return:
+def evaluate(img, cnts, reconstructed_cnts, care, fsk=0.8, tp=0.4, tr=0.8, merge_th=0.2):
 
-    '''
-    if not is_text_cnts:
-        char_cnts, text_cnts = cnts
-        cnts = text_cnts
-    assert img.shape[:2] == maps[0].shape
-    row, col = img.shape[:2]
-    [TCL_neg, TCL_pos, radius, cos_theta, sin_theta, TR_neg, TR_pos] = maps
-    TR = np.exp(TR_pos) / (np.exp(TR_pos) + np.exp(TR_neg)) > TR_threshold
-    TCL = np.exp(TCL_pos) / (np.exp(TCL_pos) + np.exp(TCL_neg)) > TCL_threshold
-    # use TR to crop TCL
-    cropped_TCL = np.bitwise_and(TR, TCL)
-
-    # pick out instance TCL from cropped_TCL map
-    instances = []
-    direction_x = [-1, 0, 1]
-    direction_y = [-1, 0, 1]
-
-    cropped_TCL_for_search = cropped_TCL.copy()
-    while np.sum(cropped_TCL_for_search) != 0:
-        instance = []
-        queue = []
-        xs, ys = np.nonzero(cropped_TCL_for_search)
-        queue.append((xs[0], ys[0]))
-        cropped_TCL_for_search[xs[0], ys[0]] = False
-        while len(queue) != 0:
-            x, y = queue.pop(0)
-            instance.append((x, y))
-            for i in range(len(direction_x)):
-                for j in range(len(direction_y)):
-                    x_next = x + direction_x[i]
-                    y_next = y + direction_y[j]
-                    if x_next < row and y_next < col and \
-                            cropped_TCL_for_search[x_next, y_next] == True:
-                        queue.append((x_next, y_next))
-                        cropped_TCL_for_search[x_next, y_next] = False
-        instances.append(instance)
-
-    # for each instance build its bounding box(represented by cnt)
-    reconstructed_cnts = []
-    for instance in instances:
-        zeros = np.zeros((row, col), np.uint8)
-        for x, y in instance:
-            r = radius[x, y]
-            zeros = cv2.circle(zeros, (y, x), r, (255), -1)
-        _, cnt, _ = cv2.findContours(zeros, 1, 2)
-        if len(cnt) > 1:
-            print('more than one cnt')
-            for cnt_ in cnt:
-                reconstructed_cnts.append(cnt_)
-        else:
-            reconstructed_cnts.append(cnt)
     reconstructed_cnts = [np.reshape(np.array(reconstructed_cnt, np.float32), (-1, 1, 2))
                           for reconstructed_cnt in reconstructed_cnts]
 

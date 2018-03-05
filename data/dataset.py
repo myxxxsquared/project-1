@@ -85,8 +85,8 @@ def enqueue(file_name, test_mode=False, real_test=False, is_syn=False, is_pixell
 
 
 def start_queue(params):
-    thread_num = 10# params.thread_num
-    file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]# *params.pre_epoch
+    thread_num = params.thread_num
+    file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)] *params.pre_epoch
 
     print('start')
     pool = mp.Pool(thread_num)
@@ -202,13 +202,16 @@ def _pad_cnts(cnts, cnt_point_max):
 def generator_eval():
     file_names = [TOTAL_TEST_DIR+name for name in os.listdir(TOTAL_TEST_DIR)]
     for file_name in file_names:
-        img_name, img, maps, cnts = loading_data(file_name, True, False)
-        features = {}
+        ins = pickle.load(open(file_name, 'rb'))
+        img = ins['img']
+        cnts = ins['contour']
+        features = dict()
         features["input_img"] = np.expand_dims(img,0).astype(np.float32)
         lens = np.array([cnt.shape[0] for cnt in cnts], np.int32)
         features['lens'] = lens
         features['cnts'] = np.array(_pad_cnts(cnts, max(lens)), np.float32)
-        features['is_text_cnts'] = True
+        features['care'] = ins['care'].astype(np.int32)
+        features['imname'] = ins['img_name']
         yield features
 
 
@@ -216,7 +219,8 @@ def get_eval_input():
     eval_dataset = tf.data.Dataset.from_generator(generator_eval,{'input_img': tf.float32,
                                                                   'lens': tf.int32,
                                                                   'cnts': tf.float32,
-                                                                  'is_text_cnts': tf.bool},
+                                                                  'care': tf.int32,
+                                                                  'imname': tf.string},
                                                   {'input_img': (
                                                       tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
                                                       tf.Dimension(None)),
@@ -224,7 +228,8 @@ def get_eval_input():
                                                    'cnts': (
                                                        tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
                                                        tf.Dimension(None)),
-                                                   'is_text_cnts':()}
+                                                   'care':(tf.Dimension(None),),
+                                                   'imname':()}
                                                   )
     iterator = eval_dataset.make_one_shot_iterator()
     features = iterator.get_next()
@@ -232,7 +237,7 @@ def get_eval_input():
 
 
 if __name__ == '__main__':
-    start_queue('dlakfj')
+    # start_queue('dlakfj')
     pass
     # file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
     #

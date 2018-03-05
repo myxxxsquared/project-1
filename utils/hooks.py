@@ -148,7 +148,8 @@ def _evaluate(eval_fn, input_fn, path, config):
             'input_img': features['input_img'],
             'lens': features['lens'],
             'cnts': features['cnts'],
-            'is_text_cnts': features['is_text_cnts']
+            'care': features['care'],
+            'imname': features['imname']
         }
         sess_creator = tf.train.ChiefSessionCreator(
             checkpoint_dir=path,
@@ -168,18 +169,20 @@ def _evaluate(eval_fn, input_fn, path, config):
                 lens = outputs['lens']
                 cnts = outputs['cnts']
                 cnts = _depad(cnts, lens)
-                is_text_cnts = outputs['is_text_cnts']
-                for i in range(img.shape[0]):
-                    maps = [np.squeeze(map) for map in np.split(np.transpose(prediction[i], (2,0,1)),7)]
-                    res = evaluate(img[i],cnts,is_text_cnts,maps)
-                    recall_list.append(res[0])
-                    precise_list.append(res[1])
-                    tf.logging.info('recall: '+str(res[0]))
-                    tf.logging.info('precise: '+str(res[1]))
-            tf.logging.info('end evaluation')
-        ave_r = sum(recall_list)/len(recall_list)
-        ave_p = sum(precise_list)/len(precise_list)
-        ave_f = 1/(1/ave_r+1/ave_p)
+                care = outputs['care']
+                imname = outputs['imname']
+                print(imname)
+                # for i in range(img.shape[0]):
+                    # re_cnts = reconstruct(img[i], prediction)
+                    # res = evaluate(img[i],cnts,re_cnts,care)
+                    # recall_list.append(res[0])
+                    # precise_list.append(res[1])
+                    # tf.logging.info('recall: '+str(res[0]))
+                    # tf.logging.info('precise: '+str(res[1]))
+            # tf.logging.info('end evaluation')
+        # ave_r = sum(recall_list)/len(recall_list)
+        # ave_p = sum(precise_list)/len(precise_list)
+        # ave_f = 1/(1/ave_r+1/ave_p)
         return ave_f
 
 
