@@ -151,7 +151,7 @@ class PixelLinkNetwork:
                 (r*posnum + 1, negsum)), tf.int32)
 
             print(k.shape, k.dtype)
-            print('----')
+            print('-----')
             weighted_loss = cross_entropy[0] * weights
             pos_loss = pos_region * weighted_loss
             neg_loss = neg_region * weighted_loss
