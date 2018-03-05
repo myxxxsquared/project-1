@@ -73,8 +73,8 @@ def load_pre_gen(file):
 
 
 ####on line data###########
-# Q = mp.Queue(maxsize=3000)
-# print('queue excuted')
+Q = mp.Queue(maxsize=3000)
+print('queue excuted')
 
 def enqueue(file_name, test_mode=False, real_test=False, is_syn=False, is_pixellink=True):
     img_name, img, cnts, mask, links, weight = loading_data(file_name, test_mode, real_test, is_syn, is_pixellink)
@@ -91,9 +91,7 @@ def start_queue(params):
 
     print('start')
     pool = mp.Pool(thread_num)
-    for file_name in file_names_totaltext_train:
-        print(file_name)
-        pool.apply_async(enqueue, (file_name, ))
+    pool.map(enqueue,file_names_totaltext_train)
     print(Q.qsize())
     print('end')
 
@@ -190,8 +188,6 @@ def get_train_input(params):
 #     features = {'input_img':tf.reshape(features[0], [-1]+params.input_size),
 #                 'Labels':tf.reshape(features[1], [-1]+params.Label_size)}
 #     return features
-
-
 
 
 def _pad_cnts(cnts, cnt_point_max):

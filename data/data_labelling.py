@@ -106,5 +106,6 @@ class data_churn(object):
 
         # for i in range(8):
         #     cv2.imwrite('img'+str(i)+'.jpg', links[i]*255)
-        maps = np.stack([np.expand_dims(mask, -1), links, np.expand_dims(weight,-1)])
+
+        maps = np.stack([mask]+ links+[weight], -1)
         return img_name, img, cnts, maps
