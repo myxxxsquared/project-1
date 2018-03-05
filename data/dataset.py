@@ -90,7 +90,7 @@ def start_queue(params):
 
     print('start')
     pool = mp.Pool(thread_num)
-    pool.map(enqueue,file_names_totaltext_train)
+    pool.map_async(enqueue,file_names_totaltext_train)
     print(Q.qsize())
     print('end')
 
