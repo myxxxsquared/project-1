@@ -9,6 +9,7 @@ import os
 import numpy as np
 import tensorflow as tf
 import model.LineBased as LineBased
+import model.pixellink as pixellink
 import data.dataset as dataset
 from utils import parallel
 from utils import hooks
@@ -137,7 +138,8 @@ def main(args):
 
         # Build model
         initializer = get_initializer(params)
-        model = LineBased.Model(params)
+        # model = LineBased.Model(params)
+        model = pixellink.PixelLinkNetwork(params)
 
         # Multi-GPU setting
         sharded_losses = parallel.parallel_model(

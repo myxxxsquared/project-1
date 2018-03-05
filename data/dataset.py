@@ -78,8 +78,8 @@ print('queue excuted')
 
 def enqueue(file_name, test_mode=False, real_test=False, is_syn=False, is_pixellink=True):
     img_name, img, cnts, maps = loading_data(file_name, test_mode, real_test, is_syn, is_pixellink)
-    print(img.shape)
-    print(maps.shape)
+    # print(img.shape)
+    # print(maps.shape)
     Q.put({'input_img': img,
            'Labels': maps.astype(np.float32)})
 
