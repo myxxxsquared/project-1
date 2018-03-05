@@ -233,10 +233,12 @@ def get_eval_input():
 
 
 if __name__ == '__main__':
-    file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
+    start_queue('dkslafj')
 
-    for file_name in file_names_totaltext_train:
-        print(file_name)
-        img_name, img, cnts, maps=loading_data(file_name, False,False,False,True)
-        print(img.shape)
-        print(maps.shape)
+    # file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
+    #
+    # for file_name in file_names_totaltext_train:
+    #     print(file_name)
+    #     img_name, img, cnts, maps=loading_data(file_name, False,False,False,True)
+    #     print(img.shape)
+    #     print(maps.shape)
