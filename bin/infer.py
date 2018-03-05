@@ -24,8 +24,6 @@ def parse_args():
                         help="Path of output file")
     parser.add_argument("--checkpoints", type=str, nargs="+", required=True,
                         help="Path of trained models")
-
-
     return parser.parse_args()
 
 
@@ -195,49 +193,6 @@ def main(args):
                     #TODO: reconstruct and save
                 except tf.errors.OutOfRangeError:
                     break
-
-        # # Convert to plain text
-        # vocab = params.vocabulary["target"]
-        # outputs = []
-        # scores = []
-        #
-        # for result in results:
-        #     for item in result[0]:
-        #         outputs.append(item.tolist())
-        #     for item in result[1]:
-        #         scores.append(item.tolist())
-        #
-        # outputs = list(itertools.chain(*outputs))
-        # scores = list(itertools.chain(*scores))
-        #
-        # restored_inputs = []
-        # restored_outputs = []
-        # restored_scores = []
-        #
-        #
-        # # Write to file
-        # with open(args.output, "w") as outfile:
-        #     count = 0
-        #     for outputs, scores in zip(restored_outputs, restored_scores):
-        #         for output, score in zip(outputs, scores):
-        #             decoded = []
-        #             for idx in output:
-        #                 if idx == params.mapping["target"][params.eos]:
-        #                     break
-        #                 decoded.append(vocab[idx])
-        #
-        #             decoded = " ".join(decoded)
-        #
-        #             if not args.verbose:
-        #                 outfile.write("%s\n" % decoded)
-        #                 break
-        #             else:
-        #                 pattern = "%d ||| %s ||| %s ||| %f\n"
-        #                 source = restored_inputs[count]
-        #                 values = (count, source, decoded, score)
-        #                 outfile.write(pattern % values)
-        #
-        #         count += 1
 
 
 if __name__ == "__main__":
