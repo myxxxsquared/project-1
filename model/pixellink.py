@@ -9,6 +9,7 @@ def cpu_variable_getter(getter, *args, **kwargs):
     with tf.device("/cpu:0"):
         return getter(*args, **kwargs)
 
+
 """
 输入:
 features['img'] np.array(shape=(batch_size, height, width, 3), dtype=tf.uint8)
@@ -19,6 +20,7 @@ features['weights'] np.array(shape=(batch_size, height_, width_), dtype=tf.float
 height_ = height / 2 或 height / 4
 height_ = width / 2 或 width / 4
 """
+
 
 class PixelLinkNetwork:
     def conv2d(self, input, shape, name):
@@ -117,7 +119,7 @@ class PixelLinkNetwork:
             # if not ffsize[0] or not ffsize[1]:
             ffsize = tf.convert_to_tensor(
                 (dynamic_shape[1], dynamic_shape[2]))
-                # print(ffsize)
+            # print(ffsize)
             prediction = tf.image.resize_images(prediction, ffsize)  \
                 + self.conv2d(maps[i], (1, 1, maps[i].shape[3],
                                         ochannels), 'conv_%d' % (i,))
@@ -137,15 +139,15 @@ class PixelLinkNetwork:
 
         prediction = tf.reshape(prediction, (-1, 18))
         maps = tf.reshape(maps, (-1, 9))
-        weights = tf.reshape(weights, (-1,1))
+        weights = tf.reshape(weights, (-1, 1))
 
         cross_entropy = []
         for i in range(9):
-            cross_entropy.append(tf.losses.softmax_cross_entropy(
-                tf.concat([1 - maps[:, i:i+1], maps[:, i:i+1]], axis=0), prediction[:, 2*i:2*i+1], reduction=tf.losses.Reduction.NONE))
+            cross_entropy.append(tf.expand_dims(tf.losses.softmax_cross_entropy(
+                tf.concat([1 - maps[:, i:i+1], maps[:, i:i+1]], axis=1), prediction[:, 2*i:2*i+2], reduction=tf.losses.Reduction.NONE), 1))
 
         with tf.name_scope('T'):
-            pos_region = maps[:, 0]
+            pos_region = maps[:, 0:1]
             neg_region = 1 - pos_region
             posnum = tf.reduce_sum(pos_region) + 1e-5
             negsum = tf.reduce_sum(neg_region) + 1e-5
@@ -157,6 +159,7 @@ class PixelLinkNetwork:
             weighted_loss = cross_entropy[0] * weights
             pos_loss = pos_region * weighted_loss
             neg_loss = neg_region * weighted_loss
+            pos_loss, neg_loss = tf.squeeze(pos_loss, 1), tf.squeeze(neg_loss, 1)
             # print(neg_loss.dtype)
             # print(tf.nn.top_k(neg_loss, k=k).shape)
             # print(tf.nn.top_k(neg_loss, k=k).dtype)
@@ -167,11 +170,13 @@ class PixelLinkNetwork:
         with tf.name_scope('L'):
             pos_region = maps[:, 1:9]
             neg_region = 1 - pos_region
-            link_loss= tf.concat([tf.expand_dims(x, 1) for x in cross_entropy[1:9]], 1)
+            link_loss = tf.concat(cross_entropy[1:9], 1)
             weights = tf.reshape(weights, (-1, 1))
             pos_weights = pos_region * weights
             neg_weights = neg_region * weights
-            L_loss = tf.reduce_sum(pos_weights*link_loss) / (tf.reduce_sum(pos_weights) + 1e-5) + tf.reduce_sum(neg_weights*link_loss) / (tf.reduce_sum(neg_weights) + 1e-5)
+            L_loss = tf.reduce_sum(pos_weights*link_loss) / (tf.reduce_sum(pos_weights) + 1e-5) + \
+                tf.reduce_sum(neg_weights*link_loss) / \
+                (tf.reduce_sum(neg_weights) + 1e-5)
             L_loss = L_loss * tf.reduce_sum(maps[:, 0])
 
         return T_loss, L_loss, T_loss + L_loss
@@ -186,10 +191,12 @@ class PixelLinkNetwork:
     def summary(self, input, maps, weights, prediction, T_loss, L_loss, loss):
         with tf.device("/device:cpu:0"):
             imgsummary = []
-            imgsummary.append(tf.summary.image('inputimg', input[0]))
+            imgsummary.append(tf.summary.image('inputimg', input[0:1]))
             for i in range(9):
-                imgsummary.append(tf.summary.image('map_%d'%(i,), maps[0, :, :, i:i+1]))
-                imgsummary.append(tf.summary.image('predict_%d'%(i,), tf.nn.softmax(prediction[0, :, :, 2*i:2*i+2])[:, :, 1:2]))
+                imgsummary.append(tf.summary.image('map_%d' %
+                                                   (i,), maps[0:1, :, :, i:i+1]))
+                imgsummary.append(tf.summary.image('predict_%d' % (i,), tf.nn.softmax(
+                    prediction[0:1, :, :, 2*i:2*i+2])[:, :, :, 1:2]))
 
             losssummary = []
             losssummary.append(tf.summary.scalar('T_loss', T_loss))
@@ -207,9 +214,9 @@ class PixelLinkNetwork:
         else:
             return loss, None
 
-    def __init__(self, params):
+    def __init__(self, params, name='PixelLinkNetwork'):
         self.parameters = params
-        self._scope = 'PixelLinkNetwork'
+        self._scope = name
 
     def get_training_func(self, initializer):
         def training_fn(features, params=None, reuse=None):
@@ -217,7 +224,8 @@ class PixelLinkNetwork:
                 params = self.parameters
             with tf.variable_scope(self._scope, initializer=initializer,
                                    reuse=reuse, custom_getter=cpu_variable_getter):
-                loss, summary = self.loss(features['input_img'], features['Labels'][:, :, :, 0:9], features['Labels'][:, :, :, 9], not bool(reuse))
+                loss, summary = self.loss(
+                    features['input_img'], features['Labels'][:, :, :, 0:9], features['Labels'][:, :, :, 9], not bool(reuse))
                 return loss
         return training_fn
 
@@ -254,4 +262,3 @@ class PixelLinkNetwork:
             return logits
 
         return inference_fn
-
