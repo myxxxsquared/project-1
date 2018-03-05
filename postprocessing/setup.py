@@ -10,7 +10,8 @@ numpypath = numpy.__path__[0]
 module_postprocessing = Extension(
     '_postprocessing',
     sources=[
-        'src/inferencemap.cpp',
+        'src/config.cpp',
+        'src/disjointset.cpp',
         'src/postprocessing.cpp',
         'src/py_postprocessing.cpp'],
     include_dirs=[

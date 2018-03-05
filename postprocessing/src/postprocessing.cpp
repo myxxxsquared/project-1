@@ -266,4 +266,6 @@ bool PostProcessor::postprocess_pixellink()
         auto &back = regions.back();
         back.contours = newctn;
     }
+
+    return true;
 }
