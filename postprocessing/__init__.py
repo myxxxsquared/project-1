@@ -23,14 +23,21 @@ class Postprocessor:
 
     def process(self, maps):
         assert len(maps.shape) == 3
-        assert maps.shape[2] == 5 or maps.shape[2] == 7
         assert maps.dtype == np.float32
 
-        if maps.shape[2] == 7:
-            tcl, geo, tr = np.split(maps, [2, 5], axis=2)
-            tcl = _softmax(tcl)
-            tr = _softmax(tr)
-            maps = np.concatenate([tcl, geo, tr], axis=2)
+        if self.is_pixellink:
+            assert maps.shape[2] == 9 or maps.shape[2] == 18
+            if maps.shape[2] == 18:
+                maps = [_softmax(x) for x in np.split(maps, 9, axis=2)]
+                maps = np.concatenate(maps, axis=2)
+        else:
+            assert maps.shape[2] == 5 or maps.shape[2] == 7
+            if maps.shape[2] == 7:
+                tcl, geo, tr = np.split(maps, [2, 5], axis=2)
+                tcl = _softmax(tcl)
+                tr = _softmax(tr)
+                maps = np.concatenate([tcl, geo, tr], axis=2)
+
 
         return _postprocessing(maps, self)
 

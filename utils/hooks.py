@@ -12,6 +12,7 @@ import os
 import tensorflow as tf
 import numpy as np
 from utils.evaluate import evaluate
+import postprocessing
 
 
 def _get_saver():
@@ -137,6 +138,9 @@ def _depad(cnts, lens):
         news.append(cnts[i][:lens[i], :, :])
     return news
 
+def reconstruct(img, maps):
+    processor = postprocessing.Postprocessor()
+    return processor.process(maps)
 
 def _evaluate(eval_fn, input_fn, path, config):
     graph = tf.Graph()
