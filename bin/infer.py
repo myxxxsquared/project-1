@@ -21,8 +21,8 @@ import thumt.utils.parallel as parallel
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Translate using existing NMT models",
-        usage="translator.py [<args>] [-h | --help]"
+        description="Infering pic using existing models",
+        usage="infer.py [<args>] [-h | --help]"
     )
 
     # input files
@@ -127,10 +127,6 @@ def main(args):
 
     params_list = [
         import_params(args.checkpoints[i], params_list[i])
-        for i in range(len(args.checkpoints))
-    ]
-    params_list = [
-        override_parameters(params_list[i], args)
         for i in range(len(args.checkpoints))
     ]
 
