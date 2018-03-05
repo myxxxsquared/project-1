@@ -132,9 +132,8 @@ def main(args):
 
     # Build Graph
     with tf.Graph().as_default():
-        dataset.start_queue(params)
+        # dataset.start_queue(params)
         features = dataset.get_train_input(params)
-        x = input('finished')
 
         # Build model
         initializer = get_initializer(params)

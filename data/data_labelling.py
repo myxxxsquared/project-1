@@ -104,7 +104,7 @@ class data_churn(object):
                 mask_ = cv2.fillPoly(np.zeros(img.shape[:2]), [_move(cnts[cnt_index], 7-i)], 255).astype(np.bool)
                 links[i][base&mask_] = 1.0
 
-        for i in range(8):
-            cv2.imwrite('img'+str(i)+'.jpg', links[i]*255)
+        # for i in range(8):
+        #     cv2.imwrite('img'+str(i)+'.jpg', links[i]*255)
 
         return img_name, img, cnts, mask, links, weight

@@ -248,5 +248,9 @@ if __name__ == '__main__':
     pool = mp.Pool(thread_num)
     for file_name in file_names_totaltext_train:
         print(file_name)
+        img_name, img, cnts, mask, links, weight=loading_data(file_name, False,False,False,True)
+        maps = np.stack([mask, links, weight], -1)
+        print(img.shape)
+        print(maps.shape)
         pool.apply_async(enqueue, (file_name, False, False, False, True))
     print(Q.qsize())
