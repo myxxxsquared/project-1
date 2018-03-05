@@ -19,6 +19,7 @@ class Postprocessor:
     smallest_area_ratio_tcl = 0.3
     radius_scaling = 1.30
     fewest_tcl = 3
+    is_pixellink = True
 
     def process(self, maps):
         assert len(maps.shape) == 3

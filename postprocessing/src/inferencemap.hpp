@@ -43,4 +43,6 @@ class InferenceMap
     // }
 };
 
+#include "inferencemap.imp.hpp"
+
 #endif /* INFERENCEMAP_HEADER */

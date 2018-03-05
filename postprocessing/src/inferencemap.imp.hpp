@@ -1,19 +1,4 @@
 
-#include "inferencemap.hpp"
-
-#include "opencv2/opencv.hpp"
-using namespace cv;
-
-#define py_assert(condition)                          \
-    do                                                \
-    { /*printf("assert: %s\n", #condition) ;*/        \
-        if (!(condition))                             \
-        {                                             \
-            failmsg("assert failed: %s", #condition); \
-            return false;                             \
-        }                                             \
-    } while (0)
-
 template<typename PIXEL_T>
 InferenceMap<PIXEL_T>::InferenceMap()
     : arrobj(NULL), data(NULL)

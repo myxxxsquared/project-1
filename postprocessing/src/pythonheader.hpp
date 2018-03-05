@@ -57,4 +57,14 @@ class PyEnsureGIL
     PyGILState_STATE _state;
 };
 
+#define py_assert(condition)                          \
+    do                                                \
+    { /*printf("assert: %s\n", #condition) ;*/        \
+        if (!(condition))                             \
+        {                                             \
+            failmsg("assert failed: %s", #condition); \
+            return false;                             \
+        }                                             \
+    } while (0)
+
 #endif /* PYTHONHEADER_HEADER */

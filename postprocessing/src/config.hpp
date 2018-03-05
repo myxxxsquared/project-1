@@ -10,6 +10,8 @@ struct ProcessConfig
     float fewest_tcl_ratio, smallest_area_ratio, smallest_area_ratio_tcl;
     float radius_scaling;
     int fewest_tcl;
+    bool is_pixellink;
+
     bool load_from(PyObject *obj);
 };
 
