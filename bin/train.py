@@ -225,7 +225,7 @@ def main(args):
             #     save_secs=None,
             #     # output_dir=params.output,
             #     summary_op=summary_op
-            )
+            # )
         ]
 
 
