@@ -9,6 +9,16 @@ def cpu_variable_getter(getter, *args, **kwargs):
     with tf.device("/cpu:0"):
         return getter(*args, **kwargs)
 
+"""
+输入:
+features['img'] np.array(shape=(batch_size, height, width, 3), dtype=tf.uint8)
+features['maps'] np.array(shape=(batch_size, height_, width_, 9), dtype=tf.float32)
+features['weights'] np.array(shape=(batch_size, height_, width_), dtype=tf.float32)
+
+图片大小：
+height_ = height / 2 或 height / 4
+height_ = width / 2 或 width / 4
+"""
 
 class PixelLinkNetwork:
     def conv2d(self, input, shape, name):
@@ -142,6 +152,7 @@ class PixelLinkNetwork:
             neg_loss = neg_region * weighted_loss
             T_loss = (tf.reduce_sum(pos_loss) +
                       tf.reduce_sum(tf.nn.top_k(neg_loss, k=k))) / (1 + r)
+            T_loss = lambda_ * T_loss
 
         with tf.name_scope('L'):
             pos_region = maps[:, 1:9]
@@ -150,9 +161,10 @@ class PixelLinkNetwork:
             weights = tf.reshape(weights, (-1, 1))
             pos_weights = pos_region * weights
             neg_weights = neg_region * weights
-            L_loss = pos_weights*link_loss / tf.reduce_sum(pos_weights) + neg_weights*link_loss / tf.reduce_sum(neg_weights)
-            
-        return lambda_ * T_loss + L_loss * tf.reduce_sum(maps[:, 0])
+            L_loss = tf.reduce_sum(pos_weights*link_loss) / tf.reduce_sum(pos_weights) + tf.reduce_sum(neg_weights*link_loss) / tf.reduce_sum(neg_weights)
+            L_loss = L_loss * tf.reduce_sum(maps[:, 0])
+
+        return T_loss, L_loss, T_loss + L_loss
 
     def infer(self, input):
         with tf.variable_scope('vgg_base'):
@@ -161,12 +173,29 @@ class PixelLinkNetwork:
             prediction = self.prediction(base)
         return prediction
 
-    def loss(self, input, maps, weights):
+    def summary(self, input, maps, weights, prediction, T_loss, L_loss, loss):
+        with tf.device("/device:cpu:0"):
+            imgsummary = []
+            imgsummary.append(tf.summary.image('inputimg', input[0]))
+            for i in range(9):
+                imgsummary.append(tf.summary.image('map_%d'%(i,), maps[0, :, :, i:i+1]))
+                imgsummary.append(tf.summary.image('predict_%d'%(i,), tf.nn.softmax(prediction[0, :, :, 2*i:2*i+2])[:, :, :, 1:2]))
+
+            losssummary = []
+            losssummary.append(tf.summary.scalar('T_loss', T_loss))
+            losssummary.append(tf.summary.scalar('L_loss', L_loss))
+            losssummary.append(tf.summary.scalar('loss', loss))
+
+            return tf.summary.merge(imgsummary), tf.summary.merge(losssummary)
+
+    def loss(self, input, maps, weights, withsum=False):
         prediction = self.infer(input)
         with tf.variable_scope('loss'):
-            loss = self.build_loss(prediction, maps, weights)
-        return loss
-
+            T_loss, L_loss, loss = self.build_loss(prediction, maps, weights)
+        if withsum:
+            return loss, self.summary(input, maps, weights, prediction, T_loss, L_loss, loss)
+        else:
+            return loss
 
     def __init__(self, params):
         self.parameters = params
