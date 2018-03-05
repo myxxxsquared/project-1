@@ -1,9 +1,11 @@
 
 #include "inferencemap.hpp"
-
 #include "postprocessing.hpp"
+#include "disjointset.hpp"
 
 #include <cmath>
+#include <vector>
+#include <map>
 
 vector<Point2i> PostProcessor::generate_random_vector(int rows, int cols)
 {
@@ -19,7 +21,9 @@ vector<Point2i> PostProcessor::generate_random_vector(int rows, int cols)
 
 void PostProcessor::search_contour(Point2i pt)
 {
-    InferencePixel sp = map.at(pt);
+    InferenceMap<Pixel_TCL> &map = *(InferenceMap<Pixel_TCL> *)this->inferencemap;
+
+    Pixel_TCL sp = map.at(pt);
 
     // vector<Point2i> points;
     deque<Point2i> to_search;
@@ -38,11 +42,11 @@ void PostProcessor::search_contour(Point2i pt)
     // search_distance = 1;
 
     Mat region;
-    region.create(map.height, map.width, CV_8UC1);
+    region.create(height, width, CV_8UC1);
     region.setTo(Scalar((unsigned char)0));
 
     Mat tclregion;
-    tclregion.create(map.height, map.width, CV_8UC1);
+    tclregion.create(height, width, CV_8UC1);
     tclregion.setTo(Scalar((unsigned char)0));
 
     while (to_search.size())
@@ -50,14 +54,14 @@ void PostProcessor::search_contour(Point2i pt)
         Point2i cur = to_search.front();
         to_search.pop_front();
 
-        InferencePixel cp = map.at(cur);
+        Pixel_TCL cp = map.at(cur);
         circle(region, cur, (int)(cp.radius * config.radius_scaling), Scalar((unsigned char)255), -1);
         tclregion.at<uchar>(cur) = 255;
 
         int xmin = std::max(0, cur.x - search_distance);
-        int xmax = std::min(map.width - 1, cur.x + search_distance);
+        int xmax = std::min(width - 1, cur.x + search_distance);
         int ymin = std::max(0, cur.y - search_distance);
-        int ymax = std::min(map.height - 1, cur.y + search_distance);
+        int ymax = std::min(height - 1, cur.y + search_distance);
 
         for (int y = ymin; y <= ymax; y++)
         {
@@ -66,9 +70,9 @@ void PostProcessor::search_contour(Point2i pt)
                 Point2i curpt{x, y};
                 if (search_mark.at<uchar>(curpt))
                     continue;
-                InferencePixel np = map.at(curpt);
+                Pixel_TCL np = map.at(curpt);
                 if (np.tr > config.t_tr && np.tcl > config.t_tcl)
-               {
+                {
                     // if (!(abs(np.radius - cp.radius) < config.t_rad * cp.radius))
                     // {
                     //     // printf("abs(np.radius - cp.radius) < config.t_rad * cp.radius\n");
@@ -150,23 +154,25 @@ void PostProcessor::search_contour(Point2i pt)
     // printf("contours in single: %d\n", (int)r.contours.size());
 }
 
-bool PostProcessor::postprocess()
+bool PostProcessor::postprocess_tcl()
 {
-    search_mark.create(map.height, map.width, CV_8UC1);
+    InferenceMap<Pixel_TCL> &map = *(InferenceMap<Pixel_TCL> *)this->inferencemap;
+
+    search_mark.create(height, width, CV_8UC1);
     search_mark.setTo(Scalar((unsigned char)0));
 
-    trmap.create(map.height, map.width, CV_8UC1);
+    trmap.create(height, width, CV_8UC1);
 
     // #pragma omp parallel for
-    for (int i = 0; i < map.height; ++i)
+    for (int i = 0; i < height; ++i)
     {
         uchar *tr = &trmap.at<uchar>(i, 0);
-        const InferencePixel *pix = &map.at(0, i);
-        for (int j = 0; j < map.width; ++j, ++pix, ++tr)
+        const Pixel_TCL *pix = &map.at(0, i);
+        for (int j = 0; j < width; ++j, ++pix, ++tr)
             *tr = pix->tr > config.t_tr ? 255 : 0;
     }
 
-    vector<Point2i> ptlist = generate_random_vector(map.height, map.width);
+    vector<Point2i> ptlist = generate_random_vector(height, width);
     for (Point2i pt : ptlist)
     {
         if (map.at(pt).tcl > config.t_tcl && !search_mark.at<uchar>(pt))
@@ -177,4 +183,76 @@ bool PostProcessor::postprocess()
     }
 
     return true;
+}
+
+Point2i PostProcessor::topoint(int i)
+{
+    return Point2i(i % width, i / width);
+}
+
+int PostProcessor::toint(Point2i pt)
+{
+    return pt.x + pt.y * width;
+}
+
+bool PostProcessor::postprocess_pixellink()
+{
+    InferenceMap<Pixel_PixelLink> &map = *(InferenceMap<Pixel_PixelLink> *)this->inferencemap;
+
+    disjointset dset;
+    dset.init(width * height);
+
+    int directions[][2] = {
+        {-1, -1},
+        {0, -1},
+        {1, -1},
+        {1, 0},
+        {1, 1},
+        {0, 1},
+        {-1, 1},
+        {-1, 0}};
+
+    for (int i = 0; i < height; ++i)
+    {
+        for (int j = 0; j < width; ++j)
+        {
+            Point2i curpt{j, i};
+            if (map.at(curpt).tr < config.t_tr)
+                continue;
+            for (int k = 0; k < 8; ++k)
+            {
+                if (map.at(curpt).link[k] < config.t_tcl)
+                    continue;
+                Point2i newpt{curpt.x + directions[i][0], curpt.y + directions[i][1]};
+                if (newpt.x < 0 || newpt.x >= width || newpt.y < 0 || newpt.y >= height)
+                    continue;
+                if (map.at(newpt).tr > config.t_tr)
+                    dset.union_element(toint(curpt), toint(newpt));
+            }
+        }
+    }
+
+    std::map<int, Mat> contours;
+
+    for(int i = 0; i < height; ++i)
+    {
+        for(int j = 0; j < width; ++j)
+        {
+            Point2i curpt{j, i};
+            if(map.at(curpt).tr < config.t_tr)
+                continue;
+            int id = toint(curpt);
+            id = dset.get_setid(id);
+            auto it = contours.find(id);
+            if(it == contours.end())
+            {
+                Mat mat;
+                mat.create(height, width, CV_8UC1);
+                mat.setTo(0);
+                contours.insert(std::make_pair(id, mat));
+            }
+            it = contours.find(id);
+            it->second.at<uchar>(curpt) = 255;
+        }
+    }
 }
