@@ -113,8 +113,8 @@ def get_train_input(params):
     #                                                )
     train_dataset = tf.data.Dataset.from_generator(g, {'input_img':tf.float32,
                                                         'Labels': tf.float32},
-                                                   {'input_img': (None,None,None),
-                                                    'Labels': (None,None,None)}
+                                                   {'input_img': (512,512,3),
+                                                    'Labels': (256,256,10)}
                                                    )
     train_dataset = train_dataset.batch(params.batch_size).prefetch(params.buffer)
     iterator = train_dataset.make_one_shot_iterator()
