@@ -135,7 +135,7 @@ class PixelLinkNetwork:
 
         prediction = tf.reshape(prediction, (-1, 18))
         maps = tf.reshape(maps, (-1, 9))
-        weights = tf.reshape(weights, (-1))
+        weights = tf.reshape(weights, (-1,1))
 
         cross_entropy = []
         for i in range(9):
