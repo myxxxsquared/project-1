@@ -139,9 +139,6 @@ class PixelLinkNetwork:
 
         cross_entropy = []
         for i in range(9):
-            print(prediction[:, 2*i:2*i+1].shape)
-            print(maps[:, i:i+1].shape)
-            print(tf.stack([1 - maps[:, i:i+1], maps[:, i:i+1]], axis=-1).shape)
             cross_entropy.append(tf.losses.softmax_cross_entropy(
                 tf.concat([1 - maps[:, i:i+1], maps[:, i:i+1]], axis=0), prediction[:, 2*i:2*i+1], reduction=tf.losses.Reduction.NONE))
 
@@ -152,7 +149,9 @@ class PixelLinkNetwork:
             negsum = tf.reduce_sum(neg_region) + 1e-5
             k = tf.cast(tf.reduce_min(
                 (r*posnum + 1, negsum)), tf.int32)
+
             print(k.shape, k.dtype)
+            print('----')
             weighted_loss = cross_entropy[0] * weights
             pos_loss = pos_region * weighted_loss
             neg_loss = neg_region * weighted_loss
