@@ -207,7 +207,7 @@ class PixelLinkNetwork:
                 params = self.parameters
             with tf.variable_scope(self._scope, initializer=initializer,
                                    reuse=reuse, custom_getter=cpu_variable_getter):
-                return self.loss(features['img'], features['maps'], features['weights'])
+                return self.loss(features['input_img'], features['maps'][:, :, :, 0:9], features['maps'][:, :, :, 9])
         return training_fn
 
     def get_evaluation_func(self):
