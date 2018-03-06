@@ -61,7 +61,7 @@ def default_parameters():
         keep_top_checkpoint_max=5,
         eval_secs=None,
         eval_steps=10,
-        prefetch_buffer=150,
+        prefetch_buffer=500,
         shuffle_buffer=100,
         epoch=400,
 
