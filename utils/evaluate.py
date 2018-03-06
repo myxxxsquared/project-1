@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-from data.utils import get_maps
 
 VIZ_DIR = '/home/rjq/data_cleaned/viz/'
 

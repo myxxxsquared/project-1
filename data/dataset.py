@@ -11,50 +11,6 @@ TOTAL_TRAIN_DIR = '/home/rjq/data_cleaned/pkl/totaltext_train_care/'
 TOTAL_TEST_DIR = '/home/rjq/data_cleaned/pkl/totaltext_test_care/'
 
 
-# DA = DataAugmentor()
-# labelling = data_churn()
-#
-#
-# def _load_file(file, is_syn):
-#     if not is_syn:
-#         if file.endswith('gz'):
-#             return pickle.load(gzip.open(file, 'rb'))
-#         else:
-#             return pickle.load(open(file, 'rb'))
-#     else:
-#         if file.endswith('gz'):
-#             return pickle.load(gzip.open(file, 'rb'), encoding='latin1')
-#         else:
-#             return pickle.load(open(file, 'rb'), encoding='latin1')
-#
-#
-# def _data_aug(ins, augment_rate, test_mode=False, real_test=False):
-#     return DA.augment(ins, augment_rate=augment_rate, test_mode=test_mode, real_test=real_test)
-#
-#
-# def _data_label(ins, is_pixellink):
-#     if is_pixellink:
-#         data = labelling._pixellink_labeling(ins['img_name'], ins['img'],
-#                                         ins['contour'], ins['is_text_cnts'],
-#                                         ins['left_top'], ins['right_bottom'],
-#                                         ins.get('chars', None), ins['care'])
-#     else:
-#         data = labelling._data_labeling(ins['img_name'], ins['img'],
-#                                         ins['contour'], ins['is_text_cnts'],
-#                                         ins['left_top'], ins['right_bottom'],
-#                                         ins.get('chars', None), ins['care'])
-#     return data
-
-
-# def loading_data(file, test_mode=False, real_test=False, is_syn=False, is_pixellink=True):
-#     return _data_label(_data_aug(_load_file(
-#         file, is_syn=is_syn),
-#         augment_rate=500, test_mode=test_mode, real_test=real_test),
-#         is_pixellink)
-
-
-
-
 def _decompress(ins):
     name = ins[0]
     img = ins[1]
