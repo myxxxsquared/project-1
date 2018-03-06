@@ -32,9 +32,9 @@ class PixelLinkNetwork:
             padding="SAME",
             name=name+'_conv')
         conv = tf.nn.bias_add(
-            input,
+            conv,
             tf.get_variable(
-                name+'_bias', shape=(1, 1, 1, shape[3]), trainable=True, initializer=tf.zeros_initializer()),
+                name+'_bias', shape=(shape[3], ), trainable=True, initializer=tf.zeros_initializer()),
             name=name+'_biasadd'
         )
         return conv
