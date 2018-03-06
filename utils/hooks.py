@@ -8,11 +8,13 @@ from __future__ import print_function
 import datetime
 import operator
 import os
+import pickle
 
 import tensorflow as tf
 import numpy as np
 from utils.evaluate import evaluate
 import postprocessing
+import cv2
 
 
 def _get_saver():
@@ -140,7 +142,16 @@ def _depad(cnts, lens):
 
 def reconstruct(img, maps):
     processor = postprocessing.Postprocessor()
-    return processor.process(maps)
+    np.save('maps.npy', maps)
+    print("-----------process started-----------")
+    ctns = processor.process(maps)
+    print("-----------process ended-------------")
+    os.system('rm maps.npy')
+    return ctns
+
+def _softmax(x):
+    x = np.exp(x)
+    return x[:, :, 1:2] / np.expand_dims(np.sum(x, axis=2), 2)
 
 def _evaluate(eval_fn, input_fn, path, config):
     graph = tf.Graph()
@@ -171,6 +182,7 @@ def _evaluate(eval_fn, input_fn, path, config):
                 prediction = outputs['prediction']
                 lens = outputs['lens']
                 cnts = outputs['cnts']
+                cnts = [(x/2).astype(np.int32) for x in cnts]
                 cnts = _depad(cnts, lens)
                 care = outputs['care']
                 # imname = outputs['imname']
@@ -184,6 +196,15 @@ def _evaluate(eval_fn, input_fn, path, config):
                     precise_sum+=TP*T_pred_n
                     gt_n_sum+=T_gt_n
                     pred_n_sum+=T_pred_n
+
+                    height, width = prediction.shape[1], prediction.shape[2]
+                    imgoutput = np.zeros(shape=(height*2, width*2, 3), dtype=np.uint8)
+                    imgoutput[0:height, width:width*2, :] = cv2.resize(img[0], (width, height))
+                    imgoutput[height:height*2, width:width*2, :] = (_softmax(prediction[i, :, :, 0:2])*255).astype(np.uint8)
+                    cv2.drawContours(imgoutput, cnts, -1, (0, 0, 255))
+                    cv2.drawContours(imgoutput, re_cnts, -1, (0, 255, 0))
+                    cv2.imwrite('output_{:03d}.png'.format(time), imgoutput)
+
         ave_r = recall_sum/gt_n_sum
         ave_p = precise_sum/pred_n_sum
         ave_f = 1/(1/ave_r+1/ave_p)
