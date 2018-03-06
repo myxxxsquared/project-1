@@ -244,3 +244,5 @@ if __name__ == '__main__':
         img_name, img, cnts, maps = pixellink_prepro(ins)
         img = cv2.drawContours(img, cnts,-1,(255,0,0), 1)
         cv2.imwrite('processed.jpg', img)
+        print('finished')
+        break
