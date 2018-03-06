@@ -22,6 +22,8 @@ vector<Point2i> PostProcessor::generate_random_vector(int rows, int cols)
 void PostProcessor::search_contour(Point2i pt)
 {
     InferenceMap<Pixel_TCL> &map = *(InferenceMap<Pixel_TCL> *)this->inferencemap;
+    this->width = map.width;
+    this->height = map.height;
 
     Pixel_TCL sp = map.at(pt);
 
@@ -157,6 +159,8 @@ void PostProcessor::search_contour(Point2i pt)
 bool PostProcessor::postprocess_tcl()
 {
     InferenceMap<Pixel_TCL> &map = *(InferenceMap<Pixel_TCL> *)this->inferencemap;
+    this->width = map.width;
+    this->height = map.height;
 
     search_mark.create(height, width, CV_8UC1);
     search_mark.setTo(Scalar((unsigned char)0));
@@ -223,7 +227,7 @@ bool PostProcessor::postprocess_pixellink()
             {
                 if (map.at(curpt).link[k] < config.t_tcl)
                     continue;
-                Point2i newpt{curpt.x + directions[i][0], curpt.y + directions[i][1]};
+                Point2i newpt{curpt.x + directions[k][0], curpt.y + directions[k][1]};
                 if (newpt.x < 0 || newpt.x >= width || newpt.y < 0 || newpt.y >= height)
                     continue;
                 if (map.at(newpt).tr > config.t_tr)

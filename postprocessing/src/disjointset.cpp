@@ -16,8 +16,8 @@ void disjointset::union_element(int i, int j)
 {
     int iroot = get_setid(i);
     int jroot = get_setid(j);
-    auto &iele = elements[i];
-    auto &jele = elements[j];
+    auto &iele = elements[iroot];
+    auto &jele = elements[jroot];
     if (iroot == jroot)
         return;
     if (iele.rank < jele.rank)
