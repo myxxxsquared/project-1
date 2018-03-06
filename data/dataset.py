@@ -74,7 +74,7 @@ def load_pre_gen(file):
 
 
 ####on line data###########
-Q = mp.Queue(maxsize=3000)
+Q = mp.Queue(maxsize=500)
 print('queue excuted')
 
 def enqueue(file_name, test_mode=False, real_test=False, is_syn=False, is_pixellink=True):
