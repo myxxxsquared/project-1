@@ -124,7 +124,7 @@ import time
 def _pixellink_labeling(img_name, img, cnts, left_top, right_bottom):
     map_shape = (img.shape[0]//2, img.shape[1]//2)
     cnts = [cnt//2 for cnt in cnts]
-
+    cnts = [cnt.astype(np.int32) for cnt in cnts]
     # mask
     mask = cv2.fillPoly(np.zeros(map_shape), cnts, 255)
     mask = np.sign(mask).astype(np.float32)
