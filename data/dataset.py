@@ -217,7 +217,7 @@ def generator_eval():
         features['lens'] = lens
         features['cnts'] = np.array(_pad_cnts(cnts, max(lens)), np.float32)
         features['care'] = np.array(ins['care']).astype(np.int32)
-        features['imname'] = ins['img_name']
+        # features['imname'] = ins['img_name']
         yield features
 
 
@@ -225,8 +225,7 @@ def get_eval_input():
     eval_dataset = tf.data.Dataset.from_generator(generator_eval,{'input_img': tf.float32,
                                                                   'lens': tf.int32,
                                                                   'cnts': tf.float32,
-                                                                  'care': tf.int32,
-                                                                  'imname': tf.string},
+                                                                  'care': tf.int32},
                                                   {'input_img': (
                                                       tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
                                                       3),
@@ -234,8 +233,7 @@ def get_eval_input():
                                                    'cnts': (
                                                        tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
                                                        tf.Dimension(None)),
-                                                   'care':(tf.Dimension(None),),
-                                                   'imname':()}
+                                                   'care':(tf.Dimension(None),)}
                                                   )
     iterator = eval_dataset.make_one_shot_iterator()
     features = iterator.get_next()

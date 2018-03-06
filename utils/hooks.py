@@ -152,8 +152,7 @@ def _evaluate(eval_fn, input_fn, path, config):
             'input_img': features['input_img'],
             'lens': features['lens'],
             'cnts': features['cnts'],
-            'care': features['care'],
-            'imname': features['imname']
+            'care': features['care']
         }
         sess_creator = tf.train.ChiefSessionCreator(
             checkpoint_dir=path,
@@ -174,13 +173,13 @@ def _evaluate(eval_fn, input_fn, path, config):
                 cnts = outputs['cnts']
                 cnts = _depad(cnts, lens)
                 care = outputs['care']
-                imname = outputs['imname']
-                print(imname)
+                # imname = outputs['imname']
+                # print(imname)
                 for i in range(img.shape[0]):
                     re_cnts = reconstruct(img[i], prediction)
                     TR, TP, T_gt_n, T_pred_n, PR, PP, P_gt_n, P_pred_n = \
                         evaluate(img[i],cnts,re_cnts,care)
-                    tf.logging.info(imname+' recall: '+str(TR)+'; precise: '+str(TP))
+                    tf.logging.info(' recall: '+str(TR)+'; precise: '+str(TP))
                     recall_sum+=TR*T_gt_n
                     precise_sum+=TP*T_pred_n
                     gt_n_sum+=T_gt_n
