@@ -63,7 +63,7 @@ def default_parameters():
         eval_steps=10,
         prefetch_buffer=150,
         shuffle_buffer=100,
-        epoch=100,
+        epoch=200,
 
         output_scalar=2
     )
@@ -221,18 +221,18 @@ def main(args):
                     sharded=False
                 )
             ),
-            tf.train.SummarySaverHook(
-                save_steps=1,
-                save_secs=None,
-                output_dir=os.path.join(params.output, "sumimg"),
-                summary_op=sum_img
-            ),
-            tf.train.SummarySaverHook(
-                save_steps=1,
-                save_secs=None,
-                output_dir=os.path.join(params.output, "sumloss"),
-                summary_op=sum_loss
-            )
+            # tf.train.SummarySaverHook(
+            #     save_steps=1,
+            #     save_secs=None,
+            #     output_dir=os.path.join(params.output, "sumimg"),
+            #     summary_op=sum_img
+            # ),
+            # tf.train.SummarySaverHook(
+            #     save_steps=1,
+            #     save_secs=None,
+            #     output_dir=os.path.join(params.output, "sumloss"),
+            #     summary_op=sum_loss
+            # )
         ]
 
 
