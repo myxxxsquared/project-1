@@ -176,7 +176,7 @@ def _evaluate(eval_fn, input_fn, path, config):
                 # imname = outputs['imname']
                 # print(imname)
                 for i in range(img.shape[0]):
-                    re_cnts = reconstruct(img[i], prediction)
+                    re_cnts = reconstruct(img[i], prediction[i])
                     TR, TP, T_gt_n, T_pred_n, PR, PP, P_gt_n, P_pred_n = \
                         evaluate(img[i],cnts,re_cnts,care)
                     tf.logging.info(' recall: '+str(TR)+'; precise: '+str(TP))
