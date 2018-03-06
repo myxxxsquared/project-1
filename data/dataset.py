@@ -50,7 +50,7 @@ def _data_label(ins, is_pixellink):
 def loading_data(file, test_mode=False, real_test=False, is_syn=False, is_pixellink=True):
     return _data_label(_data_aug(_load_file(
         file, is_syn=is_syn),
-        augment_rate=1, test_mode=test_mode, real_test=real_test),
+        augment_rate=500, test_mode=test_mode, real_test=real_test),
         is_pixellink)
 
 
@@ -74,7 +74,7 @@ def load_pre_gen(file):
 
 
 ####on line data###########
-Q = mp.Queue(maxsize=3000)
+Q = mp.Queue(maxsize=2000)
 print('queue excuted')
 
 def enqueue(file_name, test_mode=False, real_test=False, is_syn=False, is_pixellink=True):
@@ -117,7 +117,7 @@ def get_train_input(params):
                                                    {'input_img': (512,512,3),
                                                     'Labels': (256,256,10)}
                                                    )
-    train_dataset = train_dataset.repeat().shuffle(params.shuffle_buffer).batch(params.batch_size).prefetch(params.prefetch_buffer)
+    train_dataset = train_dataset.shuffle(params.shuffle_buffer).batch(params.batch_size)#.prefetch(params.prefetch_buffer)
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
     return features

@@ -61,9 +61,9 @@ def default_parameters():
         keep_top_checkpoint_max=5,
         eval_secs=None,
         eval_steps=10,
-        prefetch_buffer=150,
+        prefetch_buffer=500,
         shuffle_buffer=100,
-        epoch=100,
+        epoch=400,
 
         output_scalar=2
     )
@@ -179,8 +179,6 @@ def main(args):
                                                 global_step, params)
         learning_rate = tf.convert_to_tensor(learning_rate, dtype=tf.float32)
 
-        tf.summary.scalar("learning_rate", learning_rate)
-        tf.summary.scalar("loss", loss)
 
         print('create opt')
         # Create optimizer
@@ -199,7 +197,6 @@ def main(args):
             colocate_gradients_with_ops=True
         )
 
-        # summary_op = tf.summary.merge_all()
         print('create hooks')
         # Add hooks
         train_hooks = [
@@ -238,16 +235,16 @@ def main(args):
 
         config = session_config(params)
 
-        train_hooks.append(
-            hooks.EvaluationHook(
-                model.get_evaluation_func(),
-                dataset.get_eval_input,
-                params.output,
-                config,
-                params.keep_top_checkpoint_max,
-                eval_secs=params.eval_secs,
-                eval_steps=params.eval_steps
-            ))
+        # train_hooks.append(
+        #     hooks.EvaluationHook(
+        #         model.get_evaluation_func(),
+        #         dataset.get_eval_input,
+        #         params.output,
+        #         config,
+        #         params.keep_top_checkpoint_max,
+        #         eval_secs=params.eval_secs,
+        #         eval_steps=params.eval_steps
+        #     ))
 
         print('create session')
         # Create session, do not use default CheckpointSaverHook
