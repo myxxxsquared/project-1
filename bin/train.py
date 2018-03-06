@@ -154,7 +154,7 @@ def main(args):
         model = pixellink.PixelLinkNetwork(params)
 
         # Multi-GPU setting
-        sharded_losses = parallel.parallel_model(
+        sharded_losses, ((sum_img, sum_loss), *_) = parallel.parallel_model(
             model.get_training_func(initializer),
             features,
             params.device_list
@@ -222,12 +222,18 @@ def main(args):
                     sharded=False
                 )
             ),
-            # tf.train.SummarySaverHook(
-            #     save_steps=2,
-            #     save_secs=None,
-            #     # output_dir=params.output,
-            #     summary_op=summary_op
-            # )
+            tf.train.SummarySaverHook(
+                save_steps=1,
+                save_secs=None,
+                # output_dir=params.output,
+                summary_op=sum_img
+            ),
+            tf.train.SummarySaverHook(
+                save_steps=1,
+                save_secs=None,
+                # output_dir=params.output,
+                summary_op=sum_loss
+            )
         ]
 
 

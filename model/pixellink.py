@@ -223,7 +223,8 @@ class PixelLinkNetwork:
                                    reuse=reuse):
                 loss, summary = self.loss(
                     features['input_img'], features['Labels'][:, :, :, 0:9], features['Labels'][:, :, :, 9], not bool(reuse))
-                return loss
+                returnval = loss, summary
+                return returnval
         return training_fn
 
     def get_evaluation_func(self):
