@@ -117,11 +117,10 @@ def get_train_input(params):
                                                    {'input_img': (512,512,3),
                                                     'Labels': (256,256,10)}
                                                    )
-    train_dataset = train_dataset.batch(params.batch_size).prefetch(params.buffer)
+    train_dataset = train_dataset.repeat().shuffle(params.shuffle_buffer).batch(params.batch_size).prefetch(params.prefetch_buffer)
     iterator = train_dataset.make_one_shot_iterator()
     features = iterator.get_next()
     return features
-
 
 #######solution mp.queue##########
 # Q = mp.Queue(maxsize=3000)
