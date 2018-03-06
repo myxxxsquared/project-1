@@ -50,7 +50,7 @@ def _data_label(ins, is_pixellink):
 def loading_data(file, test_mode=False, real_test=False, is_syn=False, is_pixellink=True):
     return _data_label(_data_aug(_load_file(
         file, is_syn=is_syn),
-        augment_rate=1, test_mode=test_mode, real_test=real_test),
+        augment_rate=500, test_mode=test_mode, real_test=real_test),
         is_pixellink)
 
 
