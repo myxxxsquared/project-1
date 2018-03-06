@@ -195,6 +195,7 @@ def evaluate(img, cnts, resultcnts, care):
     row, col = img.shape[:2]
     def drawcontour(cnt):
         img = np.zeros((row, col, 1), dtype=np.uint8)
+        cnt = cnt.astype(np.int32)
         cv2.drawContours(img, [cnt], -1, 255, -1)
         return img
     cnts_mask = [drawcontour(cnt) for cnt in cnts]
