@@ -1,5 +1,5 @@
 
-from postprocessing._postprocessing import postprocessing as _postprocessing
+from ._postprocessing import postprocessing as _postprocessing
 import numpy as np
 import cv2
 
