@@ -225,13 +225,13 @@ def main(args):
             tf.train.SummarySaverHook(
                 save_steps=1,
                 save_secs=None,
-                # output_dir=params.output,
+                output_dir=os.path.join(params.output, "sumimg"),
                 summary_op=sum_img
             ),
             tf.train.SummarySaverHook(
                 save_steps=1,
                 save_secs=None,
-                # output_dir=params.output,
+                output_dir=os.path.join(params.output, "sumloss"),
                 summary_op=sum_loss
             )
         ]

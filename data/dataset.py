@@ -217,7 +217,7 @@ def generator_eval():
         lens = np.array([cnt.shape[0] for cnt in cnts], np.int32)
         features['lens'] = lens
         features['cnts'] = np.array(_pad_cnts(cnts, max(lens)), np.float32)
-        features['care'] = ins['care'].astype(np.int32)
+        features['care'] = np.array(ins['care']).astype(np.int32)
         features['imname'] = ins['img_name']
         yield features
 
