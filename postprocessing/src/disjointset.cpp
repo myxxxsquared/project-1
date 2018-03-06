@@ -1,6 +1,8 @@
 
 #include "disjointset.hpp"
 
+#include <cstdio>
+
 void disjointset::init(int n)
 {
     elements.resize(n);
@@ -14,26 +16,28 @@ void disjointset::init(int n)
 
 void disjointset::union_element(int i, int j)
 {
-    int iroot = get_setid(i);
-    int jroot = get_setid(j);
-    auto &iele = elements[iroot];
-    auto &jele = elements[jroot];
-    if (iroot == jroot)
+    i = get_setid(i);
+    j = get_setid(j);
+    auto &iele = elements[i];
+    auto &jele = elements[j];
+    if (i == j)
         return;
     if (iele.rank < jele.rank)
-        iele.parent = jroot;
+        iele.parent = j;
     else if (iele.rank > jele.rank)
-        jele.parent = iroot;
+        jele.parent = i;
     else
     {
-        iele.parent = jroot;
+        iele.parent = j;
         jele.rank++;
     }
 }
 
 int disjointset::get_setid(int i)
 {
-    if (elements[i].parent != i)
-        elements[i].parent = get_setid(elements[i].parent);
-    return elements[i].parent;
+    // if (elements[i].parent != i)
+    //     elements[i].parent = get_setid(elements[i].parent);
+    while (elements[i].parent != i)
+        i = elements[i].parent;
+    return i;
 }

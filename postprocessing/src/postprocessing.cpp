@@ -22,8 +22,6 @@ vector<Point2i> PostProcessor::generate_random_vector(int rows, int cols)
 void PostProcessor::search_contour(Point2i pt)
 {
     InferenceMap<Pixel_TCL> &map = *(InferenceMap<Pixel_TCL> *)this->inferencemap;
-    this->width = map.width;
-    this->height = map.height;
 
     Pixel_TCL sp = map.at(pt);
 
@@ -202,8 +200,28 @@ int PostProcessor::toint(Point2i pt)
 bool PostProcessor::postprocess_pixellink()
 {
     InferenceMap<Pixel_PixelLink> &map = *(InferenceMap<Pixel_PixelLink> *)this->inferencemap;
+    this->width = map.width;
+    this->height = map.height;
 
     disjointset dset;
+
+    // dset.init(10);
+    // dset.union_element(1, 2);
+    // dset.union_element(3, 4);
+    // dset.union_element(5, 6);
+    // dset.union_element(1, 6);
+    // for(int i = 0; i < 10; ++i)
+    // {
+    //     printf("%d, ", dset.elements[i].parent);
+    // }
+    // printf("\n");
+    // for(int i = 0; i < 10; ++i)
+    // {
+    //     printf("%d, ", dset.get_setid(i));
+    // }
+    // printf("\n");
+    // exit(0);
+
     dset.init(width * height);
 
     int directions[][2] = {
@@ -227,11 +245,16 @@ bool PostProcessor::postprocess_pixellink()
             {
                 if (map.at(curpt).link[k] < config.t_tcl)
                     continue;
-                Point2i newpt{curpt.x + directions[k][0], curpt.y + directions[k][1]};
+                Point2i newpt;
+                newpt.x = curpt.x + directions[k][0];
+                newpt.y = curpt.y + directions[k][1];
                 if (newpt.x < 0 || newpt.x >= width || newpt.y < 0 || newpt.y >= height)
                     continue;
-                if (map.at(newpt).tr > config.t_tr)
-                    dset.union_element(toint(curpt), toint(newpt));
+                if (map.at(newpt).tr < config.t_tr)
+                    continue;
+                // printf("%d, %d, %d, %d, %d, %d\n", curpt.x, newpt.x, curpt.y, newpt.y, directions[i][0], directions[i][1]);
+                // printf("%d, %d\n", toint(curpt), toint(newpt));
+                dset.union_element(toint(curpt), toint(newpt));
             }
         }
     }
@@ -246,16 +269,17 @@ bool PostProcessor::postprocess_pixellink()
             if(map.at(curpt).tr < config.t_tr)
                 continue;
             int id = toint(curpt);
-            id = dset.get_setid(id);
-            auto it = contours.find(id);
+            int idnew = dset.get_setid(id);
+            // printf("%d\n", idnew);
+            auto it = contours.find(idnew);
             if(it == contours.end())
             {
                 Mat mat;
                 mat.create(height, width, CV_8UC1);
                 mat.setTo(0);
-                contours.insert(std::make_pair(id, mat));
+                contours.insert(std::make_pair(idnew, mat));
             }
-            it = contours.find(id);
+            it = contours.find(idnew);
             it->second.at<uchar>(curpt) = 255;
         }
     }
@@ -269,6 +293,7 @@ bool PostProcessor::postprocess_pixellink()
         regions.emplace_back();
         auto &back = regions.back();
         back.contours = newctn;
+        // printf("%d\n", (int)newctn.size());
     }
 
     return true;

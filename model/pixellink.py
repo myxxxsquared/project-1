@@ -24,20 +24,21 @@ height_ = width / 2 或 width / 4
 
 class PixelLinkNetwork:
     def conv2d(self, input, shape, name):
-        conv = tf.nn.conv2d(
-            input,
-            tf.get_variable(
-                name+'_kernel', dtype=tf.float32, shape=shape, initializer=xavier(), trainable=True),
-            strides=(1, 1, 1, 1),
-            padding="SAME",
-            name=name+'_conv')
-        conv = tf.nn.bias_add(
-            conv,
-            tf.get_variable(
-                name+'_bias', shape=(shape[3], ), trainable=True, initializer=tf.zeros_initializer()),
-            name=name+'_biasadd'
-        )
-        return conv
+        with tf.variable_scope(name):
+            conv = tf.nn.conv2d(
+                input,
+                tf.get_variable(
+                    'kernel', dtype=tf.float32, shape=shape, initializer=xavier(), trainable=True),
+                strides=(1, 1, 1, 1),
+                padding="SAME",
+                name='conv')
+            conv = tf.nn.bias_add(
+                conv,
+                tf.get_variable(
+                    'bias', shape=(shape[3], ), trainable=True, initializer=tf.zeros_initializer()),
+                name='biasadd'
+            )
+            return conv
 
     def pool(self, input, stride, name):
         return tf.nn.max_pool(
@@ -48,7 +49,8 @@ class PixelLinkNetwork:
             name=name)
 
     def pre_processing(self, image):
-        return (image - np.reshape((123.68, 116.78, 103.94), (1, 1, 1, 3))) / 256
+        with tf.variable_scope("pre_processing"):
+            return (image - np.reshape((123.68, 116.78, 103.94), (1, 1, 1, 3))) / 256
 
     def vgg_base(self, input_image):
         layer = [
@@ -95,7 +97,7 @@ class PixelLinkNetwork:
                 activations = self.conv2d(
                     activations, filter_shapes[name], name)
             elif Layer_type == 'relu':
-                activations = tf.nn.relu(activations)
+                activations = tf.nn.relu(activations, name=name)
             elif Layer_type == 'pool':
                 activations = self.pool(activations, pool_strides[name], name)
             net[name] = activations
