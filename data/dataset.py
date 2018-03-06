@@ -261,7 +261,7 @@ def get_inference_input(path):
                                                       tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
                                                       tf.Dimension(None))}
                                                   )
-    iterator = infer_dataset.make_one_shot_iterator()
+    iterator = infer_dataset.batch(1).make_one_shot_iterator()
     features = iterator.get_next()
     return features
 
