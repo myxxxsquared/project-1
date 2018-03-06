@@ -88,7 +88,7 @@ def _pixellink_transform(ins):
         new_row, new_col = new_row, new_col*aspect_ratio
         new_row, new_col = int(new_row), int(new_col)
 
-    print('sampled resize and aspect')
+    # print('sampled resize and aspect')
     img = cv2.resize(img, (new_col, new_row))
     new = []
     for cnt in contour:

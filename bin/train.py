@@ -57,7 +57,7 @@ def default_parameters():
         predict_channels=[128, 64, 32, 32],
 
         batch_size=32,
-        thread_num=15,
+        thread_num=10,
         keep_top_checkpoint_max=5,
         eval_secs=None,
         eval_steps=10,
