@@ -8,7 +8,6 @@ import os
 
 import numpy as np
 import tensorflow as tf
-import model.LineBased as LineBased
 import model.pixellink as pixellink
 import data.dataset as dataset
 from utils import parallel
