@@ -239,9 +239,11 @@ if __name__ == '__main__':
     for file_name in file_names_totaltext_train:
         ins = pickle.load(open(file_name, 'rb'))
         img = ins['img'].copy()
-        img = cv2.drawContours(img, ins['contour'],-1,(255,0,0), 1)
+        cnts = [cnt.astype(np.int32) for cnt in ins['contour']]
+        img = cv2.drawContours(img, cnts,-1,(255,0,0), 1)
         cv2.imwrite('origin.jpg', img)
         img_name, img, cnts, maps = pixellink_prepro(ins)
+        cnts = [cnt.astype(np.int32) for cnt in cnts]
         img = cv2.drawContours(img, cnts,-1,(255,0,0), 1)
         cv2.imwrite('processed.jpg', img)
         print('finished')
