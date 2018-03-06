@@ -188,7 +188,8 @@ def _pixellink_transform(ins):
 
     if random.random() <= 0.2:
         # counter clock, 0:0, 1: 90; 2: 180, 3: 270,
-        rotate_time = random.randint(0,3)
+        # rotate_time = random.randint(0,3)
+        rotate_time = 2
         for i in range(rotate_time):
             img, contour = _rotate(img, contour)
 
@@ -232,9 +233,9 @@ if __name__ == '__main__':
     import os
     import pickle
     TOTAL_TRAIN_DIR = '/home/rjq/data_cleaned/pkl/totaltext_train_care/'
-    TOTAL_TEST_DIR = '/home/rjq/data_cleaned/pkl/totaltext_test_care/'
+    TOTAL_TEST_DIR = '/Users/ruanjiaqiang/Desktop/totaltext_test/'
 
-    file_names_totaltext_train = [TOTAL_TRAIN_DIR+name for name in os.listdir(TOTAL_TRAIN_DIR)]
+    file_names_totaltext_train = [TOTAL_TEST_DIR+name for name in os.listdir(TOTAL_TEST_DIR)]
 
     for file_name in file_names_totaltext_train:
         ins = pickle.load(open(file_name, 'rb'))
@@ -243,6 +244,7 @@ if __name__ == '__main__':
         img = cv2.drawContours(img, cnts,-1,(255,0,0), 1)
         cv2.imwrite('origin.jpg', img)
         img_name, img, cnts, maps = pixellink_prepro(ins)
+
         cnts = [cnt.astype(np.int32) for cnt in cnts]
         img = cv2.drawContours(img, cnts,-1,(255,0,0), 1)
         cv2.imwrite('processed.jpg', img)
