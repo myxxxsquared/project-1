@@ -160,6 +160,8 @@ def _pixellink_labeling(img_name, img, cnts, left_top, right_bottom):
     left_top = [left_top[0]//2, left_top[1]//2]
     right_bottom = [right_bottom[0]//2,right_bottom[1]//2]
     maps = maps[left_top[0]:right_bottom[0], left_top[1]:right_bottom[1], :]
+    # print(maps.shape)
+    # print(img.shape)
     return img_name, img, cnts, maps
 
 
@@ -188,8 +190,7 @@ def _pixellink_transform(ins):
 
     if random.random() <= 10:
         # counter clock, 0:0, 1: 90; 2: 180, 3: 270,
-        # rotate_time = random.randint(0,3)
-        rotate_time = 1
+        rotate_time = random.randint(0,3)
         for i in range(rotate_time):
             img, contour = _rotate(img, contour)
     img = img.copy().astype(np.uint8)
@@ -197,31 +198,30 @@ def _pixellink_transform(ins):
     # step2: resize and aspect
     new_row, new_col=0,0
     row, col = img.shape[:2]
-    # while new_row-512-1 <0 or new_col-512-1 <0:
-    #     size_ratio = random.random()* 2
-    #     aspect_ratio = random.random()*1.5+0.5
-    #     new_row, new_col = row*size_ratio, col*size_ratio
-    #     new_row, new_col = new_row, new_col*aspect_ratio
-    #     new_row, new_col = int(new_row), int(new_col)
-    #
-    # print('sampled resize and aspect')
-    # img = cv2.resize(img, (new_row, new_col))
-    # new = []
-    # for cnt in contour:
-    #     points = []
-    #     for point in cnt:
-    #         # y is col, x is row
-    #         y, x = point[0]
-    #         new_y, new_x = y*new_col/col, x*new_row/row
-    #         points.append([[new_y, new_x]])
-    #     points = np.array(points, np.float32)
-    #     new.append(points)
-    # contour = new
+    while new_row-512-1 <0 or new_col-512-1 <0:
+        size_ratio = random.random()* 2
+        aspect_ratio = random.random()*1.5+0.5
+        new_row, new_col = row*size_ratio, col*size_ratio
+        new_row, new_col = new_row, new_col*aspect_ratio
+        new_row, new_col = int(new_row), int(new_col)
 
-    # # step3: get crop points
-    # left_top = random.randint(0,new_row-512-1), random.randint(0,new_col-512-1)
-    # right_bottom = left_top[0]+512, left_top[1]+512
-    left_top,right_bottom=0,0
+    print('sampled resize and aspect')
+    img = cv2.resize(img, (new_col, new_row))
+    new = []
+    for cnt in contour:
+        points = []
+        for point in cnt:
+            # y is col, x is row
+            y, x = point[0]
+            new_y, new_x = y*new_col/col, x*new_row/row
+            points.append([[new_y, new_x]])
+        points = np.array(points, np.float32)
+        new.append(points)
+    contour = new
+
+    # step3: get crop points
+    left_top = random.randint(0,new_row-512-1), random.randint(0,new_col-512-1)
+    right_bottom = left_top[0]+512, left_top[1]+512
     return img_name, img, contour, left_top, right_bottom
 
 
@@ -244,13 +244,11 @@ if __name__ == '__main__':
         cnts = [cnt.astype(np.int32) for cnt in ins['contour']]
         img = cv2.drawContours(img, cnts,-1,(255,0,255), 3)
         cv2.imwrite('origin.jpg', img)
-        # img_name, img, cnts, maps = pixellink_prepro(ins)
+        img_name, img, cnts, maps = pixellink_prepro(ins)
 
-        img_name, img, cnts, left_top, right_bottom = _pixellink_transform(ins)
+        # img_name, img, cnts, left_top, right_bottom = _pixellink_transform(ins)
         cnts = [cnt.astype(np.int32) for cnt in cnts]
         img = img.astype(np.uint8)
-        print(cnts)
-        print(img.shape, img.dtype)
         img = cv2.drawContours(img, cnts,-1,(255,0,255), 3)
         cv2.imwrite('processed.jpg', img)
         print('finished')
