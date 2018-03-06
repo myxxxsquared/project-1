@@ -179,8 +179,8 @@ def main(args):
                                                 global_step, params)
         learning_rate = tf.convert_to_tensor(learning_rate, dtype=tf.float32)
 
-        tf.summary.scalar("learning_rate", learning_rate)
-        tf.summary.scalar("loss", loss)
+        # tf.summary.scalar("learning_rate", learning_rate)
+        # tf.summary.scalar("loss", loss)
 
         print('create opt')
         # Create optimizer
@@ -222,7 +222,7 @@ def main(args):
                 )
             ),
             tf.train.SummarySaverHook(
-                save_steps=1,
+                save_steps=100,
                 save_secs=None,
                 output_dir=os.path.join(params.output, "sumimg"),
                 summary_op=sum_img
