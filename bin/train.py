@@ -221,33 +221,33 @@ def main(args):
                     sharded=False
                 )
             ),
-            # tf.train.SummarySaverHook(
-            #     save_steps=1,
-            #     save_secs=None,
-            #     output_dir=os.path.join(params.output, "sumimg"),
-            #     summary_op=sum_img
-            # ),
-            # tf.train.SummarySaverHook(
-            #     save_steps=1,
-            #     save_secs=None,
-            #     output_dir=os.path.join(params.output, "sumloss"),
-            #     summary_op=sum_loss
-            # )
+            tf.train.SummarySaverHook(
+                save_steps=1,
+                save_secs=None,
+                output_dir=os.path.join(params.output, "sumimg"),
+                summary_op=sum_img
+            ),
+            tf.train.SummarySaverHook(
+                save_steps=1,
+                save_secs=None,
+                output_dir=os.path.join(params.output, "sumloss"),
+                summary_op=sum_loss
+            )
         ]
 
 
         config = session_config(params)
 
-        train_hooks.append(
-            hooks.EvaluationHook(
-                model.get_evaluation_func(),
-                dataset.get_eval_input,
-                params.output,
-                config,
-                params.keep_top_checkpoint_max,
-                eval_secs=params.eval_secs,
-                eval_steps=params.eval_steps
-            ))
+        # train_hooks.append(
+        #     hooks.EvaluationHook(
+        #         model.get_evaluation_func(),
+        #         dataset.get_eval_input,
+        #         params.output,
+        #         config,
+        #         params.keep_top_checkpoint_max,
+        #         eval_secs=params.eval_secs,
+        #         eval_steps=params.eval_steps
+        #     ))
 
         print('create session')
         # Create session, do not use default CheckpointSaverHook
