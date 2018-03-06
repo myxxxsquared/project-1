@@ -201,7 +201,7 @@ class PixelLinkNetwork:
                 imgsummary.append(tf.summary.image('map_%d' %
                                                    (i,), maps[0:1, :, :, i:i+1]))
                 imgsummary.append(tf.summary.image('predict_%d' % (i,), tf.nn.softmax(
-                    prediction[0:1, :, :, 2*i:2*i+2], axis=3)[:, :, :, 1:2]))
+                    prediction[0:1, :, :, 2*i:2*i+2])[:, :, :, 1:2]))
 
             losssummary = []
             losssummary.append(tf.summary.scalar('T_loss', T_loss))
