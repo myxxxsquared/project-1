@@ -59,13 +59,12 @@ def default_parameters():
 
         batch_size=32,
         thread_num=15,
-        pre_epoch=2,
         keep_top_checkpoint_max=5,
         eval_secs=None,
         eval_steps=10,
         prefetch_buffer=150,
         shuffle_buffer=100,
-        epoch=10,
+        epoch=100,
 
         output_scalar=2
     )
