@@ -24,13 +24,20 @@ height_ = width / 2 或 width / 4
 
 class PixelLinkNetwork:
     def conv2d(self, input, shape, name):
-        return tf.nn.conv2d(
+        conv = tf.nn.conv2d(
             input,
             tf.get_variable(
                 name+'_kernel', dtype=tf.float32, shape=shape, initializer=xavier(), trainable=True),
             strides=(1, 1, 1, 1),
             padding="SAME",
-            name=name)
+            name=name+'_conv')
+        conv = tf.nn.bias_add(
+            input,
+            tf.get_variable(
+                name+'_bias', shape=(1, 1, 1, shape[3]), trainable=True, initializer=tf.zeros_initializer()),
+            name=name+'_biasadd'
+        )
+        return conv
 
     def pool(self, input, stride, name):
         return tf.nn.max_pool(
@@ -89,7 +96,6 @@ class PixelLinkNetwork:
                     activations, filter_shapes[name], name)
             elif Layer_type == 'relu':
                 activations = tf.nn.relu(activations)
-                print(name, activations.shape)
             elif Layer_type == 'pool':
                 activations = self.pool(activations, pool_strides[name], name)
             net[name] = activations
@@ -115,12 +121,11 @@ class PixelLinkNetwork:
         prediction = tf.nn.relu(prediction)
         for i in range(1, len(maps)):
             ff = maps[i]
-            dynamic_shape = tf.shape(ff)
-            # ffsize = (ff.shape[1].values, ff.shape[2].values)
-            # if not ffsize[0] or not ffsize[1]:
-            ffsize = tf.convert_to_tensor(
-                (dynamic_shape[1], dynamic_shape[2]))
-            # print(ffsize)
+            ffsize = (ff.shape[1].value, ff.shape[2].value)
+            if not ffsize[0] or not ffsize[1]:
+                dynamic_shape = tf.shape(ff)
+                ffsize = tf.convert_to_tensor(
+                    (dynamic_shape[1], dynamic_shape[2]))
             prediction = tf.image.resize_images(prediction, ffsize)  \
                 + self.conv2d(maps[i], (1, 1, maps[i].shape[3],
                                         ochannels), 'conv_%d' % (i,))
@@ -191,7 +196,7 @@ class PixelLinkNetwork:
         with tf.device("/device:cpu:0"):
             imgsummary = []
             imgsummary.append(tf.summary.image('inputimg', input[0:1]))
-            imgsummary.append(tf.summary.image('weight', weights[0:1]))
+            imgsummary.append(tf.summary.image('weight', tf.expand_dims(weights[0:1], 3)))
             for i in range(9):
                 imgsummary.append(tf.summary.image('map_%d' %
                                                    (i,), maps[0:1, :, :, i:i+1]))
