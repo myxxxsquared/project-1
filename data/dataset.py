@@ -122,7 +122,6 @@ def get_train_input(params):
     features = iterator.get_next()
     return features
 
-
 #######solution mp.queue##########
 # Q = mp.Queue(maxsize=3000)
 # print('queue excuted')
