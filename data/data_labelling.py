@@ -224,7 +224,7 @@ def _pixellink_transform(ins):
 
 
 def pixellink_prepro(ins):
-    img_name, img, cnts, maps = _pixellink_labeling(_pixellink_transform(ins))
+    img_name, img, cnts, maps = _pixellink_labeling(*_pixellink_transform(ins))
     return img_name, img, cnts, maps
 
 
