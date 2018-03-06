@@ -1,4 +1,4 @@
-from .utils import get_maps
+from data.utils import get_maps
 import numpy as np
 import cv2
 import random
