@@ -64,8 +64,10 @@ def default_parameters():
         prefetch_buffer=500,
         shuffle_buffer=100,
         epoch=400,
+        weight_decay=0.0005,
+        momentum=0.9,
 
-        output_scalar=2
+        output_scalar=2,
     )
     return params
 
@@ -179,6 +181,18 @@ def main(args):
                                                 global_step, params)
         learning_rate = tf.convert_to_tensor(learning_rate, dtype=tf.float32)
 
+        weights = tf.trainable_variables()
+
+        with tf.variable_scope('weights_norm') as scope:
+            weights_norm = tf.reduce_sum(
+                input_tensor=params.weight_decay * tf.stack(
+                    [tf.nn.l2_loss(v) for v in weights]
+                ),
+                name='weights_norm'
+            )
+
+        loss = loss+weights_norm
+        tf.summary.scalar('total_loss', loss)
 
         print('create opt')
         # Create optimizer
@@ -186,6 +200,7 @@ def main(args):
                                      beta1=params.adam_beta1,
                                      beta2=params.adam_beta2,
                                      epsilon=params.adam_epsilon)
+
 
         train_op = tf.contrib.layers.optimize_loss(
             name="training",
