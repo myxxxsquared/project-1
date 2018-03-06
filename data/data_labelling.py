@@ -80,7 +80,7 @@ class data_churn(object):
         cnts = [cnt//2 for cnt in cnts]
 
         # mask
-        mask = cv2.drawContours(np.zeros(map_shape), cnts, -1, 255, 1)
+        mask = cv2.fillPoly(np.zeros(map_shape), cnts, 255)
         mask = np.sign(mask).astype(np.float32)
 
         # links & weight
