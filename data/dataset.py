@@ -230,7 +230,7 @@ def get_eval_input():
                                                                   'imname': tf.string},
                                                   {'input_img': (
                                                       tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
-                                                      tf.Dimension(None)),
+                                                      3),
                                                    'lens': (tf.Dimension(None),),
                                                    'cnts': (
                                                        tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
