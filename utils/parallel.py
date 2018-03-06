@@ -68,14 +68,14 @@ def data_parallelism(devices, fn, *args, **kwargs):
 
     for i in range(num_worker):
         worker = "/gpu:%d" % i
-        device_setter = _create_device_setter(False, worker, len(devices))
+        # device_setter = _create_device_setter(False, worker, len(devices))
         with tf.variable_scope(tf.get_variable_scope(), reuse=(i != 0)):
             with tf.name_scope("parallel_%d" % i):
-                with tf.device(device_setter):
+                # with tf.device(device_setter):
+                with tf.device(worker):
                     outputs.append(fns[i](*new_args[i], **new_kwargs[i]))
 
     if isinstance(outputs[0], tuple):
-        print('--------------------tuple')
         outputs = list(zip(*outputs))
         outputs = tuple([list(o) for o in outputs])
 
@@ -99,8 +99,9 @@ def shard_features(features, device_list):
 
     for d in range(num_datashards):
         worker = "/gpu:%d" % d
-        device_setter = _create_device_setter(False, worker, len(device_list))
-        with tf.device(device_setter):
+        # device_setter = _create_device_setter(False, worker, len(device_list))
+        # with tf.device(device_setter):
+        with tf.device(worker):
             feat = {
                 k: v[d] for k, v in sharded_features.items()
             }

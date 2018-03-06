@@ -89,6 +89,7 @@ class PixelLinkNetwork:
                     activations, filter_shapes[name], name)
             elif Layer_type == 'relu':
                 activations = tf.nn.relu(activations)
+                print(name, activations.shape)
             elif Layer_type == 'pool':
                 activations = self.pool(activations, pool_strides[name], name)
             net[name] = activations
@@ -111,6 +112,7 @@ class PixelLinkNetwork:
     def prediction_block(self, maps, ochannels):
         prediction = self.conv2d(
             maps[0], (1, 1, maps[0].shape[3], ochannels), 'conv_0')
+        prediction = tf.nn.relu(prediction)
         for i in range(1, len(maps)):
             ff = maps[i]
             dynamic_shape = tf.shape(ff)
@@ -122,7 +124,7 @@ class PixelLinkNetwork:
             prediction = tf.image.resize_images(prediction, ffsize)  \
                 + self.conv2d(maps[i], (1, 1, maps[i].shape[3],
                                         ochannels), 'conv_%d' % (i,))
-        return self.conv2d(prediction, (1, 1, ochannels, ochannels), 'conv_o')
+        return tf.nn.relu(self.conv2d(prediction, (1, 1, ochannels, ochannels), 'conv_o'))
 
     def build_loss(self, prediction, maps, weights):
         """
@@ -189,11 +191,12 @@ class PixelLinkNetwork:
         with tf.device("/device:cpu:0"):
             imgsummary = []
             imgsummary.append(tf.summary.image('inputimg', input[0:1]))
+            imgsummary.append(tf.summary.image('weight', weights[0:1]))
             for i in range(9):
                 imgsummary.append(tf.summary.image('map_%d' %
                                                    (i,), maps[0:1, :, :, i:i+1]))
                 imgsummary.append(tf.summary.image('predict_%d' % (i,), tf.nn.softmax(
-                    prediction[0:1, :, :, 2*i:2*i+2])[:, :, :, 1:2]))
+                    prediction[0:1, :, :, 2*i:2*i+2], axis=3)[:, :, :, 1:2]))
 
             losssummary = []
             losssummary.append(tf.summary.scalar('T_loss', T_loss))
@@ -238,7 +241,7 @@ class PixelLinkNetwork:
             # params.label_smoothing = 0.0
 
             with tf.variable_scope(self._scope):
-                prediction = self.infer(features)
+                prediction = self.infer(features['input_img'])
 
             return prediction
 
