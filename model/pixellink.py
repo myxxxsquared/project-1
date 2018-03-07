@@ -173,7 +173,7 @@ class PixelLinkNetwork:
             # T_loss = (tf.reduce_sum(pos_loss) +
             #           tf.reduce_mean(tf.nn.top_k(neg_loss, k=k).values)*r) / (1 + r)
             T_loss = (tf.reduce_mean(pos_loss) +
-                      tf.reduce_mean(tf.nn.top_k(neg_loss, k=k).values)) / (1 + r)
+                      tf.reduce_mean(tf.nn.top_k(neg_loss, k=k).values))
             T_loss = lambda_ * T_loss
 
         with tf.name_scope('L'):
