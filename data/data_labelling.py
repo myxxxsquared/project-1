@@ -14,7 +14,7 @@ def _pixellink_labeling(img_name, img, cnts, left_top, right_bottom):
 
     # links & weight
     links = [np.zeros(map_shape, np.float32) for _ in range(8)]
-    weight = np.zeros(map_shape, np.float32)
+    weight = np.ones(map_shape, np.float32)
 
     def _move(cnt, dir):
         '''
