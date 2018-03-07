@@ -169,6 +169,13 @@ def generator_eval():
         ins = pickle.load(open(file_name, 'rb'))
         img = ins['img']
         cnts = ins['contour']
+        if img.shape[0] >= 2000 or img.shape[1] >= 2000:
+            ratio1 = img.shape[0]/2000
+            ratio2 = img.shape[1]/2000
+            ratio = max(ratio1,ratio2)
+            img = cv2.resize(img, (int(img.shape[1]/ratio), int(img.shape[0]/ratio)))
+            cnts = [np.array(cnt/ratio, np.int32) for cnt in cnts]
+
         features = dict()
         features["input_img"] = np.expand_dims(img,0).astype(np.float32)
         lens = np.array([cnt.shape[0] for cnt in cnts], np.int32)
@@ -212,16 +219,19 @@ def get_infer_generator(path):
     return func
 
 
+# def get_inference_input(path):
+#     g = get_infer_generator(path)
+#     infer_dataset = tf.data.Dataset.from_generator(g,{'input_img': tf.float32},
+#                                                   {'input_img': (
+#                                                       tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
+#                                                       tf.Dimension(None))}
+#                                                   )
+#     iterator = infer_dataset.batch(1).make_one_shot_iterator()
+#     features = iterator.get_next()
+#     return features
+
 def get_inference_input(path):
-    g = get_infer_generator(path)
-    infer_dataset = tf.data.Dataset.from_generator(g,{'input_img': tf.float32},
-                                                  {'input_img': (
-                                                      tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
-                                                      tf.Dimension(None))}
-                                                  )
-    iterator = infer_dataset.batch(1).make_one_shot_iterator()
-    features = iterator.get_next()
-    return features
+    return get_eval_input()
 
 
 if __name__ == '__main__':

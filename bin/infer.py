@@ -190,7 +190,8 @@ def main(args):
                     results.append(sess.run(predictions, feed_dict=feed_dict))
                     message = "Finished batch %d" % len(results)
                     tf.logging.log(tf.logging.INFO, message)
-                    #TODO: reconstruct and save
+                    #TODO: save and reconstruct
+
                 except tf.errors.OutOfRangeError:
                     break
 

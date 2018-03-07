@@ -146,7 +146,7 @@ def reconstruct(img, maps):
     print("-----------process started-----------")
     ctns = processor.process(maps)
     print("-----------process ended-------------")
-    os.system('rm maps.npy')
+    # os.system('rm maps.npy')
     return ctns
 
 def _softmax(x):

@@ -37,8 +37,6 @@ class Postprocessor:
                 tcl = _softmax(tcl)
                 tr = _softmax(tr)
                 maps = np.concatenate([tcl, geo, tr], axis=2)
-
-
         return _postprocessing(maps, self)
 
 
