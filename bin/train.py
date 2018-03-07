@@ -30,7 +30,7 @@ def default_parameters():
         crop_skel=1.0,
         neighbor=5,
         device_list=[3],
-        learning_rate_decay="noam",
+        learning_rate_decay="pixellink",
         warmup_steps=2000,
         adam_beta1=0.9,
         adam_beta2=0.999,
@@ -66,6 +66,7 @@ def default_parameters():
         epoch=400,
         weight_decay=0.0005,
         momentum=0.9,
+        optimizer='sgd_momentum',
 
         output_scalar=2,
     )
@@ -92,6 +93,9 @@ def get_initializer(params):
     if params.initializer == "uniform":
         max_val = params.initializer_gain
         return tf.random_uniform_initializer(-max_val, max_val)
+    elif params.initializer == 'pixellink':
+        from tensorflow.contrib.layers import xavier_initializer_conv2d as xavier
+        return xavier()
     elif params.initializer == "normal":
         return tf.random_normal_initializer(0.0, params.initializer_gain)
     elif params.initializer == "normal_unit_scaling":
@@ -115,6 +119,12 @@ def get_learning_rate_decay(learning_rate, global_step, params):
                                         (step + 1) ** -0.5)
 
         return learning_rate * decay
+
+    elif params.learning_rate_decay == 'pixellink':
+        step = tf.to_float(global_step)
+        decay = tf.where(step>=100, 0.001,0.01)
+        return learning_rate *decay
+
     elif params.learning_rate_decay == "piecewise_constant":
         return tf.train.piecewise_constant(tf.to_int32(global_step),
                                            params.learning_rate_boundaries,
@@ -195,11 +205,17 @@ def main(args):
         tf.summary.scalar('total_loss', loss)
 
         print('create opt')
+        if params.optimizer == 'adam':
         # Create optimizer
-        opt = tf.train.AdamOptimizer(learning_rate,
-                                     beta1=params.adam_beta1,
-                                     beta2=params.adam_beta2,
-                                     epsilon=params.adam_epsilon)
+            opt = tf.train.AdamOptimizer(learning_rate,
+                                         beta1=params.adam_beta1,
+                                         beta2=params.adam_beta2,
+                                         epsilon=params.adam_epsilon)
+        elif params.optimizer == 'sgd_momentum':
+            opt = tf.train.MomentumOptimizer(learning_rate, momentum=params.momentum)
+        else:
+            raise NotImplementedError()
+
 
 
         train_op = tf.contrib.layers.optimize_loss(
