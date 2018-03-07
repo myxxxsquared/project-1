@@ -201,7 +201,7 @@ def main(args):
                 name='weights_norm'
             )
 
-        loss = loss+weights_norm
+        # loss = loss+weights_norm
         tf.summary.scalar('total_loss', loss)
 
         print('create opt')
