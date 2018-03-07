@@ -28,15 +28,17 @@ def _pixellink_labeling(img_name, img, cnts, left_top, right_bottom):
         directs = [(-1,-1), (0,-1), (1,-1), (-1,0), (1,0), (-1,1),(0,1),(1,1)]
         return cnt+directs[dir]
 
+    total_sum = 0
     for cnt_index in range(len(cnts)):
         base = cv2.fillPoly(np.zeros(map_shape), [cnts[cnt_index]], 255).astype(np.bool)
         temp = base > 0
+        total_sum+=np.sum(temp)
         weight[temp] = 1/np.sum(temp)/len(cnts)
         # print(1/np.sum(temp)/len(cnts))
         for i in range(8):
             mask_ = cv2.fillPoly(np.zeros(map_shape), [_move(cnts[cnt_index], 7-i)], 255).astype(np.bool)
             links[i][base&mask_] = 1.0
-
+    weight *= total_sum
 
     maps = np.stack([mask]+ links+[weight], -1)
     img = img[left_top[0]:right_bottom[0], left_top[1]:right_bottom[1], :]
@@ -162,87 +164,89 @@ def _fit_TCL(img, cnts):
 if __name__ == '__main__':
     import os
     import pickle
-    # TOTAL_TRAIN_DIR = '/home/rjq/data_cleaned/pkl/totaltext_train_care/'
-    # TOTAL_TEST_DIR = '/Users/ruanjiaqiang/Desktop/totaltext_test/'
+    TOTAL_TRAIN_DIR = '/home/rjq/data_cleaned/pkl/totaltext_train_care/'
+    TOTAL_TEST_DIR = '/Users/ruanjiaqiang/Desktop/totaltext_test/'
+
+    file_names_totaltext_train = [TOTAL_TEST_DIR+name for name in os.listdir(TOTAL_TEST_DIR)]
+
+    for file_name in file_names_totaltext_train:
+        ins = pickle.load(open(file_name, 'rb'))
+        img = ins['img'].copy()
+        cnts = [cnt.astype(np.int32) for cnt in ins['contour']]
+        img = cv2.drawContours(img, cnts,-1,(255,0,255), 3)
+        cv2.imwrite('origin.jpg', img)
+        img_name, img, cnts, maps = pixellink_prepro(ins)
+
+        # img_name, img, cnts, left_top, right_bottom = _pixellink_transform(ins)
+        cnts = [cnt.astype(np.int32) for cnt in cnts]
+        img = img.astype(np.uint8)
+        img = cv2.drawContours(img, cnts,-1,(255,0,255), 3)
+        # for i in range(maps.shape[2]):
+        #     cv2.imwrite('map'+str(i)+'.jpg', maps[:,:,i]*255)
+        # cv2.imwrite('processed.jpg', img)
+        print('finished')
+        break
+
+    # img = np.zeros((512,512,3))
+    # cnts = [
+    #     [
+    #         [[100,100]],
+    #         [[200,100]],
+    #         [[300,300]],
+    #         [[300,100]],
+    #         [[350,100]],
+    #         [[350,400]],
+    #         [[250,400]],
+    #         [[150,200]],
+    #         [[150,400]],
+    #         [[100,400]],
+    #     ]
+    # ]
     #
-    # file_names_totaltext_train = [TOTAL_TEST_DIR+name for name in os.listdir(TOTAL_TEST_DIR)]
-
-    # for file_name in file_names_totaltext_train:
-    #     ins = pickle.load(open(file_name, 'rb'))
-    #     img = ins['img'].copy()
-    #     cnts = [cnt.astype(np.int32) for cnt in ins['contour']]
-    #     img = cv2.drawContours(img, cnts,-1,(255,0,255), 3)
-    #     cv2.imwrite('origin.jpg', img)
-    #     img_name, img, cnts, maps = pixellink_prepro(ins)
+    # cnts = [
+    #     [
+    #         [[100,100]],
+    #         [[200,100]],
+    #         [[300,300]],
+    #         [[350,100]],
+    #         [[400,100]],
+    #         [[350,400]],
+    #         [[250,400]],
+    #         [[150,200]],
+    #         [[100,400]],
+    #         [[50,400]],
+    #     ]
+    # ]
     #
-    #     # img_name, img, cnts, left_top, right_bottom = _pixellink_transform(ins)
-    #     cnts = [cnt.astype(np.int32) for cnt in cnts]
-    #     img = img.astype(np.uint8)
-    #     img = cv2.drawContours(img, cnts,-1,(255,0,255), 3)
-    #     cv2.imwrite('processed.jpg', img)
-    #     print('finished')
-    #     break
-
-    img = np.zeros((512,512,3))
-    cnts = [
-        [
-            [[100,100]],
-            [[200,100]],
-            [[300,300]],
-            [[300,100]],
-            [[350,100]],
-            [[350,400]],
-            [[250,400]],
-            [[150,200]],
-            [[150,400]],
-            [[100,400]],
-        ]
-    ]
-
-    cnts = [
-        [
-            [[100,100]],
-            [[200,100]],
-            [[300,300]],
-            [[350,100]],
-            [[400,100]],
-            [[350,400]],
-            [[250,400]],
-            [[150,200]],
-            [[100,400]],
-            [[50,400]],
-        ]
-    ]
-
-    cnts = [
-        [
-            [[100,100]],
-            [[200,100]],
-            [[200,300]],
-            [[100,300]],
-        ]
-    ]
-
-    cnts = [
-        [
-            [[100,100]],
-            [[400,100]],
-            [[400,200]],
-            [[100,200]],
-        ]
-    ]
-
-    cnts = [
-        [
-            [[100,100]],
-            [[200,200]],
-            [[300,200]],
-            [[400,100]],
-            [[400,200]],
-            [[300,300]],
-            [[200,300]],
-            [[100,200]],
-        ]
-    ]
-    cnts = [np.array(cnt, np.int32) for cnt in cnts]
-    _fit_TCL(img, cnts)
+    # cnts = [
+    #     [
+    #         [[100,100]],
+    #         [[200,100]],
+    #         [[200,300]],
+    #         [[100,300]],
+    #     ]
+    # ]
+    #
+    # cnts = [
+    #     [
+    #         [[100,100]],
+    #         [[400,100]],
+    #         [[400,200]],
+    #         [[100,200]],
+    #     ]
+    # ]
+    #
+    # cnts = [
+    #     [
+    #         [[100,100]],
+    #         [[200,200]],
+    #         [[300,200]],
+    #         [[400,100]],
+    #         [[400,200]],
+    #         [[300,300]],
+    #         [[200,300]],
+    #         [[100,200]],
+    #     ]
+    # ]
+    # cnts = [np.array(cnt, np.int32) for cnt in cnts]
+    # _fit_TCL(img, cnts)
