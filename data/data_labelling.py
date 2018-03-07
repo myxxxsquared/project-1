@@ -145,7 +145,7 @@ def _fit_TCL(img, cnts):
     #     rows.append(row)
 
     a,b,c,d = np.polyfit(cols,rows,3)
-    line_cols = np.linspace(1,400,400)
+    line_cols = np.linspace(0,500,500)
     line_rows = ((a*line_cols+b)*line_cols+c)*line_cols+d
     line_cols = line_cols.astype(np.int32)
     line_rows = line_rows.astype(np.int32)
@@ -153,10 +153,8 @@ def _fit_TCL(img, cnts):
     test = np.zeros_like(img, np.uint8)
     test = cv2.fillPoly(test, cnts, 255)
     for row, col in zip(line_rows, line_cols):
-        try:
+        if row <= img.shape[0] and col <= img.shape[1]:
             test[row, col, :] = (255,255,255)
-        except:
-            pass
     cv2.imwrite('test.jpg', test)
     return 0
 
@@ -198,6 +196,52 @@ if __name__ == '__main__':
             [[150,200]],
             [[150,400]],
             [[100,400]],
+        ]
+    ]
+
+    cnts = [
+        [
+            [[100,100]],
+            [[200,100]],
+            [[300,300]],
+            [[350,100]],
+            [[400,100]],
+            [[350,400]],
+            [[250,400]],
+            [[150,200]],
+            [[100,400]],
+            [[50,400]],
+        ]
+    ]
+
+    cnts = [
+        [
+            [[100,100]],
+            [[200,100]],
+            [[200,300]],
+            [[100,300]],
+        ]
+    ]
+
+    cnts = [
+        [
+            [[100,100]],
+            [[400,100]],
+            [[400,200]],
+            [[100,200]],
+        ]
+    ]
+
+    cnts = [
+        [
+            [[100,100]],
+            [[200,200]],
+            [[300,200]],
+            [[400,100]],
+            [[400,200]],
+            [[300,300]],
+            [[200,300]],
+            [[100,200]],
         ]
     ]
     cnts = [np.array(cnt, np.int32) for cnt in cnts]
