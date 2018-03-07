@@ -48,7 +48,6 @@ def _pixellink_labeling(img_name, img, cnts, left_top, right_bottom):
     return img_name, img, cnts, maps
 
 
-
 def _pixellink_transform(ins):
     img = ins['img']
     contour = ins['contour']
@@ -117,26 +116,89 @@ def pixellink_prepro(ins):
     return img_name, img, cnts, maps
 
 
+def _fit_TCL(img, cnts):
+    zeros = np.zeros(img.shape[:2], np.uint8)
+    zeros = cv2.fillPoly(zeros, cnts, 255)
+    cv2.imwrite('img.jpg', zeros)
+    points = np.argwhere(zeros>100)
+    # row, col
+    # for point in points:
+    #     print(point)
+    # points = points.transpose()
+    # [rows, cols]
+
+    rows,cols = [],[]
+    show = np.zeros(img.shape[:2], np.uint8)
+    for row,col in points:
+        show[row, col] = 255
+        rows.append(row)
+        cols.append(col)
+
+    # show[points] = 255
+    # cv2.imwrite('show.jpg', show)
+    #
+    # rows,cols = [],[]
+    #
+    # cnt = cnts[0]
+    # for col, row in np.squeeze(cnt):
+    #     cols.append(col)
+    #     rows.append(row)
+
+    a,b,c,d = np.polyfit(cols,rows,3)
+    line_cols = np.linspace(1,400,400)
+    line_rows = ((a*line_cols+b)*line_cols+c)*line_cols+d
+    line_cols = line_cols.astype(np.int32)
+    line_rows = line_rows.astype(np.int32)
+
+    test = np.zeros_like(img, np.uint8)
+    test = cv2.fillPoly(test, cnts, 255)
+    for row, col in zip(line_rows, line_cols):
+        try:
+            test[row, col, :] = (255,255,255)
+        except:
+            pass
+    cv2.imwrite('test.jpg', test)
+    return 0
+
+
 if __name__ == '__main__':
     import os
     import pickle
-    TOTAL_TRAIN_DIR = '/home/rjq/data_cleaned/pkl/totaltext_train_care/'
-    TOTAL_TEST_DIR = '/Users/ruanjiaqiang/Desktop/totaltext_test/'
+    # TOTAL_TRAIN_DIR = '/home/rjq/data_cleaned/pkl/totaltext_train_care/'
+    # TOTAL_TEST_DIR = '/Users/ruanjiaqiang/Desktop/totaltext_test/'
+    #
+    # file_names_totaltext_train = [TOTAL_TEST_DIR+name for name in os.listdir(TOTAL_TEST_DIR)]
 
-    file_names_totaltext_train = [TOTAL_TEST_DIR+name for name in os.listdir(TOTAL_TEST_DIR)]
+    # for file_name in file_names_totaltext_train:
+    #     ins = pickle.load(open(file_name, 'rb'))
+    #     img = ins['img'].copy()
+    #     cnts = [cnt.astype(np.int32) for cnt in ins['contour']]
+    #     img = cv2.drawContours(img, cnts,-1,(255,0,255), 3)
+    #     cv2.imwrite('origin.jpg', img)
+    #     img_name, img, cnts, maps = pixellink_prepro(ins)
+    #
+    #     # img_name, img, cnts, left_top, right_bottom = _pixellink_transform(ins)
+    #     cnts = [cnt.astype(np.int32) for cnt in cnts]
+    #     img = img.astype(np.uint8)
+    #     img = cv2.drawContours(img, cnts,-1,(255,0,255), 3)
+    #     cv2.imwrite('processed.jpg', img)
+    #     print('finished')
+    #     break
 
-    for file_name in file_names_totaltext_train:
-        ins = pickle.load(open(file_name, 'rb'))
-        img = ins['img'].copy()
-        cnts = [cnt.astype(np.int32) for cnt in ins['contour']]
-        img = cv2.drawContours(img, cnts,-1,(255,0,255), 3)
-        cv2.imwrite('origin.jpg', img)
-        img_name, img, cnts, maps = pixellink_prepro(ins)
-
-        # img_name, img, cnts, left_top, right_bottom = _pixellink_transform(ins)
-        cnts = [cnt.astype(np.int32) for cnt in cnts]
-        img = img.astype(np.uint8)
-        img = cv2.drawContours(img, cnts,-1,(255,0,255), 3)
-        cv2.imwrite('processed.jpg', img)
-        print('finished')
-        break
+    img = np.zeros((512,512,3))
+    cnts = [
+        [
+            [[100,100]],
+            [[200,100]],
+            [[300,300]],
+            [[300,100]],
+            [[350,100]],
+            [[350,400]],
+            [[250,400]],
+            [[150,200]],
+            [[150,400]],
+            [[100,400]],
+        ]
+    ]
+    cnts = [np.array(cnt, np.int32) for cnt in cnts]
+    _fit_TCL(img, cnts)
