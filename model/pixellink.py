@@ -169,8 +169,8 @@ class PixelLinkNetwork:
             # print(neg_loss.dtype)
             # print(tf.nn.top_k(neg_loss, k=k).shape)
             # print(tf.nn.top_k(neg_loss, k=k).dtype)
-            T_loss = (tf.reduce_mean(pos_loss) +
-                      tf.reduce_mean(tf.nn.top_k(neg_loss, k=k).values)) / (1 + r)
+            T_loss = (tf.reduce_sum(pos_loss) +
+                      tf.reduce_mean(tf.nn.top_k(neg_loss, k=k).values)*r) / (1 + r)
             T_loss = lambda_ * T_loss
 
         with tf.name_scope('L'):
@@ -185,8 +185,8 @@ class PixelLinkNetwork:
                 (tf.reduce_sum(neg_weights) + 1e-5)
             L_loss = L_loss
 
-        return T_loss, L_loss, T_loss + L_loss
-        # return T_loss, L_loss, T_loss
+        # return T_loss, L_loss, T_loss + L_loss
+        return T_loss, L_loss, T_loss
 
     def infer(self, input):
         with tf.variable_scope('vgg_base'):

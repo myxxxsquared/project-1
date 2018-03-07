@@ -180,10 +180,12 @@ if __name__ == '__main__':
         # img_name, img, cnts, left_top, right_bottom = _pixellink_transform(ins)
         cnts = [cnt.astype(np.int32) for cnt in cnts]
         img = img.astype(np.uint8)
+        img = cv2.resize(img, (256,256))
         img = cv2.drawContours(img, cnts,-1,(255,0,255), 3)
-        # for i in range(maps.shape[2]):
-        #     cv2.imwrite('map'+str(i)+'.jpg', maps[:,:,i]*255)
-        # cv2.imwrite('processed.jpg', img)
+
+        for i in range(maps.shape[2]):
+            cv2.imwrite('map'+str(i)+'.jpg', maps[:,:,i]*255)
+        cv2.imwrite('processed.jpg', img)
         print('finished')
         break
 
