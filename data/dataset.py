@@ -169,7 +169,7 @@ def generator_eval():
         ins = pickle.load(open(file_name, 'rb'))
         img = ins['img']
         cnts = ins['contour']
-        if img.shape[0] >= 2000 or img.shape[1] >= 2000:
+        if img.shape[0] >= 512 or img.shape[1] >= 512:
             ratio1 = img.shape[0]/2000
             ratio2 = img.shape[1]/2000
             ratio = max(ratio1,ratio2)

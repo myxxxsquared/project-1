@@ -38,7 +38,7 @@ def _pixellink_labeling(img_name, img, cnts, left_top, right_bottom):
         for i in range(8):
             mask_ = cv2.fillPoly(np.zeros(map_shape), [_move(cnts[cnt_index], 7-i)], 255).astype(np.bool)
             links[i][base&mask_] = 1.0
-    weight *= total_sum
+    # weight *= total_sum
 
     maps = np.stack([mask]+ links+[weight], -1)
     img = img[left_top[0]:right_bottom[0], left_top[1]:right_bottom[1], :]
