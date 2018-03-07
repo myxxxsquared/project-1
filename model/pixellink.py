@@ -162,15 +162,18 @@ class PixelLinkNetwork:
             k = tf.cast(tf.reduce_min(
                 (r*posnum + 1, negsum)), tf.int32)
 
-            weighted_loss = cross_entropy[0] * weights
+            # weighted_loss = cross_entropy[0] * weights
+            weighted_loss = cross_entropy[0]
             pos_loss = pos_region * weighted_loss
             neg_loss = neg_region * cross_entropy[0]
             pos_loss, neg_loss = tf.squeeze(pos_loss, 1), tf.squeeze(neg_loss, 1)
             # print(neg_loss.dtype)
             # print(tf.nn.top_k(neg_loss, k=k).shape)
             # print(tf.nn.top_k(neg_loss, k=k).dtype)
-            T_loss = (tf.reduce_sum(pos_loss) +
-                      tf.reduce_mean(tf.nn.top_k(neg_loss, k=k).values)*r) / (1 + r)
+            # T_loss = (tf.reduce_sum(pos_loss) +
+            #           tf.reduce_mean(tf.nn.top_k(neg_loss, k=k).values)*r) / (1 + r)
+            T_loss = (tf.reduce_mean(pos_loss) +
+                      tf.reduce_mean(tf.nn.top_k(neg_loss, k=k).values)) / (1 + r)
             T_loss = lambda_ * T_loss
 
         with tf.name_scope('L'):
