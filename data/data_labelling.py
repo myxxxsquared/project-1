@@ -81,7 +81,7 @@ def _pixellink_transform(ins):
     # step2: resize and aspect
     new_row, new_col=0,0
     row, col = img.shape[:2]
-    t = 0
+    # t = 0
     incremental = 0.0
     while new_row-512-1 <0 or new_col-512-1 <0:
         size_ratio = random.random()* 2*(1+incremental)
@@ -90,8 +90,8 @@ def _pixellink_transform(ins):
         new_row, new_col = new_row, new_col*aspect_ratio
         new_row, new_col = int(new_row), int(new_col)
         incremental += 0.1
-        print(t)
-        t+= 1
+        # print(t)
+        # t+= 1
 
     img = cv2.resize(img, (new_col, new_row))
     new = []
