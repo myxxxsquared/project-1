@@ -185,6 +185,7 @@ class PixelLinkNetwork:
                 (tf.reduce_sum(neg_weights) + 1e-5)
             L_loss = L_loss
 
+
         # return T_loss, L_loss, T_loss + L_loss
         return T_loss, L_loss, T_loss
 
