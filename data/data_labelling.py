@@ -8,6 +8,10 @@ def _pixellink_labeling(img_name, img, cnts, left_top, right_bottom):
     map_shape = (img.shape[0]//2, img.shape[1]//2)
     cnts = [cnt//2 for cnt in cnts]
     cnts = [cnt.astype(np.int32) for cnt in cnts]
+    half_left_top = [left_top[0]//2, left_top[1]//2]
+    half_right_bottom = [right_bottom[0]//2,right_bottom[1]//2]
+
+
     # mask
     mask = cv2.fillPoly(np.zeros(map_shape), cnts, 255)
     mask = np.sign(mask).astype(np.float32)
@@ -28,23 +32,30 @@ def _pixellink_labeling(img_name, img, cnts, left_top, right_bottom):
         directs = [(-1,-1), (0,-1), (1,-1), (-1,0), (1,0), (-1,1),(0,1),(1,1)]
         return cnt+directs[dir]
 
-    total_sum = 0
+    # total_sum = 0
+    N = 0
+    for cnt_index in range(len(cnts)):
+        for col, row in np.squeeze(cnts[cnt_index]):
+            if half_left_top[0]< row < half_right_bottom[0] and half_left_top[1] < col < half_right_bottom[1]:
+                N += 1
+                continue
+
+    crop_map = np.zeros(map_shape, np.bool)
+    crop_map[half_left_top[0]:half_right_bottom[0], half_left_top[1]:half_right_bottom[1]] = True
     for cnt_index in range(len(cnts)):
         base = cv2.fillPoly(np.zeros(map_shape), [cnts[cnt_index]], 255).astype(np.bool)
         temp = base > 0
-        total_sum+=np.sum(temp)
-        weight[temp] = 1/np.sum(temp)/len(cnts)
-        # print(1/np.sum(temp)/len(cnts))
+        temp = temp&crop_map
+        if np.sum(temp) != 0 and N != 0:
+            weight[temp] = 1/np.sum(temp)/N
         for i in range(8):
             mask_ = cv2.fillPoly(np.zeros(map_shape), [_move(cnts[cnt_index], 7-i)], 255).astype(np.bool)
             links[i][base&mask_] = 1.0
     # weight *= total_sum
 
     maps = np.stack([mask]+ links+[weight], -1)
-    img = img[left_top[0]:right_bottom[0], left_top[1]:right_bottom[1], :]
-    left_top = [left_top[0]//2, left_top[1]//2]
-    right_bottom = [right_bottom[0]//2,right_bottom[1]//2]
-    maps = maps[left_top[0]:right_bottom[0], left_top[1]:right_bottom[1], :]
+    img = img[half_left_top[0]:half_right_bottom[0], half_left_top[1]:half_right_bottom[1], :]
+    maps = maps[half_left_top[0]:half_right_bottom[0], half_left_top[1]:half_right_bottom[1], :]
     # print(maps.shape)
     # print(img.shape)
     return img_name, img, cnts, maps
