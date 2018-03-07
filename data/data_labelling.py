@@ -54,7 +54,7 @@ def _pixellink_labeling(img_name, img, cnts, left_top, right_bottom):
     # weight *= total_sum
 
     maps = np.stack([mask]+ links+[weight], -1)
-    img = img[half_left_top[0]:half_right_bottom[0], half_left_top[1]:half_right_bottom[1], :]
+    img = img[left_top[0]:right_bottom[0], left_top[1]:right_bottom[1], :]
     maps = maps[half_left_top[0]:half_right_bottom[0], half_left_top[1]:half_right_bottom[1], :]
     # print(maps.shape)
     # print(img.shape)
