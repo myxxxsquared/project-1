@@ -189,8 +189,7 @@ class PixelLinkNetwork:
             L_loss = L_loss
 
 
-        # return T_loss, L_loss, T_loss + L_loss
-        return T_loss, L_loss, T_loss
+        return T_loss, L_loss, T_loss + L_loss
 
     def infer(self, input):
         with tf.variable_scope('vgg_base'):
