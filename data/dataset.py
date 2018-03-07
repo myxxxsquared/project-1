@@ -164,14 +164,14 @@ def _pad_cnts(cnts, cnt_point_max):
 
 
 def generator_eval():
-    file_names = [TOTAL_TEST_DIR+name for name in os.listdir(TOTAL_TEST_DIR)]
+    file_names = [TOTAL_TEST_DIR+name for name in os.listdir(TOTAL_TEST_DIR)][:20]
     for file_name in file_names:
         ins = pickle.load(open(file_name, 'rb'))
         img = ins['img']
         cnts = ins['contour']
         if img.shape[0] >= 512 or img.shape[1] >= 512:
-            ratio1 = img.shape[0]/2000
-            ratio2 = img.shape[1]/2000
+            ratio1 = img.shape[0]/512
+            ratio2 = img.shape[1]/512
             ratio = max(ratio1,ratio2)
             img = cv2.resize(img, (int(img.shape[1]/ratio), int(img.shape[0]/ratio)))
             cnts = [np.array(cnt/ratio, np.int32) for cnt in cnts]
