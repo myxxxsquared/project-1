@@ -263,12 +263,14 @@ class PixelLinkNetwork:
                 params = copy.copy(params)
 
             with tf.variable_scope(self._scope):
-                prediction = self.infer(features['input_img'])
+                input_img = features['input_img']
+                prediction = self.infer(input_img)
                 lens = features['lens']
                 cnts = features['cnts']
                 care = features['care']
 
             return {'prediction':prediction,
+                    'input_img': input_img,
                     'lens':lens,
                     'cnts':cnts,
                     'care':care}
