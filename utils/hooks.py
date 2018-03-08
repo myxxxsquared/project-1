@@ -153,7 +153,7 @@ def _softmax(x):
     x = np.exp(x)
     return x[:, :, 1:2] / np.expand_dims(np.sum(x, axis=2), 2)
 
-def _evaluate(eval_fn, input_fn, path, config):
+def _evaluate(eval_fn, input_fn, path, config, save_path):
     graph = tf.Graph()
     with graph.as_default():
         features = input_fn()
@@ -203,7 +203,7 @@ def _evaluate(eval_fn, input_fn, path, config):
                     imgoutput[height:height*2, width:width*2, :] = (_softmax(prediction[i, :, :, 0:2])*255).astype(np.uint8)
                     cv2.drawContours(imgoutput, cnts, -1, (0, 0, 255))
                     cv2.drawContours(imgoutput, re_cnts, -1, (0, 255, 0))
-                    cv2.imwrite('output_{:03d}.png'.format(time), imgoutput)
+                    cv2.imwrite(os.path.join(save_path,'output_{:03d}.png'.format(time)), imgoutput)
 
         ave_r = recall_sum/gt_n_sum
         ave_p = precise_sum/pred_n_sum
@@ -299,7 +299,7 @@ class EvaluationHook(tf.train.SessionRunHook):
                 tf.logging.info("Validating model at step %d" % global_step)
                 score = _evaluate(self._eval_fn, self._eval_input_fn,
                                   self._base_dir,
-                                  self._session_config)
+                                  self._session_config, self._save_path)
                 tf.logging.info("%s at step %d: %f" %
                                 (self._metric, global_step, score))
 
