@@ -303,6 +303,7 @@ def main(args):
                         lens = outputs['lens']
                         cnts = outputs['cnts']
                         cnts = [(x / 2).astype(np.int32) for x in cnts]
+                        print(cnts)
                         cnts = _depad(cnts, lens)
                         care = outputs['care']
                         # imname = outputs['imname']
