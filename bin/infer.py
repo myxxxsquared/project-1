@@ -9,6 +9,7 @@ import tensorflow as tf
 import model.pixellink as pixellink
 import data.dataset as dataset
 import utils.parallel as parallel
+import postprocessing
 
 
 def parse_args():
@@ -101,6 +102,16 @@ def shard_features(features, placeholders, predictions):
     return predictions[:n], feed_dict
 
 
+def reconstruct(img, maps):
+    processor = postprocessing.Postprocessor()
+    # np.save('maps.npy', maps)
+    print("-----------process started-----------")
+    ctns = processor.process(maps)
+    print("-----------process ended-------------")
+    # os.system('rm maps.npy')
+    return ctns
+
+
 def main(args):
     tf.logging.set_verbosity(tf.logging.INFO)
     # Load configs
@@ -191,7 +202,9 @@ def main(args):
                     message = "Finished batch %d" % len(results)
                     tf.logging.log(tf.logging.INFO, message)
                     #TODO: save and reconstruct
-
+                    for i in range(len(predictions)):
+                        res = reconstruct(None, predictions)
+                        print(res)
                 except tf.errors.OutOfRangeError:
                     break
 
