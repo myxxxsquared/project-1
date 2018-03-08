@@ -10,6 +10,9 @@ import model.pixellink as pixellink
 import data.dataset as dataset
 import utils.parallel as parallel
 import postprocessing
+import cv2
+import numpy as np
+from utils.evaluate import evaluate
 
 
 def parse_args():
@@ -168,6 +171,18 @@ def reconstruct(img, maps):
     return ctns
 
 
+def _depad(cnts, lens):
+    news = []
+    for i in range(len(lens)):
+        news.append(cnts[i][:lens[i], :, :])
+    return news
+
+
+def _softmax(x):
+    x = np.exp(x)
+    return x[:, :, 1:2] / np.expand_dims(np.sum(x, axis=2), 2)
+
+
 def main(args):
     tf.logging.set_verbosity(tf.logging.INFO)
     # Load configs
@@ -268,27 +283,68 @@ def main(args):
             sess.run(assign_op)
             sess.run(tf.tables_initializer())
 
+            time = 0
+            recall_sum, precise_sum, gt_n_sum, pred_n_sum = 0,0,0,0
             while True:
                 try:
                     feats = sess.run(features)
                     op, feed_dict = shard_features(feats, placeholders,
                                                    predictions_dict)
                     temp = sess.run(predictions_dict, feed_dict=feed_dict)
-                    print(temp)
                     results.append(temp)
                     message = "Finished batch %d" % len(results)
                     tf.logging.log(tf.logging.INFO, message)
                     #TODO: save and reconstruct
-                    for res in results:
-                        print(len(res))
-                        print(res)
-                        print(res.shape)
+                    for outputs in results:
+                        img = outputs['input_img']
+                        prediction = outputs['prediction']
+                        lens = outputs['lens']
+                        cnts = outputs['cnts']
+                        cnts = [(x / 2).astype(np.int32) for x in cnts]
+                        cnts = _depad(cnts, lens)
+                        care = outputs['care']
+                        # imname = outputs['imname']
+                        # print(imname)
+                        for i in range(img.shape[0]):
+                            re_cnts = reconstruct(img[i], prediction[i])
+                            TR, TP, T_gt_n, T_pred_n, PR, PP, P_gt_n, P_pred_n = \
+                                evaluate(img[i], cnts, re_cnts, care)
+                            tf.logging.info(' recall: ' + str(TR) + '; precise: ' + str(TP))
+                            recall_sum += TR * T_gt_n
+                            precise_sum += TP * T_pred_n
+                            gt_n_sum += T_gt_n
+                            pred_n_sum += T_pred_n
+
+                            height, width = prediction.shape[1], prediction.shape[2]
+                            imgoutput = np.zeros(shape=(height * 2, width * 2, 3), dtype=np.uint8)
+                            imgoutput[0:height, width:width * 2, :] = cv2.resize(img[0], (width, height))
+                            imgoutput[height:height * 2, width:width * 2, :] = (
+                                    _softmax(prediction[i, :, :, 0:2]) * 255).astype(np.uint8)
+                            cv2.drawContours(imgoutput, cnts, -1, (0, 0, 255))
+                            cv2.drawContours(imgoutput, re_cnts, -1, (0, 255, 0))
+                            cv2.imwrite(os.path.join(params.output, 'output_{:03d}_r{}_p{}.png'.format(time,TR,TP)), imgoutput)
+                            time += 1
 
                     # for i in range(len(predictions)):
                     #     res = reconstruct(None, predictions[i])
                     #     print(res)
                 except tf.errors.OutOfRangeError:
-                    break
+                    if int(gt_n_sum) != 0:
+                        ave_r = recall_sum / gt_n_sum
+                    else:
+                        ave_r = 0.0
+                    if int(pred_n_sum) != 0:
+                        ave_p = precise_sum / pred_n_sum
+                    else:
+                        ave_p = 0.0
+                    if ave_r != 0.0 and ave_p != 0.0:
+                        ave_f = 2 / (1 / ave_r + 1 / ave_p)
+                    else:
+                        ave_f = 0.0
+                    tf.logging.info('ave recall:{}, precise:{}, f:{}'.format(ave_r, ave_p, ave_f))
+                    tf.logging.info('end evaluation')
+                    time += 1
+
 
 
 if __name__ == "__main__":
