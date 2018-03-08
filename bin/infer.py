@@ -173,8 +173,12 @@ def reconstruct(img, maps):
 
 def _depad(cnts, lens):
     news = []
+    #print(lens)
+    #print(cnts)
+    #cnts = [np.array(cnt) for cnt in cnts]
+    lens = [int(i) for i in lens]
     for i in range(len(lens)):
-        print(i)
+        #print(i)
         news.append(cnts[i][:lens[i], :, :])
     return news
 
@@ -304,7 +308,7 @@ def main(args):
                         lens = outputs['lens']
                         cnts = outputs['cnts']
                         cnts = [(x / 2).astype(np.int32) for x in cnts]
-                        print(cnts)
+                        #print(cnts)
                         cnts = _depad(cnts, lens)
                         care = outputs['care']
                         # imname = outputs['imname']
