@@ -30,7 +30,6 @@ def default_parameters():
         crop_skel=1.0,
         neighbor=5,
         device_list=[3],
-        learning_rate_decay="pixellink",
         warmup_steps=2000,
         adam_beta1=0.9,
         adam_beta2=0.999,
@@ -67,6 +66,7 @@ def default_parameters():
         weight_decay=0.0005,
         momentum=0.9,
         optimizer='sgd_momentum',
+        learning_rate_decay="pixellink",
 
         output_scalar=2,
     )
@@ -122,7 +122,7 @@ def get_learning_rate_decay(learning_rate, global_step, params):
 
     elif params.learning_rate_decay == 'pixellink':
         step = tf.to_float(global_step)
-        learning_rate = tf.where(step>=100, 0.001,0.01)
+        learning_rate = tf.where(step>=100, 0.01,0.001)
         return learning_rate
 
     elif params.learning_rate_decay == "piecewise_constant":
@@ -191,8 +191,8 @@ def main(args):
                                                 global_step, params)
         learning_rate = tf.convert_to_tensor(learning_rate, dtype=tf.float32)
 
+        # weitght decay
         weights = tf.trainable_variables()
-
         with tf.variable_scope('weights_norm') as scope:
             weights_norm = tf.reduce_sum(
                 input_tensor=params.weight_decay * tf.stack(
@@ -200,7 +200,6 @@ def main(args):
                 ),
                 name='weights_norm'
             )
-
         loss = loss+weights_norm
         tf.summary.scalar('total_loss', loss)
 

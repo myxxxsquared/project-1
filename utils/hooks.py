@@ -142,7 +142,7 @@ def _depad(cnts, lens):
 
 def reconstruct(img, maps):
     processor = postprocessing.Postprocessor()
-    np.save('maps.npy', maps)
+    # np.save('maps.npy', maps)
     print("-----------process started-----------")
     ctns = processor.process(maps)
     print("-----------process ended-------------")
