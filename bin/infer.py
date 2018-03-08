@@ -174,6 +174,7 @@ def reconstruct(img, maps):
 def _depad(cnts, lens):
     news = []
     for i in range(len(lens)):
+        print(i)
         news.append(cnts[i][:lens[i], :, :])
     return news
 
