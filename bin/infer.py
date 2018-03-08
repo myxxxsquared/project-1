@@ -295,7 +295,8 @@ def main(args):
                     message = "Finished batch %d" % len(results)
                     tf.logging.log(tf.logging.INFO, message)
                     #TODO: save and reconstruct
-                    for outputs in results:
+                    for res in results:
+                        outputs = res[0]
                         img = outputs['input_img']
                         prediction = outputs['prediction']
                         lens = outputs['lens']
