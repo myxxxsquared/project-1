@@ -122,8 +122,8 @@ def get_learning_rate_decay(learning_rate, global_step, params):
 
     elif params.learning_rate_decay == 'pixellink':
         step = tf.to_float(global_step)
-        decay = tf.where(step>=100, 0.001,0.01)
-        return learning_rate *decay
+        learning_rate = tf.where(step>=100, 0.001,0.01)
+        return learning_rate
 
     elif params.learning_rate_decay == "piecewise_constant":
         return tf.train.piecewise_constant(tf.to_int32(global_step),

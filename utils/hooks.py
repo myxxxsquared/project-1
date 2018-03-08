@@ -205,9 +205,18 @@ def _evaluate(eval_fn, input_fn, path, config):
                     cv2.drawContours(imgoutput, re_cnts, -1, (0, 255, 0))
                     cv2.imwrite('output_{:03d}.png'.format(time), imgoutput)
 
-        ave_r = recall_sum/gt_n_sum
-        ave_p = precise_sum/pred_n_sum
-        ave_f = 1/(1/ave_r+1/ave_p)
+        if int(gt_n_sum) != 0:
+            ave_r = recall_sum/gt_n_sum
+        else:
+            ave_r = 0.0
+        if int(pred_n_sum) != 0:
+            ave_p = precise_sum/pred_n_sum
+        else:
+            ave_p = 0.0
+        if ave_r != 0.0 and ave_p != 0.0:
+            ave_f = 1/(1/ave_r+1/ave_p)
+        else:
+            ave_f = 0.0
         tf.logging.info('ave recall:{}, precise:{}, f:{}'.format(ave_r,ave_p,ave_f))
         tf.logging.info('end evaluation')
         return ave_f
