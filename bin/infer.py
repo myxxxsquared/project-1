@@ -219,7 +219,7 @@ def main(args):
 
         for i in range(len(params.device_list)):
             placeholders.append({
-                "input_img": tf.placeholder(tf.float32, [None, None, None],
+                "input_img": tf.placeholder(tf.float32, [None, None, None, 3],
                                             "input_img_%d" % i),
                 'lens': tf.placeholder(tf.float32,[None,], 'lens_%d'%i),
                 'cnts': tf.placeholder(tf.float32, [None,None, None,None], 'cnts_%d'%i),
