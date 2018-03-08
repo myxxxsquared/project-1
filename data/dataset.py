@@ -228,7 +228,7 @@ def generator_infer():
         yield features
 
 
-def get_infer_input():
+def get_inference_input():
     eval_dataset = tf.data.Dataset.from_generator(generator_infer,{'input_img': tf.float32,
                                                                   'lens': tf.int32,
                                                                   'cnts': tf.float32,
