@@ -264,7 +264,13 @@ class PixelLinkNetwork:
 
             with tf.variable_scope(self._scope):
                 prediction = self.infer(features['input_img'])
+                lens = features['lens']
+                cnts = features['cnts']
+                care = features['care']
 
-            return prediction
+            return {'prediction':prediction,
+                    'lens':lens,
+                    'cnts':cnts,
+                    'care':care}
 
         return inference_fn

@@ -238,7 +238,7 @@ def main(args):
 
 
             # A list of outputs
-        predictions = parallel.data_parallelism(
+        predictions_dict = parallel.data_parallelism(
             params.device_list,
             model_fns,
             placeholders)
@@ -272,8 +272,8 @@ def main(args):
                 try:
                     feats = sess.run(features)
                     op, feed_dict = shard_features(feats, placeholders,
-                                                   predictions)
-                    temp = sess.run(predictions, feed_dict=feed_dict)
+                                                   predictions_dict)
+                    temp = sess.run(predictions_dict, feed_dict=feed_dict)
                     print(temp)
                     results.append(temp)
                     message = "Finished batch %d" % len(results)
@@ -284,9 +284,9 @@ def main(args):
                         print(res)
                         print(res.shape)
 
-                    for i in range(len(predictions)):
-                        res = reconstruct(None, predictions[i])
-                        print(res)
+                    # for i in range(len(predictions)):
+                    #     res = reconstruct(None, predictions[i])
+                    #     print(res)
                 except tf.errors.OutOfRangeError:
                     break
 
