@@ -247,9 +247,6 @@ class PixelLinkNetwork:
                 params = copy.copy(self.parameters)
             else:
                 params = copy.copy(params)
-            # params.dropout = 0.0
-            # params.use_variational_dropout = False
-            # params.label_smoothing = 0.0
 
             with tf.variable_scope(self._scope):
                 prediction = self.infer(features['input_img'])
@@ -264,13 +261,10 @@ class PixelLinkNetwork:
                 params = copy.copy(self.parameters)
             else:
                 params = copy.copy(params)
-            params.dropout = 0.0
-            params.use_variational_dropout = False
-            params.label_smoothing = 0.0
 
             with tf.variable_scope(self._scope):
-                logits = model_graph(features, "infer", params)
+                prediction = self.infer(features['input_img'])
 
-            return logits
+            return prediction
 
         return inference_fn
