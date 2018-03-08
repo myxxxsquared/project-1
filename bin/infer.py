@@ -25,6 +25,8 @@ def parse_args():
                         help="Path of output file")
     parser.add_argument("--checkpoints", type=str, nargs="+", required=True,
                         help="Path of trained models")
+    parser.add_argument("--parameters", type=str, default="",
+                        help="Additional hyper parameters")
     return parser.parse_args()
 
 
@@ -46,6 +48,12 @@ def import_params(model_dir, params):
         json_str = fd.readline()
         params.parse_json(json_str)
 
+    return params
+
+
+def override_parameters(params, args):
+    if args.parameters:
+        params.parse(args.parameters)
     return params
 
 
@@ -119,6 +127,11 @@ def main(args):
 
     params_list = [
         import_params(args.checkpoints[i], params_list[i])
+        for i in range(len(args.checkpoints))
+    ]
+
+    params_list = [
+        override_parameters(params_list[i], args)
         for i in range(len(args.checkpoints))
     ]
 
