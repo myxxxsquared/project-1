@@ -277,6 +277,9 @@ def main(args):
                     message = "Finished batch %d" % len(results)
                     tf.logging.log(tf.logging.INFO, message)
                     #TODO: save and reconstruct
+                    for res in results:
+                        print(res.shape)
+                        print(res)
                     for i in range(len(predictions)):
                         res = reconstruct(None, predictions[i])
                         print(res)
