@@ -220,10 +220,24 @@ def main(args):
         for i in range(len(params.device_list)):
             placeholders.append({
                 "input_img": tf.placeholder(tf.float32, [None, None, None],
-                                            "input_img_%d" % i)
-            })
+                                            "input_img_%d" % i),
+                'lens': tf.placeholder(tf.float32,[None,], 'lens_%d'%i),
+                'cnts': tf.placeholder(tf.float32, [None,None, None,None], 'cnts_%d'%i),
+                'care': tf.placeholder(tf.float32,[None,], 'care_%d'%i),
 
-        # A list of outputs
+            })
+            # {'input_img': (
+            #     tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
+            #     3),
+            # 'lens': (tf.Dimension(None),),
+            # 'cnts': (
+            #     tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
+            #     tf.Dimension(None)),
+            # 'care': (tf.Dimension(None),)}
+            # )
+
+
+            # A list of outputs
         predictions = parallel.data_parallelism(
             params.device_list,
             model_fns,
