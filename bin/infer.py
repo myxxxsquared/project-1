@@ -278,8 +278,10 @@ def main(args):
                     tf.logging.log(tf.logging.INFO, message)
                     #TODO: save and reconstruct
                     for res in results:
-                        print(res.shape)
+                        print(len(res))
                         print(res)
+                        print(res.shape)
+
                     for i in range(len(predictions)):
                         res = reconstruct(None, predictions[i])
                         print(res)
