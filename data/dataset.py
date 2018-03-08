@@ -205,33 +205,46 @@ def get_eval_input():
     return features
 
 
+def generator_infer():
+    file_names = [TOTAL_TEST_DIR+name for name in os.listdir(TOTAL_TEST_DIR)][:20]
+    for file_name in file_names:
+        ins = pickle.load(open(file_name, 'rb'))
+        img = ins['img']
+        cnts = ins['contour']
+        if img.shape[0] >= 2000 or img.shape[1] >= 2000:
+            ratio1 = img.shape[0]/2000
+            ratio2 = img.shape[1]/2000
+            ratio = max(ratio1,ratio2)
+            img = cv2.resize(img, (int(img.shape[1]/ratio), int(img.shape[0]/ratio)))
+            cnts = [np.array(cnt/ratio, np.int32) for cnt in cnts]
+
+        features = dict()
+        features["input_img"] = np.expand_dims(img,0).astype(np.float32)
+        lens = np.array([cnt.shape[0] for cnt in cnts], np.int32)
+        features['lens'] = lens
+        features['cnts'] = np.array(_pad_cnts(cnts, max(lens)), np.float32)
+        features['care'] = np.array(ins['care']).astype(np.int32)
+        # features['imname'] = ins['img_name']
+        yield features
 
 
-def get_infer_generator(path):
-    def func():
-        file_names = [path + name for name in os.listdir(path)]
-        for file_name in file_names:
-            features = dict()
-            img = cv2.imread(file_name).astype(np.float32)
-            if img:
-                features["input_img"] = cv2.imread(file_name).astype(np.float32)
-                yield features
-    return func
-
-
-# def get_inference_input(path):
-#     g = get_infer_generator(path)
-#     infer_dataset = tf.data.Dataset.from_generator(g,{'input_img': tf.float32},
-#                                                   {'input_img': (
-#                                                       tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
-#                                                       tf.Dimension(None))}
-#                                                   )
-#     iterator = infer_dataset.batch(1).make_one_shot_iterator()
-#     features = iterator.get_next()
-#     return features
-
-def get_inference_input(path):
-    return get_eval_input()
+def get_infer_input():
+    eval_dataset = tf.data.Dataset.from_generator(generator_infer,{'input_img': tf.float32,
+                                                                  'lens': tf.int32,
+                                                                  'cnts': tf.float32,
+                                                                  'care': tf.int32},
+                                                  {'input_img': (
+                                                      tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
+                                                      3),
+                                                   'lens': (tf.Dimension(None),),
+                                                   'cnts': (
+                                                       tf.Dimension(None), tf.Dimension(None), tf.Dimension(None),
+                                                       tf.Dimension(None)),
+                                                   'care':(tf.Dimension(None),)}
+                                                  )
+    iterator = eval_dataset.make_one_shot_iterator()
+    features = iterator.get_next()
+    return features
 
 
 if __name__ == '__main__':
