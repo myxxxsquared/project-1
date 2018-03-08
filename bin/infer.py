@@ -278,7 +278,7 @@ def main(args):
                     tf.logging.log(tf.logging.INFO, message)
                     #TODO: save and reconstruct
                     for i in range(len(predictions)):
-                        res = reconstruct(None, predictions)
+                        res = reconstruct(None, predictions[i])
                         print(res)
                 except tf.errors.OutOfRangeError:
                     break
