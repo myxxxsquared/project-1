@@ -63,6 +63,8 @@ def default_parameters():
         prefetch_buffer=500,
         shuffle_buffer=100,
         epoch=400,
+
+        # pixellink
         weight_decay=0.0005,
         momentum=0.9,
         optimizer='sgd_momentum',
