@@ -214,7 +214,7 @@ def _evaluate(eval_fn, input_fn, path, config, save_path):
         else:
             ave_p = 0.0
         if ave_r != 0.0 and ave_p != 0.0:
-            ave_f = 1/(1/ave_r+1/ave_p)
+            ave_f = 2/(1/ave_r+1/ave_p)
         else:
             ave_f = 0.0
         tf.logging.info('ave recall:{}, precise:{}, f:{}'.format(ave_r,ave_p,ave_f))
