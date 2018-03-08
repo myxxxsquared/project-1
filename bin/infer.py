@@ -273,7 +273,9 @@ def main(args):
                     feats = sess.run(features)
                     op, feed_dict = shard_features(feats, placeholders,
                                                    predictions)
-                    results.append(sess.run(predictions, feed_dict=feed_dict))
+                    temp = sess.run(predictions, feed_dict=feed_dict)
+                    print(temp)
+                    results.append(temp)
                     message = "Finished batch %d" % len(results)
                     tf.logging.log(tf.logging.INFO, message)
                     #TODO: save and reconstruct
