@@ -31,7 +31,55 @@ def parse_args():
 
 
 def default_parameters():
-    params = tf.contrib.training.HParams()
+    # params = tf.contrib.training.HParams()
+    params = tf.contrib.training.HParams(
+        thickness=0.15,
+        crop_skel=1.0,
+        neighbor=5,
+        device_list=[3],
+        warmup_steps=2000,
+        adam_beta1=0.9,
+        adam_beta2=0.999,
+        adam_epsilon=1e-8,
+        train_steps=100000,
+
+        initializer="uniform",
+        clip_grad_norm=5.0,
+        output='/home/rjq/train',
+        save_checkpoint_steps=100,
+        keep_checkpoint_max=5,
+        initializer_gain=0.08,
+        learning_rate=0.01,
+        save_checkpoint_secs=None,
+        basenets='vgg16',
+        input_size=[512,512,3],
+        Label_size=[512,512,5],
+        padding='SAME',
+        pooling='max',
+        basenet='vgg16',
+        upsampling='DeConv',
+        US_Params='3 3 2 2 same ReLU',
+        Predict_stage=4,
+        predict_channels=[128, 64, 32, 32],
+
+        batch_size=32,
+        thread_num=10,
+        keep_top_checkpoint_max=5,
+        eval_secs=None,
+        eval_steps=10,
+        prefetch_buffer=500,
+        shuffle_buffer=100,
+        epoch=400,
+
+        # pixellink
+        weight_decay=0.0005,
+        momentum=0.9,
+        optimizer='sgd_momentum',
+        learning_rate_decay="pixellink",
+
+        output_scalar=2,
+    )
+
     return params
 
 
