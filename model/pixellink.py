@@ -156,14 +156,16 @@ class PixelLinkNetwork:
 
         with tf.variable_scope('T'):
             T = self.prediction_block(maps, 2)
+            print('T', T)
         with tf.variable_scope('L'):
             L = self.prediction_block(maps, 16)
+            print('L', L)
         return tf.concat([T, L], axis=3)
 
     def prediction_block(self, maps, ochannels):
-        print('-----')
-        print(maps)
-        print('------')
+        # print('-----')
+        # print(maps)
+        # print('------')
         prediction = self.conv2d(
             maps[0], (1, 1, maps[0].shape[3], ochannels), 'conv_0')
         prediction = tf.nn.relu(prediction)
