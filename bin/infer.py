@@ -302,7 +302,7 @@ def main(args):
                     tf.logging.log(tf.logging.INFO, message)
                     #TODO: save and reconstruct
                     for res in results:
-                        print(len(results))
+                        # print(len(results))
                         outputs = res[0]
                         img = outputs['input_img']
                         prediction = outputs['prediction']
