@@ -206,7 +206,7 @@ def get_eval_input():
 
 
 def generator_infer():
-    file_names = [TOTAL_TEST_DIR+name for name in os.listdir(TOTAL_TEST_DIR)][:20]
+    file_names = [TOTAL_TEST_DIR+name for name in os.listdir(TOTAL_TEST_DIR)]
     for file_name in file_names:
         ins = pickle.load(open(file_name, 'rb'))
         img = ins['img']
