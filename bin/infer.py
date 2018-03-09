@@ -280,7 +280,6 @@ def main(args):
             assign_ops.extend(ops)
 
         assign_op = tf.group(*assign_ops)
-        results = []
 
         # Create session
         with tf.Session(config=session_config(params)) as sess:
@@ -295,6 +294,7 @@ def main(args):
                     feats = sess.run(features)
                     op, feed_dict = shard_features(feats, placeholders,
                                                    predictions_dict)
+                    results = []
                     temp = sess.run(predictions_dict, feed_dict=feed_dict)
                     # print(temp)
                     results.append(temp)
