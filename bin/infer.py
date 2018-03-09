@@ -352,6 +352,7 @@ def main(args):
                     tf.logging.info('ave recall:{}, precise:{}, f:{}'.format(ave_r, ave_p, ave_f))
                     tf.logging.info('end evaluation')
                     time += 1
+                    break
 
 
 
