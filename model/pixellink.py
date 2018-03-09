@@ -53,6 +53,18 @@ class PixelLinkNetwork:
             return (image - np.reshape((123.68, 116.78, 103.94), (1, 1, 1, 3))) / 256
 
     def vgg_base(self, input_image):
+        # layer = [
+        #     'conv1_1', 'relu1_1', 'conv1_2', 'relu1_2', 'pool1',  # part1
+        #     'conv2_1', 'relu2_1', 'conv2_2', 'relu2_2', 'pool2',  # part2
+        #     'conv3_1', 'relu3_1', 'conv3_2', 'relu3_2', 'conv3_3',
+        #     'relu3_3', 'pool3',                                   # part3
+        #     'conv4_1', 'relu4_1', 'conv4_2', 'relu4_2', 'conv4_3',
+        #     'relu4_3', 'pool4',                                   # part4
+        #     'conv5_1', 'relu5_1', 'conv5_2', 'relu5_2', 'conv5_3',
+        #     'relu5_3', 'pool5',                                   # part5
+        #     'conv6_1', 'relu6_1',  'conv6_2', 'relu6_2'           # part6
+        # ]
+
         layer = [
             'conv1_1', 'relu1_1', 'conv1_2', 'relu1_2', 'pool1',  # part1
             'conv2_1', 'relu2_1', 'conv2_2', 'relu2_2', 'pool2',  # part2
@@ -62,8 +74,24 @@ class PixelLinkNetwork:
             'relu4_3', 'pool4',                                   # part4
             'conv5_1', 'relu5_1', 'conv5_2', 'relu5_2', 'conv5_3',
             'relu5_3', 'pool5',                                   # part5
-            'conv6_1', 'relu6_1',  'conv6_2', 'relu6_2'           # part6
+            'conv6_1', 'relu6_1',                                 # part6
+            'conv7_1', 'relu7_1'                                  # part7
         ]
+
+        # filter_shapes = {
+        #     # part1
+        #     'conv1_1': (3, 3, 3, 64), 'conv1_2': (3, 3, 64, 64),
+        #     # part2
+        #     'conv2_1': (3, 3, 64, 128), 'conv2_2': (3, 3, 128, 128),
+        #     # part3
+        #     'conv3_1': (3, 3, 128, 256), 'conv3_2': (3, 3, 256, 256), 'conv3_3': (3, 3, 256, 256),
+        #     # part4
+        #     'conv4_1': (3, 3, 256, 512), 'conv4_2': (3, 3, 512, 512), 'conv4_3': (3, 3, 512, 512),
+        #     # part4
+        #     'conv5_1': (3, 3, 512, 512), 'conv5_2': (3, 3, 512, 512), 'conv5_3': (3, 3, 512, 512),
+        #     # part 6
+        #     'conv6_1': (3, 3, 512, 512), 'conv6_2': (3, 3, 512, 512)
+        # }
 
         filter_shapes = {
             # part1
@@ -77,15 +105,25 @@ class PixelLinkNetwork:
             # part4
             'conv5_1': (3, 3, 512, 512), 'conv5_2': (3, 3, 512, 512), 'conv5_3': (3, 3, 512, 512),
             # part 6
-            'conv6_1': (3, 3, 512, 512), 'conv6_2': (3, 3, 512, 512)
+            'conv6_1': (3, 3, 512, 1024),
+            # part 7
+            'conv7_1': (3, 3, 1024, 1024)
         }
+
+        # pool_strides = {
+        #     'pool1': (1, 2, 2, 1),
+        #     'pool2': (1, 2, 2, 1),
+        #     'pool3': (1, 2, 2, 1),
+        #     'pool4': (1, 2, 2, 1),
+        #     'pool5': (1, 1, 1, 1),
+        # }
 
         pool_strides = {
             'pool1': (1, 2, 2, 1),
             'pool2': (1, 2, 2, 1),
             'pool3': (1, 2, 2, 1),
             'pool4': (1, 2, 2, 1),
-            'pool5': (1, 1, 1, 1),
+            'pool5': (1, 3, 3, 1),
         }
 
         net = {}
@@ -105,9 +143,14 @@ class PixelLinkNetwork:
         return net
 
     def prediction(self, vgg):
+        # maps = [vgg[x] for x in
+        #         {
+        #             2: ['relu2_2', 'relu3_3', 'relu4_3', 'relu5_3', 'relu6_2'],
+        #             4: ['relu3_3', 'relu4_3', 'relu5_3', 'relu6_2']}
+        #         [self.parameters.output_scalar][::-1]]
         maps = [vgg[x] for x in
                 {
-                    2: ['relu2_2', 'relu3_3', 'relu4_3', 'relu5_3', 'relu6_2'],
+                    2: ['relu2_2', 'relu3_3', 'relu4_3', 'relu5_3', 'conv7_1'],
                     4: ['relu3_3', 'relu4_3', 'relu5_3', 'relu6_2']}
                 [self.parameters.output_scalar][::-1]]
 
