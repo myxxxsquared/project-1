@@ -62,7 +62,7 @@ def default_parameters():
         eval_steps=10,
         prefetch_buffer=500,
         shuffle_buffer=100,
-        epoch=400,
+        epoch=1000,
 
         # pixellink
         weight_decay=0.0005,
