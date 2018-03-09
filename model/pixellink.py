@@ -161,6 +161,9 @@ class PixelLinkNetwork:
         return tf.concat([T, L], axis=3)
 
     def prediction_block(self, maps, ochannels):
+        print('-----')
+        print(maps.shape)
+        print('------')
         prediction = self.conv2d(
             maps[0], (1, 1, maps[0].shape[3], ochannels), 'conv_0')
         prediction = tf.nn.relu(prediction)
