@@ -162,7 +162,7 @@ class PixelLinkNetwork:
 
     def prediction_block(self, maps, ochannels):
         print('-----')
-        print(maps.shape)
+        print(maps)
         print('------')
         prediction = self.conv2d(
             maps[0], (1, 1, maps[0].shape[3], ochannels), 'conv_0')
