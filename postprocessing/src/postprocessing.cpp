@@ -290,6 +290,11 @@ bool PostProcessor::postprocess_pixellink()
     for(auto& cnt: contours)
     {
         findContours(cnt.second, newctn, h_useless, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_KCOS);
+        if(newctn.size() == 0)
+            continue;
+        RotatedRect r = minAreaRect(newctn[0]);
+        if(r.size.width < config.fewest_tcl_ratio || r.size.height < config.fewest_tcl_ratio)
+            continue;
         regions.emplace_back();
         auto &back = regions.back();
         back.contours = newctn;
